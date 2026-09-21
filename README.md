@@ -6,7 +6,7 @@
 
 ## Development Status
 
-- **Current Phase:** Phase 0 — Project Foundation
+- **Current Phase:** Phase 1 — Topic Intake
 - **Status:** Complete
 - **GitHub Checkpoint:** Pending
 
@@ -19,12 +19,15 @@ ai-notemaker/
 ├── .venv/              # Dedicated local virtual environment (gitignored)
 ├── backend/            # FastAPI backend application
 │   └── app/
+│       ├── api/        # REST API endpoints (Journeys router)
 │       ├── db/         # SQLite database session and engine setup
+│       ├── models/     # SQLAlchemy ORM models (LearningJourney)
 │       ├── providers/  # LLM provider abstraction (Ollama, OpenAI, Groq, Mock)
+│       ├── schemas/    # Pydantic request/response schemas
 │       ├── config.py   # Pydantic Settings
-│       └── main.py     # FastAPI application and health endpoints
+│       └── main.py     # FastAPI application and lifespan
 ├── frontend/           # HTML, CSS, Vanilla JavaScript web UI
-│   └── index.html      # Living note viewer and foundation status
+│   └── index.html      # Topic Intake UI, journey state, and diagnostics
 ├── data/               # SQLite database storage (gitignored)
 ├── tests/              # Unit, API, and provider test suite
 ├── .env.example        # Configuration template
@@ -44,24 +47,21 @@ ai-notemaker/
 ### 2. Virtual Environment Setup (PowerShell on Windows)
 ```powershell
 python -m venv .venv
-.venv\Scripts\activate
+.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
 ### 3. Environment Configuration
-Copy the example environment file:
 ```powershell
 cp .env.example .env
 ```
-Default values use local SQLite and Ollama.
 
 ### 4. Running the Application
-Start the FastAPI server:
 ```powershell
 .venv\Scripts\uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
-Open your browser at [http://127.0.0.1:8000](http://127.0.0.1:8000) or check the health API at [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health).
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
 
 ### 5. Running Tests
 ```powershell

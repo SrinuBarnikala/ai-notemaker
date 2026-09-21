@@ -6,17 +6,19 @@
   <title>Personalized Technical Note Maker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-primary: #0a0e17;
-      --bg-secondary: #111827;
-      --bg-card: rgba(17, 24, 39, 0.75);
+      --bg-primary: #080c14;
+      --bg-secondary: #0f172a;
+      --bg-card: rgba(15, 23, 42, 0.75);
       --border: rgba(255, 255, 255, 0.08);
-      --border-accent: rgba(99, 102, 241, 0.4);
-      --text-primary: #f3f4f6;
-      --text-secondary: #9ca3af;
+      --border-accent: rgba(99, 102, 241, 0.35);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
       --accent: #6366f1;
+      --accent-hover: #4f46e5;
       --accent-glow: rgba(99, 102, 241, 0.25);
       --success: #10b981;
       --success-glow: rgba(16, 185, 129, 0.2);
@@ -34,8 +36,8 @@
     body {
       background-color: var(--bg-primary);
       background-image: 
-        radial-gradient(at 10% 10%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
-        radial-gradient(at 90% 90%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
+        radial-gradient(at 15% 15%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+        radial-gradient(at 85% 85%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
       color: var(--text-primary);
       font-family: var(--font-sans);
       line-height: 1.6;
@@ -46,15 +48,15 @@
 
     header {
       border-bottom: 1px solid var(--border);
-      padding: 1.25rem 2rem;
+      padding: 1.1rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       backdrop-filter: blur(12px);
-      background: rgba(10, 14, 23, 0.8);
+      background: rgba(8, 12, 20, 0.85);
       position: sticky;
       top: 0;
-      z-index: 10;
+      z-index: 20;
     }
 
     .brand {
@@ -64,39 +66,47 @@
     }
 
     .brand-icon {
-      width: 32px;
-      height: 32px;
+      width: 34px;
+      height: 34px;
       background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      border-radius: 8px;
+      border-radius: 9px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 700;
+      font-weight: 800;
       color: #fff;
-      font-size: 1rem;
+      font-size: 1.1rem;
       box-shadow: 0 0 16px var(--accent-glow);
     }
 
     .brand-title {
-      font-size: 1.125rem;
+      font-size: 1.15rem;
       font-weight: 700;
       letter-spacing: -0.02em;
     }
 
+    .header-badges {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
     .phase-badge {
       font-size: 0.75rem;
-      padding: 0.25rem 0.65rem;
+      padding: 0.3rem 0.75rem;
       border-radius: 9999px;
       background: rgba(99, 102, 241, 0.15);
       border: 1px solid var(--border-accent);
       color: #a5b4fc;
       font-family: var(--font-mono);
       font-weight: 600;
+      letter-spacing: 0.02em;
     }
 
     main {
-      max-width: 900px;
-      margin: 3rem auto;
+      max-width: 960px;
+      width: 100%;
+      margin: 2.5rem auto;
       padding: 0 1.5rem;
       flex: 1;
     }
@@ -107,94 +117,306 @@
     }
 
     .hero h1 {
-      font-size: 2.5rem;
+      font-size: 2.6rem;
       font-weight: 800;
-      line-height: 1.2;
-      margin-bottom: 1rem;
+      line-height: 1.25;
+      margin-bottom: 0.85rem;
       background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      letter-spacing: -0.03em;
     }
 
     .hero p {
       font-size: 1.125rem;
       color: var(--text-secondary);
-      max-width: 650px;
+      max-width: 680px;
       margin: 0 auto;
     }
 
     .card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.75rem;
-      backdrop-filter: blur(16px);
-      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+      border-radius: 18px;
+      padding: 2rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
       margin-bottom: 2rem;
+      transition: border-color 0.2s ease;
     }
 
-    .card-header {
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .card-title-row {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       margin-bottom: 1.25rem;
-      padding-bottom: 0.75rem;
+      padding-bottom: 0.85rem;
       border-bottom: 1px solid var(--border);
     }
 
     .card-title {
-      font-size: 1.125rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      letter-spacing: -0.01em;
+    }
+
+    .card-tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* Topic Intake Form */
+    .intake-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .intake-label {
+      font-size: 0.875rem;
       font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .intake-input {
+      width: 100%;
+      background: rgba(8, 12, 20, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      font-size: 1.05rem;
+      color: #fff;
+      font-family: var(--font-sans);
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .intake-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .intake-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .chip-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      align-items: center;
+    }
+
+    .chip-label {
+      font-size: 0.775rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-right: 0.25rem;
+    }
+
+    .chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: #cbd5e1;
+      font-size: 0.8125rem;
+      padding: 0.35rem 0.8rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: var(--font-mono);
+    }
+
+    .chip:hover {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: var(--border-accent);
+      color: #e0e7ff;
+      transform: translateY(-1px);
+    }
+
+    .btn-submit {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      width: 100%;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #ffffff;
+      padding: 0.95rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 16px var(--accent-glow);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: linear-gradient(135deg, #4f46e5, #4338ca);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px var(--accent-glow);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Active Journey Box */
+    .journey-result {
+      display: none;
+      margin-top: 1.5rem;
+      background: rgba(16, 185, 129, 0.05);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 14px;
+      padding: 1.5rem;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .journey-result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .journey-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #6ee7b7;
+      font-weight: 600;
+    }
+
+    .journey-meta-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .meta-box {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+    }
+
+    .meta-label {
+      font-size: 0.725rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .meta-val {
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: #f1f5f9;
+      word-break: break-all;
+    }
+
+    .next-phase-notice {
+      margin-top: 1.25rem;
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px dashed var(--border-accent);
+      font-size: 0.85rem;
+      color: #c7d2fe;
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
 
-    .status-indicator {
-      display: inline-flex;
+    /* Recent Journeys History */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .history-item {
+      display: flex;
       align-items: center;
-      gap: 0.5rem;
-      font-family: var(--font-mono);
-      font-size: 0.8125rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      background: rgba(255, 255, 255, 0.05);
+      justify-content: space-between;
+      padding: 0.85rem 1.1rem;
+      background: rgba(8, 12, 20, 0.6);
       border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: all 0.15s ease;
     }
 
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #6b7280;
+    .history-item:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      background: rgba(8, 12, 20, 0.9);
     }
 
-    .status-dot.active {
-      background: var(--success);
-      box-shadow: 0 0 10px var(--success-glow);
+    .history-topic {
+      font-weight: 600;
+      color: #e2e8f0;
+      font-size: 0.95rem;
     }
 
-    .status-dot.error {
-      background: #ef4444;
-      box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+    .history-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
     }
 
+    /* Diagnostics Section */
     .grid-info {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 1rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
     }
 
     .info-box {
       background: rgba(0, 0, 0, 0.25);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 1rem;
+      padding: 0.85rem 1rem;
     }
 
     .info-label {
-      font-size: 0.75rem;
+      font-size: 0.725rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-secondary);
@@ -203,47 +425,59 @@
 
     .info-value {
       font-family: var(--font-mono);
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: #e2e8f0;
       font-weight: 600;
     }
 
-    .btn {
+    .btn-secondary {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      background: var(--accent);
-      color: #ffffff;
-      padding: 0.65rem 1.25rem;
+      background: rgba(255, 255, 255, 0.06);
+      color: #cbd5e1;
+      padding: 0.5rem 1rem;
       border-radius: 8px;
       font-weight: 600;
-      font-size: 0.875rem;
-      border: none;
+      font-size: 0.8125rem;
+      border: 1px solid var(--border);
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
-    .btn:hover {
-      background: #4f46e5;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px var(--accent-glow);
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
     }
 
-    .btn:active {
-      transform: translateY(0);
-    }
-
-    .terminal-box {
-      background: #050811;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1rem;
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
       font-family: var(--font-mono);
-      font-size: 0.8125rem;
-      color: #94a3b8;
-      overflow-x: auto;
-      max-height: 200px;
+      font-size: 0.775rem;
+      padding: 0.2rem 0.65rem;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #6b7280;
+    }
+
+    .status-dot.active {
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success-glow);
+    }
+
+    .status-dot.error {
+      background: #ef4444;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
     }
 
     .footer {
@@ -251,7 +485,7 @@
       text-align: center;
       padding: 1.5rem;
       font-size: 0.8125rem;
-      color: var(--text-secondary);
+      color: var(--text-muted);
     }
   </style>
 </head>
@@ -261,98 +495,264 @@
       <div class="brand-icon">N</div>
       <span class="brand-title">Personalized Technical Note Maker</span>
     </div>
-    <div class="phase-badge">PHASE 0: FOUNDATION</div>
+    <div class="header-badges">
+      <div class="status-indicator" id="header-status">
+        <span class="status-dot" id="header-dot"></span>
+        <span id="header-text">Checking</span>
+      </div>
+      <div class="phase-badge">PHASE 1: TOPIC INTAKE</div>
+    </div>
   </header>
 
   <main>
     <div class="hero">
-      <h1>Living Technical Notes Built for Your Mental Model</h1>
-      <p>A personalized technical learning system that evolves with your understanding, identifies knowledge gaps, and updates selectively.</p>
+      <h1>What technical topic are you exploring?</h1>
+      <p>Enter any topic, architecture, or question. The system will discover your current mental model, pinpoint knowledge gaps, and build an evolving technical note.</p>
     </div>
 
-    <div class="card">
-      <div class="card-header">
+    <!-- Phase 1: Topic Intake Card -->
+    <div class="card" id="intake-card">
+      <div class="card-title-row">
         <div class="card-title">
-          <span>Backend System Status</span>
+          <span>1. Begin Learning Journey</span>
         </div>
-        <div class="status-indicator" id="status-indicator">
-          <span class="status-dot" id="status-dot"></span>
-          <span id="status-text">Checking...</span>
+        <span class="card-tag">POST /journeys</span>
+      </div>
+
+      <form id="intake-form" onsubmit="submitTopic(event)">
+        <div class="intake-group">
+          <label class="intake-label" for="topic-input">
+            <span>Technical Topic or Question</span>
+            <span style="font-size: 0.775rem; color: var(--text-muted);">Specific questions create more tailored notes</span>
+          </label>
+          <div class="input-wrapper">
+            <input 
+              type="text" 
+              id="topic-input" 
+              class="intake-input" 
+              placeholder="e.g. How does RAG work internally?" 
+              autocomplete="off"
+              required
+              minlength="2"
+              maxlength="500"
+            />
+          </div>
         </div>
+
+        <div class="chip-container">
+          <span class="chip-label">Try an example:</span>
+          <button type="button" class="chip" onclick="setTopic('How does RAG work internally?')">RAG Internal Architecture</button>
+          <button type="button" class="chip" onclick="setTopic('Transformer Multi-Head Self-Attention')">Transformer Self-Attention</button>
+          <button type="button" class="chip" onclick="setTopic('Raft Distributed Consensus Algorithm')">Raft Consensus</button>
+          <button type="button" class="chip" onclick="setTopic('eBPF Linux Kernel Observability')">eBPF Tracing</button>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btn-submit">
+          <span id="btn-submit-text">Start Learning Journey</span>
+          <span id="btn-submit-spinner" style="display: none;">⏳ Creating Journey...</span>
+        </button>
+      </form>
+
+      <!-- Active Journey Result Card -->
+      <div class="journey-result" id="journey-result">
+        <div class="journey-result-header">
+          <span style="font-size: 0.95rem; font-weight: 700; color: #10b981;">&check; Learning Journey Initiated</span>
+          <span class="journey-status-badge" id="res-status">CREATED</span>
+        </div>
+
+        <div style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;" id="res-topic">--</div>
+
+        <div class="journey-meta-row">
+          <div class="meta-box">
+            <div class="meta-label">Journey ID</div>
+            <div class="meta-val" id="res-id">--</div>
+          </div>
+          <div class="meta-box">
+            <div class="meta-label">Database Status</div>
+            <div class="meta-val" style="color: #6ee7b7;">Persisted (SQLite)</div>
+          </div>
+          <div class="meta-box">
+            <div class="meta-label">Created At</div>
+            <div class="meta-val" id="res-created">--</div>
+          </div>
+        </div>
+
+        <div class="next-phase-notice">
+          <span>&rarr;</span>
+          <span><strong>Next: Phase 2 Knowledge Discovery</strong> — The system will generate 3–5 adaptive questions to evaluate your mental model for this topic.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Journeys History Card -->
+    <div class="card" id="history-card">
+      <div class="card-title-row">
+        <div class="card-title">
+          <span>Recent Learning Journeys</span>
+        </div>
+        <button class="btn-secondary" onclick="loadRecentJourneys()">Refresh History</button>
+      </div>
+      <div class="history-list" id="history-list">
+        <div style="color: var(--text-muted); font-size: 0.875rem; text-align: center; padding: 1rem;">
+          No journeys initiated yet. Enter a topic above to create one.
+        </div>
+      </div>
+    </div>
+
+    <!-- Backend Diagnostics Card (Phase 0) -->
+    <div class="card" style="opacity: 0.85;">
+      <div class="card-title-row">
+        <div class="card-title">
+          <span>System Diagnostics</span>
+        </div>
+        <button class="btn-secondary" onclick="checkHealth()">Ping /health</button>
       </div>
 
       <div class="grid-info">
         <div class="info-box">
           <div class="info-label">API Health</div>
-          <div class="info-value" id="val-status">--</div>
+          <div class="info-value" id="diag-status">--</div>
         </div>
         <div class="info-box">
           <div class="info-label">Database</div>
-          <div class="info-value" id="val-db">--</div>
+          <div class="info-value" id="diag-db">--</div>
         </div>
         <div class="info-box">
           <div class="info-label">LLM Provider</div>
-          <div class="info-value" id="val-provider">--</div>
+          <div class="info-value" id="diag-provider">--</div>
         </div>
         <div class="info-box">
           <div class="info-label">Configured Model</div>
-          <div class="info-value" id="val-model">--</div>
+          <div class="info-value" id="diag-model">--</div>
         </div>
       </div>
-
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <span style="font-size: 0.8125rem; color: var(--text-secondary);">Endpoint: <code style="font-family: var(--font-mono); color: #cbd5e1;">GET /health</code></span>
-        <button class="btn" id="btn-refresh" onclick="checkHealth()">Ping Backend</button>
-      </div>
-
-      <div class="terminal-box" id="json-output">// Health check response payload will appear here...</div>
     </div>
   </main>
 
   <footer class="footer">
-    Personalized Technical Note Maker &bull; Phase 0 Foundation Verified
+    Personalized Technical Note Maker &bull; Phase 1: Topic Intake Complete
   </footer>
 
   <script>
-    async function checkHealth() {
-      const statusDot = document.getElementById('status-dot');
-      const statusText = document.getElementById('status-text');
-      const valStatus = document.getElementById('val-status');
-      const valDb = document.getElementById('val-db');
-      const valProvider = document.getElementById('val-provider');
-      const valModel = document.getElementById('val-model');
-      const jsonOutput = document.getElementById('json-output');
+    function setTopic(text) {
+      const input = document.getElementById('topic-input');
+      input.value = text;
+      input.focus();
+    }
 
-      statusDot.className = 'status-dot';
-      statusText.textContent = 'Querying...';
+    async function submitTopic(event) {
+      event.preventDefault();
+      const input = document.getElementById('topic-input');
+      const topic = input.value.trim();
+      if (!topic) return;
+
+      const btn = document.getElementById('btn-submit');
+      const btnText = document.getElementById('btn-submit-text');
+      const btnSpinner = document.getElementById('btn-submit-spinner');
+      const resultBox = document.getElementById('journey-result');
+
+      btn.disabled = true;
+      btnText.style.display = 'none';
+      btnSpinner.style.display = 'inline';
 
       try {
-        const start = performance.now();
-        const res = await fetch('/health');
-        const elapsed = Math.round(performance.now() - start);
-        const data = await res.json();
+        const res = await fetch('/journeys', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic: topic })
+        });
 
-        if (res.ok) {
-          statusDot.className = 'status-dot active';
-          statusText.textContent = `Online (${elapsed}ms)`;
-          valStatus.textContent = data.status || 'OK';
-          valDb.textContent = data.database || 'connected';
-          valProvider.textContent = data.llm_provider || 'ollama';
-          valModel.textContent = data.llm_model || 'qwen2.5:7b';
-          jsonOutput.textContent = JSON.stringify(data, null, 2);
-        } else {
-          throw new Error('HTTP ' + res.status);
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.detail || 'Failed to create journey');
         }
+
+        const journey = await res.json();
+
+        // Populate result card
+        document.getElementById('res-topic').textContent = journey.topic;
+        document.getElementById('res-id').textContent = journey.id;
+        document.getElementById('res-status').textContent = journey.status.toUpperCase();
+        document.getElementById('res-created').textContent = new Date(journey.created_at).toLocaleTimeString();
+        resultBox.style.display = 'block';
+
+        // Refresh recent list
+        loadRecentJourneys();
       } catch (err) {
-        statusDot.className = 'status-dot error';
-        statusText.textContent = 'Disconnected';
-        valStatus.textContent = 'ERROR';
-        jsonOutput.textContent = '// Failed to connect to /health: ' + err.message;
+        alert('Error initiating journey: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btnText.style.display = 'inline';
+        btnSpinner.style.display = 'none';
       }
     }
 
-    // Run health check on page load
-    window.addEventListener('DOMContentLoaded', checkHealth);
+    async function loadRecentJourneys() {
+      const listEl = document.getElementById('history-list');
+      try {
+        const res = await fetch('/journeys?limit=5');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.journeys || data.journeys.length === 0) {
+          listEl.innerHTML = '<div style="color: var(--text-muted); font-size: 0.875rem; text-align: center; padding: 1rem;">No journeys initiated yet. Enter a topic above to create one.</div>';
+          return;
+        }
+
+        listEl.innerHTML = data.journeys.map(j => `
+          <div class="history-item">
+            <div>
+              <div class="history-topic">${escapeHtml(j.topic)}</div>
+              <div style="font-size: 0.775rem; color: var(--text-muted); font-family: var(--font-mono); margin-top: 0.2rem;">ID: ${j.id.slice(0, 8)}...</div>
+            </div>
+            <div class="history-meta">
+              <span class="phase-badge">${j.status.toUpperCase()}</span>
+              <span>${new Date(j.created_at).toLocaleDateString()}</span>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error("Failed to load journeys", e);
+      }
+    }
+
+    async function checkHealth() {
+      const headerDot = document.getElementById('header-dot');
+      const headerText = document.getElementById('header-text');
+      const diagStatus = document.getElementById('diag-status');
+      const diagDb = document.getElementById('diag-db');
+      const diagProvider = document.getElementById('diag-provider');
+      const diagModel = document.getElementById('diag-model');
+
+      try {
+        const res = await fetch('/health');
+        if (res.ok) {
+          const data = await res.json();
+          headerDot.className = 'status-dot active';
+          headerText.textContent = 'Ready';
+          diagStatus.textContent = data.status || 'OK';
+          diagDb.textContent = data.database || 'connected';
+          diagProvider.textContent = data.llm_provider || 'ollama';
+          diagModel.textContent = data.llm_model || 'qwen2.5:7b';
+        } else {
+          throw new Error();
+        }
+      } catch (e) {
+        headerDot.className = 'status-dot error';
+        headerText.textContent = 'Offline';
+        diagStatus.textContent = 'ERROR';
+      }
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      checkHealth();
+      loadRecentJourneys();
+    });
   </script>
 </body>
 </html>

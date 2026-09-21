@@ -4,17 +4,21 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from sqlalchemy.orm import Session
 
 from backend.app.config import Settings, get_settings
-from backend.app.db.session import get_db, check_db_health
+from backend.app.db.session import engine, Base, check_db_health
 from backend.app.providers.factory import get_llm_provider
+from backend.app.api import api_router
+# Ensure models are imported so Base.metadata knows about them
+import backend.app.models  # noqa: F401
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Ensure data directory exists
     Path("./data").mkdir(parents=True, exist_ok=True)
+    # Create tables if not exist
+    Base.metadata.create_all(bind=engine)
     yield
 
 
@@ -34,6 +38,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# API routes
+app.include_router(api_router)
 
 
 @app.get("/health", tags=["System"])
