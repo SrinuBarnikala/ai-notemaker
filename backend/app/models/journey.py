@@ -35,7 +35,15 @@ class LearningJourney(Base):
         cascade="all, delete-orphan",
     )
 
+    note_architecture = relationship(
+        "NoteArchitecture",
+        back_populates="journey",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
     def __repr__(self):
         return f"<LearningJourney(id={self.id}, topic={self.topic}, status={self.status})>"
+
 
 

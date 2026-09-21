@@ -11,7 +11,7 @@
     :root {
       --bg-primary: #070b12;
       --bg-secondary: #0d1424;
-      --bg-card: rgba(13, 20, 36, 0.82);
+      --bg-card: rgba(13, 20, 36, 0.85);
       --border: rgba(255, 255, 255, 0.08);
       --border-accent: rgba(99, 102, 241, 0.4);
       --text-primary: #f8fafc;
@@ -70,8 +70,6 @@
 
     .brand-title { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; }
 
-    .header-badges { display: flex; align-items: center; gap: 0.75rem; }
-
     .phase-badge {
       font-size: 0.75rem;
       padding: 0.3rem 0.75rem;
@@ -84,7 +82,7 @@
     }
 
     main {
-      max-width: 960px;
+      max-width: 980px;
       width: 100%;
       margin: 2.5rem auto;
       padding: 0 1.5rem;
@@ -122,8 +120,6 @@
       transition: border-color 0.2s ease;
     }
 
-    .card:hover { border-color: rgba(255, 255, 255, 0.12); }
-
     .card-title-row {
       display: flex;
       align-items: center;
@@ -151,14 +147,7 @@
 
     /* Form Styles */
     .intake-group { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.25rem; }
-
-    .intake-label {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      display: flex; justify-content: space-between;
-    }
-
+    .intake-label { font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); display: flex; justify-content: space-between; }
     .intake-input {
       width: 100%;
       background: rgba(7, 11, 18, 0.8);
@@ -171,22 +160,10 @@
       outline: none;
       transition: all 0.2s ease;
     }
+    .intake-input:focus, .answer-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
 
-    .intake-input:focus, .answer-textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    .chip-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-      align-items: center;
-    }
-
+    .chip-container { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; align-items: center; }
     .chip-label { font-size: 0.775rem; color: var(--text-muted); font-weight: 600; }
-
     .chip {
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--border);
@@ -198,7 +175,6 @@
       transition: all 0.15s ease;
       font-family: var(--font-mono);
     }
-
     .chip:hover {
       background: rgba(99, 102, 241, 0.15);
       border-color: var(--border-accent);
@@ -223,237 +199,131 @@
       transition: all 0.2s ease;
       box-shadow: 0 4px 16px var(--accent-glow);
     }
-
-    .btn-submit:hover:not(:disabled) {
-      background: linear-gradient(135deg, #4f46e5, #4338ca);
-      transform: translateY(-1px);
-    }
-
+    .btn-submit:hover:not(:disabled) { background: linear-gradient(135deg, #4f46e5, #4338ca); transform: translateY(-1px); }
     .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
     /* Panels */
-    #discovery-panel, #profile-panel {
+    #discovery-panel, #profile-panel, #architecture-panel {
       display: none;
       animation: fadeIn 0.3s ease-in-out;
     }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
     .concept-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: rgba(99, 102, 241, 0.15);
-      border: 1px solid var(--border-accent);
-      color: #c7d2fe;
-      padding: 0.3rem 0.8rem;
-      border-radius: 9999px;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      font-weight: 600;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: rgba(99, 102, 241, 0.15); border: 1px solid var(--border-accent);
+      color: #c7d2fe; padding: 0.3rem 0.8rem; border-radius: 9999px;
+      font-family: var(--font-mono); font-size: 0.8rem; font-weight: 600;
     }
 
-    .progress-bar-bg {
-      width: 100%;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 9999px;
-      overflow: hidden;
-      margin-bottom: 1.5rem;
-    }
+    .progress-bar-bg { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.08); border-radius: 9999px; overflow: hidden; margin-bottom: 1.5rem; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #10b981); width: 25%; transition: width 0.4s ease; }
 
-    .progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #6366f1, #10b981);
-      width: 25%;
-      transition: width 0.4s ease;
-    }
-
-    .question-box {
-      background: rgba(7, 11, 18, 0.9);
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      border-radius: 14px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .question-prompt-text {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #ffffff;
-      line-height: 1.5;
-    }
-
+    .question-box { background: rgba(7, 11, 18, 0.9); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .question-prompt-text { font-size: 1.2rem; font-weight: 600; color: #ffffff; line-height: 1.5; }
     .answer-textarea {
-      width: 100%;
-      min-height: 110px;
-      background: rgba(7, 11, 18, 0.8);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
-      font-size: 1rem;
-      color: #fff;
-      font-family: var(--font-sans);
-      outline: none;
-      resize: vertical;
-      margin-bottom: 1rem;
-      transition: all 0.2s ease;
+      width: 100%; min-height: 110px; background: rgba(7, 11, 18, 0.8);
+      border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem;
+      font-size: 1rem; color: #fff; font-family: var(--font-sans); outline: none;
+      resize: vertical; margin-bottom: 1rem; transition: all 0.2s ease;
     }
 
     .qa-feed { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
-
-    .qa-card {
-      background: rgba(7, 11, 18, 0.6);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.25rem;
-    }
-
+    .qa-card { background: rgba(7, 11, 18, 0.6); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
     .qa-q { font-weight: 600; color: #e2e8f0; margin-bottom: 0.5rem; font-size: 0.95rem; }
     .qa-a { color: #94a3b8; font-size: 0.9rem; margin-bottom: 0.5rem; padding-left: 0.75rem; border-left: 2px solid var(--border-accent); }
-    .qa-assessment {
-      font-size: 0.825rem;
-      color: #a7f3d0;
-      background: rgba(16, 185, 129, 0.1);
-      padding: 0.4rem 0.75rem;
-      border-radius: 8px;
-      display: inline-block;
-    }
+    .qa-assessment { font-size: 0.825rem; color: #a7f3d0; background: rgba(16, 185, 129, 0.1); padding: 0.4rem 0.75rem; border-radius: 8px; display: inline-block; }
 
-    /* Knowledge Profile Card Styles */
+    /* Knowledge Profile Styles */
     .profile-summary-box {
-      background: rgba(99, 102, 241, 0.08);
-      border: 1px solid var(--border-accent);
-      border-radius: 14px;
-      padding: 1.5rem;
-      margin-bottom: 1.75rem;
-      line-height: 1.7;
+      background: rgba(99, 102, 241, 0.08); border: 1px solid var(--border-accent);
+      border-radius: 14px; padding: 1.5rem; margin-bottom: 1.75rem; line-height: 1.7;
     }
-
     .profile-summary-text { font-size: 1.05rem; color: #f1f5f9; }
-
     .confidence-badge {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      padding: 0.3rem 0.85rem;
-      border-radius: 9999px;
+      font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em; padding: 0.3rem 0.85rem; border-radius: 9999px;
     }
-
     .confidence-beginner { background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fbbf24; }
     .confidence-intermediate { background: rgba(99, 102, 241, 0.15); border: 1px solid var(--accent); color: #a5b4fc; }
     .confidence-advanced { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--success); color: #6ee7b7; }
     .confidence-mixed { background: rgba(168, 85, 247, 0.15); border: 1px solid var(--purple); color: #d8b4fe; }
 
-    .matrix-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.25rem;
-      margin-bottom: 1.75rem;
-    }
-
-    .matrix-col {
-      background: rgba(7, 11, 18, 0.6);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.25rem;
-    }
-
-    .matrix-col-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--border);
-    }
-
+    .matrix-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.75rem; }
+    .matrix-col { background: rgba(7, 11, 18, 0.6); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; }
+    .matrix-col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
     .matrix-col-title { font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
 
-    .concept-item-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.85rem 1rem;
-      margin-bottom: 0.75rem;
-    }
-
+    .concept-item-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 0.75rem; }
     .concept-name-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; }
     .concept-name { font-weight: 600; font-size: 0.9rem; color: #e2e8f0; }
-    .concept-level-tag {
-      font-size: 0.7rem;
-      font-family: var(--font-mono);
-      font-weight: 700;
-      text-transform: uppercase;
-      padding: 0.15rem 0.5rem;
-      border-radius: 4px;
-    }
-
+    .concept-level-tag { font-size: 0.7rem; font-family: var(--font-mono); font-weight: 700; text-transform: uppercase; padding: 0.15rem 0.5rem; border-radius: 4px; }
     .tag-strong { background: rgba(16, 185, 129, 0.15); color: #34d399; }
     .tag-moderate { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
     .tag-weak, .tag-unknown { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; }
-
     .concept-notes { font-size: 0.8rem; color: var(--text-muted); }
 
-    .gaps-list, .misconceptions-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
+    .gap-badge { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.825rem; color: #cbd5e1; background: rgba(255, 255, 255, 0.03); padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 0.4rem; }
+    .misconception-card { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 10px; padding: 0.85rem 1rem; font-size: 0.85rem; color: #fca5a5; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
 
-    .gap-badge {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.5rem;
-      font-size: 0.825rem;
-      color: #cbd5e1;
-      background: rgba(255, 255, 255, 0.03);
-      padding: 0.5rem 0.75rem;
-      border-radius: 8px;
+    /* Note Architecture Section Styles */
+    .arch-summary-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.08));
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      border-radius: 14px; padding: 1.5rem; margin-bottom: 1.75rem;
+    }
+    .arch-summary-title { font-size: 0.8rem; font-family: var(--font-mono); text-transform: uppercase; color: #d8b4fe; margin-bottom: 0.4rem; letter-spacing: 0.05em; font-weight: 700; }
+    .arch-summary-text { font-size: 1.05rem; color: #f8fafc; line-height: 1.6; }
+
+    .blueprint-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+    .blueprint-card {
+      background: rgba(7, 11, 18, 0.7);
       border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.4rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .blueprint-card:hover { border-color: rgba(99, 102, 241, 0.4); transform: translateX(3px); }
+
+    .blueprint-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
+    .blueprint-title-row { display: flex; align-items: center; gap: 0.75rem; }
+    .blueprint-index {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: rgba(99, 102, 241, 0.2); border: 1px solid var(--border-accent);
+      color: #a5b4fc; font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .blueprint-title { font-size: 1.1rem; font-weight: 700; color: #ffffff; }
+
+    .blueprint-badges { display: flex; align-items: center; gap: 0.5rem; }
+    .depth-badge {
+      font-size: 0.7rem; font-family: var(--font-mono); font-weight: 700;
+      text-transform: uppercase; padding: 0.2rem 0.6rem; border-radius: 9999px;
+    }
+    .depth-brief { background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #7dd3fc; }
+    .depth-standard { background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #fde047; }
+    .depth-deep { background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #e9d5ff; }
+
+    .blueprint-rationale {
+      font-size: 0.875rem; color: #cbd5e1; margin-top: 0.5rem; padding-left: 0.75rem;
+      border-left: 2px solid var(--border-accent); line-height: 1.5;
     }
 
-    .misconception-card {
-      background: rgba(239, 68, 68, 0.08);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      border-radius: 10px;
-      padding: 0.85rem 1rem;
-      font-size: 0.85rem;
-      color: #fca5a5;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.75rem;
+    .blueprint-footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-top: 0.9rem; padding-top: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.05); gap: 0.5rem; }
+    .blueprint-features { display: flex; align-items: center; gap: 0.5rem; }
+    .feature-pill {
+      font-size: 0.725rem; font-family: var(--font-mono); padding: 0.2rem 0.55rem;
+      border-radius: 6px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border);
+      color: #94a3b8; display: flex; align-items: center; gap: 0.35rem;
     }
-
-    .next-phase-cta {
-      margin-top: 1.5rem;
-      padding: 1.25rem;
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(16, 185, 129, 0.1));
-      border: 1px dashed var(--border-accent);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+    .feature-pill.active { background: rgba(99, 102, 241, 0.15); border-color: var(--border-accent); color: #c7d2fe; }
 
     .history-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.85rem 1.1rem;
-      background: rgba(7, 11, 18, 0.6);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.15s ease;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.85rem 1.1rem; background: rgba(7, 11, 18, 0.6);
+      border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.15s ease;
     }
-
     .history-item:hover { border-color: var(--border-accent); background: rgba(7, 11, 18, 0.9); }
     .history-topic { font-weight: 600; color: #e2e8f0; font-size: 0.95rem; }
 
@@ -473,14 +343,14 @@
       <span class="brand-title">Personalized Technical Note Maker</span>
     </div>
     <div class="header-badges">
-      <div class="phase-badge">PHASE 3: KNOWLEDGE PROFILE</div>
+      <div class="phase-badge">PHASE 4: NOTE ARCHITECTURE</div>
     </div>
   </header>
 
   <main>
     <div class="hero">
-      <h1>Personalized Learning Architecture</h1>
-      <p>Discovering what you know and pinpointing conceptual gaps to build evolving, personalized technical notes.</p>
+      <h1>Personalized Technical Architecture</h1>
+      <p>Turning your unique mental model into an adaptive, tailored note blueprint that prioritizes your exact knowledge gaps.</p>
     </div>
 
     <!-- Phase 1: Topic Intake Card -->
@@ -495,7 +365,7 @@
       <form id="intake-form" onsubmit="submitTopic(event)">
         <div class="intake-group">
           <label class="intake-label" for="topic-input">
-            <span>What do you want to master?</span>
+            <span>What technical topic are you exploring?</span>
             <span style="font-size: 0.775rem; color: var(--text-muted);">Topic or question</span>
           </label>
           <input 
@@ -588,7 +458,6 @@
         <div class="profile-summary-text" id="prof-summary">Synthesizing knowledge profile...</div>
       </div>
 
-      <!-- Misconceptions Alert if any -->
       <div id="misconceptions-container" style="display: none; margin-bottom: 1.5rem;">
         <div style="font-size: 0.85rem; font-weight: 700; color: #f87171; margin-bottom: 0.5rem;">
           ⚠️ Identified Misconceptions to Address:
@@ -596,7 +465,6 @@
         <div id="misconceptions-list"></div>
       </div>
 
-      <!-- Concept Matrix: Known vs Partial vs Gaps -->
       <div class="matrix-grid">
         <div class="matrix-col">
           <div class="matrix-col-header">
@@ -623,14 +491,35 @@
         </div>
       </div>
 
-      <div class="next-phase-cta">
+      <button type="button" class="btn-submit" id="btn-gen-arch" onclick="triggerArchitectureGeneration(currentJourneyId)">
+        <span>Design Personalized Note Architecture &rarr;</span>
+      </button>
+    </div>
+
+    <!-- Phase 4: Personalized Note Architecture Panel -->
+    <div class="card" id="architecture-panel">
+      <div class="card-title-row">
+        <div class="card-title">
+          <span>4. Personalized Note Architecture</span>
+        </div>
+        <span class="card-tag">Agent 3 &bull; Bespoke Blueprint</span>
+      </div>
+
+      <div class="arch-summary-box">
+        <div class="arch-summary-title">Architecture Rationale for You</div>
+        <div class="arch-summary-text" id="arch-rationale">Generating personalized section blueprint...</div>
+      </div>
+
+      <div class="blueprint-list" id="blueprint-list"></div>
+
+      <div style="margin-top: 1.5rem; padding: 1.25rem; background: rgba(99, 102, 241, 0.1); border: 1px dashed var(--border-accent); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
         <div>
-          <div style="font-weight: 700; color: #ffffff;">Phase 4: Personalized Note Architecture</div>
+          <div style="font-weight: 700; color: #fff;">Ready for Phase 5: Structured Note Content Generation</div>
           <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
-            The system will now design a section outline specifically tailored around your gaps and misconceptions.
+            Each structured block (definitions, comparisons, code, and warnings) will be built to this exact blueprint.
           </div>
         </div>
-        <span class="phase-badge">READY FOR PHASE 4</span>
+        <span class="phase-badge">READY FOR PHASE 5</span>
       </div>
     </div>
 
@@ -647,7 +536,7 @@
   </main>
 
   <footer class="footer">
-    Personalized Technical Note Maker &bull; Phase 3: Knowledge Profile Verified
+    Personalized Technical Note Maker &bull; Phase 4: Personalized Note Architecture Verified
   </footer>
 
   <script>
@@ -708,8 +597,10 @@
 
       const discPanel = document.getElementById('discovery-panel');
       const profPanel = document.getElementById('profile-panel');
+      const archPanel = document.getElementById('architecture-panel');
       discPanel.style.display = 'block';
       profPanel.style.display = 'none';
+      archPanel.style.display = 'none';
       discPanel.scrollIntoView({ behavior: 'smooth' });
 
       document.getElementById('disc-topic-label').textContent = topic;
@@ -828,15 +719,12 @@
     }
 
     function renderProfile(profile) {
-      // Confidence
       const confBadge = document.getElementById('prof-confidence');
       confBadge.textContent = profile.overall_confidence.toUpperCase();
       confBadge.className = `confidence-badge confidence-${profile.overall_confidence}`;
 
-      // Summary
       document.getElementById('prof-summary').textContent = profile.summary;
 
-      // Misconceptions
       const misContainer = document.getElementById('misconceptions-container');
       const misList = document.getElementById('misconceptions-list');
       if (profile.misconceptions && profile.misconceptions.length > 0) {
@@ -848,7 +736,6 @@
         misContainer.style.display = 'none';
       }
 
-      // Matrix
       const colKnown = document.getElementById('col-known');
       const colPartial = document.getElementById('col-partial');
       const colGaps = document.getElementById('col-gaps');
@@ -884,6 +771,60 @@
           ${c.notes ? `<div class="concept-notes">${escapeHtml(c.notes)}</div>` : ''}
         </div>
       `;
+    }
+
+    async function triggerArchitectureGeneration(journeyId) {
+      const archPanel = document.getElementById('architecture-panel');
+      archPanel.style.display = 'block';
+      archPanel.scrollIntoView({ behavior: 'smooth' });
+
+      document.getElementById('arch-rationale').textContent = '🤖 Agent 3 designing personalized section blueprint around your gaps...';
+      const bList = document.getElementById('blueprint-list');
+      bList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Designing sections...</div>';
+
+      try {
+        const res = await fetch(`/journeys/${journeyId}/architecture`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ learning_goal: 'Master core mechanics, resolve gaps, and implement in production' })
+        });
+        if (!res.ok) throw new Error('Failed to generate architecture');
+        const arch = await res.json();
+        renderArchitecture(arch);
+      } catch (err) {
+        document.getElementById('arch-rationale').textContent = 'Failed to generate architecture: ' + err.message;
+      }
+    }
+
+    function renderArchitecture(arch) {
+      document.getElementById('arch-rationale').textContent = arch.summary_rationale;
+      const bList = document.getElementById('blueprint-list');
+
+      bList.innerHTML = arch.sections.map(s => `
+        <div class="blueprint-card">
+          <div class="blueprint-header">
+            <div class="blueprint-title-row">
+              <div class="blueprint-index">${s.order_index}</div>
+              <div class="blueprint-title">${escapeHtml(s.title)}</div>
+            </div>
+            <div class="blueprint-badges">
+              <span class="depth-badge depth-${s.depth}">${s.depth}</span>
+            </div>
+          </div>
+          <div class="blueprint-rationale">
+            <strong>Why for you:</strong> ${escapeHtml(s.rationale)}
+          </div>
+          <div class="blueprint-footer">
+            <div style="font-size: 0.775rem; color: var(--text-muted); font-family: var(--font-mono);">
+              Targets: ${s.target_concepts.map(tc => escapeHtml(tc)).join(', ')}
+            </div>
+            <div class="blueprint-features">
+              ${s.needs_code ? '<span class="feature-pill active">💻 Code Required</span>' : ''}
+              ${s.needs_visual ? `<span class="feature-pill active">📊 ${escapeHtml(s.visual_type || 'Diagram')}</span>` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
     }
 
     async function loadRecentJourneys() {
