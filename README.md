@@ -6,7 +6,7 @@
 
 ## Development Status
 
-- **Current Phase:** Phase 5 — Note Generation
+- **Current Phase:** Phase 6 — Web Note Viewer
 - **Status:** Complete
 - **GitHub Checkpoint:** Pending
 

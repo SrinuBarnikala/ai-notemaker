@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Personalized Technical Note Maker</title>
+  <meta name="description" content="Personalized living technical learning and note-making system that adapts to your mental model, addresses knowledge gaps, and structures notes for technical mastery.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-primary: #070b12;
@@ -23,10 +24,19 @@
       --success: #10b981;
       --success-glow: rgba(16, 185, 129, 0.25);
       --warning: #f59e0b;
+      --warning-glow: rgba(245, 158, 11, 0.2);
       --danger: #ef4444;
       --purple: #a855f7;
+      --cyan: #06b6d4;
       --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
+
+      /* Phase 6 Typography Tokens */
+      --note-font-size: 1.05rem;
+      --note-line-height: 1.78;
+      --note-heading-h1: 2rem;
+      --note-heading-h2: 1.45rem;
+      --note-heading-h3: 1.15rem;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -44,6 +54,18 @@
       flex-direction: column;
     }
 
+    /* Reading Progress Bar (Fixed Top) */
+    #reading-progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0%;
+      background: linear-gradient(90deg, #6366f1, #10b981);
+      z-index: 1000;
+      transition: width 0.1s ease;
+    }
+
     header {
       border-bottom: 1px solid var(--border);
       padding: 1.1rem 2rem;
@@ -55,9 +77,10 @@
       position: sticky;
       top: 0;
       z-index: 30;
+      transition: all 0.3s ease;
     }
 
-    .brand { display: flex; align-items: center; gap: 0.75rem; }
+    .brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: inherit; cursor: pointer; }
     .brand-icon {
       width: 34px; height: 34px;
       background: linear-gradient(135deg, #6366f1, #8b5cf6);
@@ -65,6 +88,7 @@
       font-weight: 800; color: #fff; font-size: 1.1rem; box-shadow: 0 0 16px var(--accent-glow);
     }
     .brand-title { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; }
+    .header-badges { display: flex; align-items: center; gap: 0.75rem; }
     .phase-badge {
       font-size: 0.75rem; padding: 0.3rem 0.75rem; border-radius: 9999px;
       background: rgba(99, 102, 241, 0.15); border: 1px solid var(--border-accent);
@@ -72,14 +96,15 @@
     }
 
     main {
-      max-width: 1000px;
+      max-width: 1100px;
       width: 100%;
-      margin: 2.5rem auto;
+      margin: 2rem auto;
       padding: 0 1.5rem;
       flex: 1;
+      transition: all 0.3s ease;
     }
 
-    .hero { text-align: center; margin-bottom: 2.5rem; }
+    .hero { text-align: center; margin-bottom: 2.5rem; transition: opacity 0.3s ease; }
     .hero h1 {
       font-size: 2.6rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.85rem;
       background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
@@ -95,7 +120,7 @@
       backdrop-filter: blur(20px);
       box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
       margin-bottom: 2rem;
-      transition: border-color 0.2s ease;
+      transition: border-color 0.2s ease, opacity 0.3s ease;
     }
     .card:hover { border-color: rgba(255, 255, 255, 0.12); }
 
@@ -219,103 +244,630 @@
     .feature-pill { font-size: 0.725rem; font-family: var(--font-mono); padding: 0.2rem 0.55rem; border-radius: 6px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); color: #94a3b8; display: flex; align-items: center; gap: 0.35rem; }
     .feature-pill.active { background: rgba(99, 102, 241, 0.15); border-color: var(--border-accent); color: #c7d2fe; }
 
-    /* Phase 5: Structured Note Styles */
-    .note-meta-box {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 1rem 1.5rem; background: rgba(7, 11, 18, 0.8); border: 1px solid var(--border);
-      border-radius: 12px; margin-bottom: 2rem;
+    /* ==========================================================================
+       PHASE 6: WEB NOTE VIEWER STYLES
+       ========================================================================== */
+    .note-viewer-container {
+      position: relative;
     }
-    .note-version-tag { font-family: var(--font-mono); font-size: 0.75rem; background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 0.25rem 0.6rem; border-radius: 6px; }
+
+    /* Note Header Banner */
+    .note-reader-header {
+      background: linear-gradient(180deg, rgba(13, 20, 36, 0.9) 0%, rgba(7, 11, 18, 0.8) 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .note-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1.5rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .note-main-h1 {
+      font-size: var(--note-heading-h1);
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.25;
+      letter-spacing: -0.03em;
+      flex: 1;
+    }
+
+    .note-meta-badges {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .note-version-pill {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      letter-spacing: 0.05em;
+    }
+
+    .note-readtime-pill {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid var(--border-accent);
+      color: #c7d2fe;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .note-summary-text {
+      font-size: 1.05rem;
+      color: #cbd5e1;
+      line-height: 1.7;
+      margin-top: 0.5rem;
+    }
+
+    /* Reader Toolbar Controls */
+    .note-reader-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(7, 11, 18, 0.95);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.6rem 1.25rem;
+      margin-bottom: 2rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 66px;
+      z-index: 25;
+      backdrop-filter: blur(10px);
+    }
+
+    .reader-toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .toolbar-label {
+      font-size: 0.775rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-right: 0.25rem;
+    }
+
+    .tool-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: #cbd5e1;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.35rem 0.7rem;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+    }
+    .tool-btn:hover {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: var(--border-accent);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+    .tool-btn.active {
+      background: rgba(99, 102, 241, 0.25);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    /* Note Two-Column Layout: TOC + Reading Column */
+    .note-viewer-layout {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: 2.5rem;
+      align-items: start;
+    }
+
+    /* Sticky Section Navigation (TOC) */
+    .note-toc-sidebar {
+      position: sticky;
+      top: 130px;
+      max-height: calc(100vh - 160px);
+      overflow-y: auto;
+      background: rgba(7, 11, 18, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem;
+    }
+
+    .note-toc-sidebar::-webkit-scrollbar { width: 4px; }
+    .note-toc-sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+
+    .toc-header {
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #a5b4fc;
+      margin-bottom: 0.85rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.55rem 0.75rem;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      line-height: 1.4;
+      transition: all 0.15s ease;
+      border-left: 2px solid transparent;
+    }
+
+    .toc-item:hover {
+      background: rgba(255, 255, 255, 0.03);
+      color: #f1f5f9;
+      transform: translateX(2px);
+    }
+
+    .toc-item.active {
+      background: rgba(99, 102, 241, 0.12);
+      border-left-color: var(--accent);
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .toc-num {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: #a5b4fc;
+      font-weight: 700;
+      min-width: 1.2rem;
+    }
+
+    /* Note Body / Sections */
+    .note-content-body {
+      font-size: var(--note-font-size);
+      line-height: var(--note-line-height);
+      color: #cbd5e1;
+      max-width: 820px;
+    }
 
     .note-section-container {
-      margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      margin-bottom: 3.5rem;
+      padding-top: 1rem;
+      scroll-margin-top: 130px;
     }
-    .note-section-container:last-child { border-bottom: none; margin-bottom: 1rem; }
 
-    .section-header-row { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.25rem; }
-    .section-num { font-family: var(--font-mono); font-size: 1.1rem; color: #a5b4fc; font-weight: 700; }
-    .section-heading { font-size: 1.45rem; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; }
+    .section-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.4rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      flex-wrap: wrap;
+    }
 
-    /* Blocks */
-    .block-paragraph { font-size: 1.05rem; line-height: 1.75; color: #cbd5e1; margin-bottom: 1.25rem; }
-    .block-paragraph strong { color: #ffffff; }
+    .section-title-wrap {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+    }
 
+    .section-num {
+      font-family: var(--font-mono);
+      font-size: 1.25rem;
+      color: #a5b4fc;
+      font-weight: 800;
+    }
+
+    .section-heading {
+      font-size: var(--note-heading-h2);
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    .section-meta-tags {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-type-pill {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: #94a3b8;
+    }
+
+    /* Rich Blocks */
+    .block-paragraph {
+      margin-bottom: 1.35rem;
+      color: #cbd5e1;
+    }
+    .block-paragraph strong {
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    /* Definition Block */
     .block-definition {
-      background: rgba(168, 85, 247, 0.08); border-left: 4px solid var(--purple);
-      border-radius: 0 12px 12px 0; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem;
+      background: rgba(168, 85, 247, 0.06);
+      border: 1px solid rgba(168, 85, 247, 0.25);
+      border-left: 4px solid var(--purple);
+      border-radius: 12px;
+      padding: 1.25rem 1.6rem;
+      margin-bottom: 1.6rem;
     }
-    .def-term { font-weight: 700; font-size: 1.05rem; color: #e9d5ff; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem; }
-    .def-content { font-size: 0.975rem; color: #d8b4fe; line-height: 1.6; }
+    .def-term {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #f3e8ff;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .def-content {
+      font-size: 0.98rem;
+      color: #e9d5ff;
+      line-height: 1.65;
+    }
 
+    /* Warning / Misconception Callout */
     .block-warning {
-      background: rgba(245, 158, 11, 0.08); border-left: 4px solid var(--warning);
-      border-radius: 0 12px 12px 0; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem;
+      background: rgba(245, 158, 11, 0.06);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-left: 4px solid var(--warning);
+      border-radius: 12px;
+      padding: 1.25rem 1.6rem;
+      margin-bottom: 1.6rem;
     }
-    .warning-title { font-weight: 700; font-size: 1.05rem; color: #fde047; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem; }
-    .warning-content { font-size: 0.975rem; color: #fef08a; line-height: 1.6; }
+    .warning-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #fef08a;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .warning-content {
+      font-size: 0.98rem;
+      color: #fef9c3;
+      line-height: 1.65;
+    }
 
+    /* Example Walkthrough Block */
     .block-example {
-      background: rgba(99, 102, 241, 0.08); border-left: 4px solid var(--accent);
-      border-radius: 0 12px 12px 0; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem;
+      background: rgba(99, 102, 241, 0.06);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-left: 4px solid var(--accent);
+      border-radius: 12px;
+      padding: 1.25rem 1.6rem;
+      margin-bottom: 1.6rem;
     }
-    .example-title { font-weight: 700; font-size: 1.05rem; color: #c7d2fe; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem; }
-    .example-content { font-size: 0.975rem; color: #e0e7ff; line-height: 1.6; }
+    .example-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #e0e7ff;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .example-content {
+      font-size: 0.98rem;
+      color: #c7d2fe;
+      line-height: 1.65;
+    }
 
+    /* Code Block with Copy Button */
     .block-code {
-      background: #050811; border: 1px solid var(--border); border-radius: 12px;
-      margin-bottom: 1.5rem; overflow: hidden;
+      background: #03060c;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      margin-bottom: 1.6rem;
+      overflow: hidden;
+      box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.6);
     }
     .code-header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 0.6rem 1rem; background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 1.1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
-    .code-lang { font-family: var(--font-mono); font-size: 0.75rem; color: #a5b4fc; text-transform: uppercase; font-weight: 600; }
+    .code-lang {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: #a5b4fc;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .code-title {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      margin-left: 0.5rem;
+    }
+    .code-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: #cbd5e1;
+      font-family: var(--font-mono);
+      font-size: 0.725rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.15s ease;
+    }
+    .copy-btn:hover {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--border-accent);
+      color: #fff;
+    }
+    .copy-btn.copied {
+      background: rgba(16, 185, 129, 0.25);
+      border-color: var(--success);
+      color: #34d399;
+    }
+
     .code-pre {
-      padding: 1.25rem; overflow-x: auto; font-family: var(--font-mono);
-      font-size: 0.9rem; color: #e2e8f0; line-height: 1.6;
+      padding: 1.25rem 1.4rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      color: #f1f5f9;
+      line-height: 1.65;
     }
 
+    /* Diagram Block */
     .block-diagram {
-      background: rgba(7, 11, 18, 0.9); border: 1px solid rgba(99, 102, 241, 0.3);
-      border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;
+      background: rgba(7, 11, 18, 0.95);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 12px;
+      padding: 1.4rem 1.6rem;
+      margin-bottom: 1.6rem;
     }
-    .diagram-title { font-weight: 700; color: #c7d2fe; font-size: 1rem; margin-bottom: 0.4rem; }
+    .diagram-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .diagram-title {
+      font-weight: 700;
+      color: #c7d2fe;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
     .diagram-spec-pre {
-      background: #050811; border: 1px solid var(--border); border-radius: 8px;
-      padding: 1rem; font-family: var(--font-mono); font-size: 0.85rem; color: #38bdf8;
-      overflow-x: auto; margin: 0.75rem 0; line-height: 1.5;
+      background: #020408;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 8px;
+      padding: 1.2rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: #38bdf8;
+      overflow-x: auto;
+      margin: 0.75rem 0;
+      line-height: 1.5;
     }
-    .diagram-caption { font-size: 0.8rem; color: var(--text-muted); font-style: italic; }
+    .diagram-caption {
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-top: 0.5rem;
+    }
 
+    /* Comparison Table Block */
     .block-comparison {
-      background: rgba(7, 11, 18, 0.8); border: 1px solid var(--border);
-      border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; overflow-x: auto;
+      background: rgba(7, 11, 18, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.4rem;
+      margin-bottom: 1.6rem;
+      overflow-x: auto;
     }
-    .comparison-title { font-weight: 700; color: #f1f5f9; font-size: 1rem; margin-bottom: 0.75rem; }
-    .comparison-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-    .comparison-table th, .comparison-table td { padding: 0.6rem 0.85rem; text-align: left; border-bottom: 1px solid var(--border); }
-    .comparison-table th { color: #a5b4fc; font-family: var(--font-mono); font-weight: 600; }
-    .comparison-table td { color: #cbd5e1; }
+    .comparison-title {
+      font-weight: 700;
+      color: #f1f5f9;
+      font-size: 1.05rem;
+      margin-bottom: 0.75rem;
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+    .comparison-table th, .comparison-table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .comparison-table th {
+      color: #a5b4fc;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.02);
+      border-top: 1px solid var(--border);
+    }
+    .comparison-table td {
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+    .comparison-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
 
+    /* Note Footer Status */
+    .note-viewer-footer {
+      border-top: 1px solid var(--border);
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .note-footer-note {
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Focus Mode Overlay / Modifications */
+    body.focus-mode header,
+    body.focus-mode .hero,
+    body.focus-mode #intake-card,
+    body.focus-mode #discovery-panel,
+    body.focus-mode #profile-panel,
+    body.focus-mode #architecture-panel,
+    body.focus-mode #history-card,
+    body.focus-mode footer {
+      display: none !important;
+    }
+
+    body.focus-mode main {
+      max-width: 1200px;
+      margin: 1.5rem auto;
+    }
+
+    .focus-exit-btn {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      right: 1.5rem;
+      z-index: 1001;
+      background: #1e1b4b;
+      border: 1px solid var(--accent);
+      color: #e0e7ff;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    }
+    body.focus-mode .focus-exit-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Recent Journeys History Card */
     .history-item {
       display: flex; align-items: center; justify-content: space-between;
       padding: 0.85rem 1.1rem; background: rgba(7, 11, 18, 0.6); border: 1px solid var(--border);
       border-radius: 10px; cursor: pointer; transition: all 0.15s ease;
+      margin-bottom: 0.6rem;
     }
-    .history-item:hover { border-color: var(--border-accent); background: rgba(7, 11, 18, 0.9); }
+    .history-item:hover { border-color: var(--border-accent); background: rgba(7, 11, 18, 0.9); transform: translateX(3px); }
     .history-topic { font-weight: 600; color: #e2e8f0; font-size: 0.95rem; }
 
     .footer { border-top: 1px solid var(--border); text-align: center; padding: 1.5rem; font-size: 0.8125rem; color: var(--text-muted); }
+
+    /* Responsive adjustments */
+    @media (max-width: 880px) {
+      .note-viewer-layout {
+        grid-template-columns: 1fr;
+      }
+      .note-toc-sidebar {
+        position: relative;
+        top: 0;
+        max-height: 220px;
+        margin-bottom: 1.5rem;
+      }
+      .note-reader-controls {
+        top: 0;
+      }
+    }
+
+    @media print {
+      body { background: #fff; color: #000; }
+      header, .hero, #intake-card, #discovery-panel, #profile-panel, #architecture-panel, #history-card, .note-reader-controls, .note-toc-sidebar, footer {
+        display: none !important;
+      }
+      .note-viewer-layout { grid-template-columns: 1fr; }
+      .card { border: none; box-shadow: none; padding: 0; }
+      .block-code { border: 1px solid #ccc; background: #f8f9fa; }
+      .code-pre { color: #000; }
+    }
   </style>
 </head>
 <body>
+  <!-- Fixed Reading Progress Bar -->
+  <div id="reading-progress-bar"></div>
+
+  <!-- Focus Mode Exit Button (Only visible in Focus Mode) -->
+  <button type="button" class="focus-exit-btn" id="btn-exit-focus" onclick="toggleFocusMode()">
+    <span>✕ Exit Focus Mode</span>
+  </button>
+
   <header>
-    <div class="brand">
+    <div class="brand" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
       <div class="brand-icon">N</div>
       <span class="brand-title">Personalized Technical Note Maker</span>
     </div>
     <div class="header-badges">
-      <div class="phase-badge">PHASE 5: NOTE GENERATION</div>
+      <div class="phase-badge">PHASE 6: WEB NOTE VIEWER</div>
     </div>
   </header>
 
@@ -490,24 +1042,79 @@
       </button>
     </div>
 
-    <!-- Phase 5: Structured Living Note Panel -->
-    <div class="card" id="note-panel">
+    <!-- Phase 5 & 6: Living Web Note Viewer Panel -->
+    <div class="card note-viewer-container" id="note-panel">
       <div class="card-title-row">
         <div class="card-title">
-          <span>5. Canonical Living Technical Note</span>
+          <span>5. Living Technical Note</span>
         </div>
-        <span class="card-tag">Structured Blocks</span>
+        <span class="card-tag">Phase 6 &bull; Web Note Viewer</span>
       </div>
 
-      <div class="note-meta-box">
-        <div>
-          <div style="font-size: 1.25rem; font-weight: 800; color: #ffffff;" id="note-topic-heading">--</div>
-          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;" id="note-summary-text">--</div>
+      <!-- Note Reader Header Banner -->
+      <div class="note-reader-header">
+        <div class="note-title-row">
+          <h1 class="note-main-h1" id="note-topic-heading">--</h1>
+          <div class="note-meta-badges">
+            <span class="note-version-pill" id="note-version-badge">VERSION 1</span>
+            <span class="note-readtime-pill" id="note-readtime-badge">⏱️ ~3 min read</span>
+            <span class="feature-pill active" id="note-sections-count">4 Sections</span>
+          </div>
         </div>
-        <div class="note-version-tag" id="note-version-badge">VERSION 1</div>
+        <p class="note-summary-text" id="note-summary-text">--</p>
       </div>
 
-      <div id="note-content-container"></div>
+      <!-- Reader Controls Toolbar -->
+      <div class="note-reader-controls" id="reader-toolbar">
+        <div class="reader-toolbar-group">
+          <span class="toolbar-label">Text Size:</span>
+          <button type="button" class="tool-btn" onclick="adjustFontSize(-1)" title="Smaller font">A-</button>
+          <button type="button" class="tool-btn active" id="btn-font-reset" onclick="resetFontSize()" title="Reset font">A</button>
+          <button type="button" class="tool-btn" onclick="adjustFontSize(1)" title="Larger font">A+</button>
+        </div>
+
+        <div class="reader-toolbar-group">
+          <button type="button" class="tool-btn" id="btn-focus-toggle" onclick="toggleFocusMode()">
+            <span>📖 Focus Mode</span>
+          </button>
+          <button type="button" class="tool-btn" onclick="copyNoteLink()" title="Copy link to this note">
+            <span id="btn-link-text">🔗 Copy Link</span>
+          </button>
+          <button type="button" class="tool-btn" onclick="window.print()" title="Print or save as PDF">
+            <span>🖨️ Print</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Two-column Reader Layout: TOC on left, Body on right -->
+      <div class="note-viewer-layout">
+        <aside class="note-toc-sidebar" id="note-viewer-toc">
+          <div class="toc-header">
+            <span>Table of Contents</span>
+            <span id="toc-progress-text" style="color: var(--text-muted); font-size: 0.7rem;">0%</span>
+          </div>
+          <nav>
+            <ul class="toc-list" id="toc-list">
+              <!-- Dynamically populated -->
+            </ul>
+          </nav>
+        </aside>
+
+        <article class="note-content-body" id="note-content-body">
+          <!-- Dynamically populated sections & blocks -->
+        </article>
+      </div>
+
+      <!-- Note Viewer Footer -->
+      <div class="note-viewer-footer">
+        <div class="note-footer-note">
+          <span>🌱 Living Note:</span>
+          <span>Evolves continuously with your future discovery sessions.</span>
+        </div>
+        <button type="button" class="tool-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+          <span>↑ Back to Top</span>
+        </button>
+      </div>
     </div>
 
     <!-- Recent Journeys History Card -->
@@ -523,12 +1130,14 @@
   </main>
 
   <footer class="footer">
-    Personalized Technical Note Maker &bull; Phase 5: Note Generation Verified
+    Personalized Technical Note Maker &bull; Phase 6: Web Note Viewer Verified
   </footer>
 
   <script>
     let currentJourneyId = null;
     let currentTopic = "";
+    let currentFontSizeRem = 1.05;
+    let observer = null;
 
     function setTopic(text) {
       const input = document.getElementById('topic-input');
@@ -542,6 +1151,103 @@
       textarea.focus();
     }
 
+    /* Reader Controls */
+    function adjustFontSize(delta) {
+      currentFontSizeRem = Math.max(0.9, Math.min(1.35, currentFontSizeRem + (delta * 0.08)));
+      document.getElementById('note-content-body').style.fontSize = `${currentFontSizeRem}rem`;
+      document.querySelectorAll('.tool-btn').forEach(b => {
+        if (b.id === 'btn-font-reset') b.classList.toggle('active', Math.abs(currentFontSizeRem - 1.05) < 0.02);
+      });
+    }
+
+    function resetFontSize() {
+      currentFontSizeRem = 1.05;
+      document.getElementById('note-content-body').style.fontSize = `1.05rem`;
+      document.getElementById('btn-font-reset').classList.add('active');
+    }
+
+    function toggleFocusMode() {
+      document.body.classList.toggle('focus-mode');
+      const isFocus = document.body.classList.contains('focus-mode');
+      const focusBtn = document.getElementById('btn-focus-toggle');
+      if (focusBtn) {
+        focusBtn.classList.toggle('active', isFocus);
+        focusBtn.innerHTML = isFocus ? '<span>✕ Exit Focus</span>' : '<span>📖 Focus Mode</span>';
+      }
+      if (isFocus) {
+        document.getElementById('note-panel').scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function copyNoteLink() {
+      const url = new URL(window.location.href);
+      if (currentJourneyId) {
+        url.searchParams.set('journey_id', currentJourneyId);
+      }
+      navigator.clipboard.writeText(url.toString()).then(() => {
+        const btnLinkText = document.getElementById('btn-link-text');
+        const orig = btnLinkText.textContent;
+        btnLinkText.textContent = '✓ Copied URL!';
+        setTimeout(() => { btnLinkText.textContent = orig; }, 2000);
+      });
+    }
+
+    function copyCode(btn, codeText) {
+      navigator.clipboard.writeText(codeText).then(() => {
+        const orig = btn.innerHTML;
+        btn.classList.add('copied');
+        btn.innerHTML = '<span>✓ Copied!</span>';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = orig;
+        }, 2000);
+      });
+    }
+
+    /* Reading Progress & Scrollspy */
+    window.addEventListener('scroll', () => {
+      const notePanel = document.getElementById('note-panel');
+      const progressBar = document.getElementById('reading-progress-bar');
+      const progressText = document.getElementById('toc-progress-text');
+
+      if (!notePanel || notePanel.style.display === 'none') {
+        progressBar.style.width = '0%';
+        return;
+      }
+
+      const rect = notePanel.getBoundingClientRect();
+      const totalHeight = notePanel.offsetHeight - window.innerHeight;
+      if (totalHeight > 0) {
+        const currentProgress = Math.min(100, Math.max(0, ((-rect.top) / totalHeight) * 100));
+        progressBar.style.width = `${currentProgress}%`;
+        if (progressText) progressText.textContent = `${Math.round(currentProgress)}%`;
+      }
+    });
+
+    function setupScrollSpy() {
+      if (observer) observer.disconnect();
+      const sections = document.querySelectorAll('.note-section-container');
+      const tocLinks = document.querySelectorAll('.toc-item');
+
+      observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach(link => {
+              if (link.getAttribute('href') === `#${id}`) {
+                link.classList.add('active');
+              } else {
+                link.classList.remove('active');
+              }
+            });
+          }
+        });
+      }, { rootMargin: '-100px 0px -60% 0px', threshold: 0.1 });
+
+      sections.forEach(sec => observer.observe(sec));
+    }
+
+    /* Submission & Step Handling */
     async function submitTopic(event) {
       event.preventDefault();
       const input = document.getElementById('topic-input');
@@ -843,46 +1549,94 @@
       }
     }
 
+    /* ==========================================================================
+       PHASE 6: WEB NOTE VIEWER RENDERER
+       ========================================================================== */
     function renderNote(note) {
       const notePanel = document.getElementById('note-panel');
       notePanel.style.display = 'block';
       notePanel.scrollIntoView({ behavior: 'smooth' });
 
+      // Note Header
       document.getElementById('note-topic-heading').textContent = note.topic;
       document.getElementById('note-summary-text').textContent = note.summary;
       document.getElementById('note-version-badge').textContent = `VERSION ${note.version}`;
+      document.getElementById('note-sections-count').textContent = `${note.sections.length} Sections`;
 
-      const container = document.getElementById('note-content-container');
-      container.innerHTML = note.sections.map(s => `
-        <div class="note-section-container">
+      // Word count & estimated reading time calculation
+      let totalWords = (note.summary || '').split(/\s+/).length;
+      note.sections.forEach(s => {
+        totalWords += (s.title || '').split(/\s+/).length;
+        s.blocks.forEach(b => {
+          const text = (b.content || '') + ' ' + (b.code || '') + ' ' + (b.term || '');
+          totalWords += text.split(/\s+/).length;
+        });
+      });
+      const readMins = Math.max(1, Math.ceil(totalWords / 180));
+      document.getElementById('note-readtime-badge').textContent = `⏱️ ~${readMins} min read`;
+
+      // Render Sticky Table of Contents (TOC)
+      const tocList = document.getElementById('toc-list');
+      tocList.innerHTML = note.sections.map((s, idx) => `
+        <li>
+          <a href="#sec-${s.order_index}" class="toc-item ${idx === 0 ? 'active' : ''}" onclick="smoothScrollTo(event, 'sec-${s.order_index}')">
+            <span class="toc-num">${s.order_index}.</span>
+            <span>${escapeHtml(s.title)}</span>
+          </a>
+        </li>
+      `).join('');
+
+      // Render Note Sections & Blocks
+      const bodyContainer = document.getElementById('note-content-body');
+      bodyContainer.innerHTML = note.sections.map(s => `
+        <section class="note-section-container" id="sec-${s.order_index}">
           <div class="section-header-row">
-            <span class="section-num">${s.order_index}.</span>
-            <h2 class="section-heading">${escapeHtml(s.title)}</h2>
+            <div class="section-title-wrap">
+              <span class="section-num">${s.order_index}.</span>
+              <h2 class="section-heading">${escapeHtml(s.title)}</h2>
+            </div>
+            <div class="section-meta-tags">
+              <span class="depth-badge depth-${s.depth}">${s.depth}</span>
+              <span class="section-type-pill">${escapeHtml(s.section_type)}</span>
+            </div>
           </div>
-          <div class="blocks-feed">
+          <div class="section-blocks-feed">
             ${s.blocks.map(renderNoteBlock).join('')}
           </div>
-        </div>
+        </section>
       `).join('');
+
+      // Initialize ScrollSpy
+      setTimeout(setupScrollSpy, 150);
+    }
+
+    function smoothScrollTo(event, elementId) {
+      event.preventDefault();
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Update URL hash without jump
+        history.replaceState(null, null, `#${elementId}`);
+      }
     }
 
     function renderNoteBlock(b) {
       if (b.type === 'paragraph') {
-        return `<div class="block-paragraph">${escapeHtml(b.content || '')}</div>`;
+        return `<div class="block-paragraph">${formatInlineMarkdown(b.content || '')}</div>`;
       }
       if (b.type === 'definition') {
         return `
           <div class="block-definition">
             <div class="def-term"><span>📖</span><span>${escapeHtml(b.term || 'Definition')}</span></div>
-            <div class="def-content">${escapeHtml(b.content || '')}</div>
+            <div class="def-content">${formatInlineMarkdown(b.content || '')}</div>
           </div>
         `;
       }
       if (b.type === 'warning') {
         return `
           <div class="block-warning">
-            <div class="warning-title"><span>⚠️</span><span>${escapeHtml(b.title || 'Important Note')}</span></div>
-            <div class="warning-content">${escapeHtml(b.content || '')}</div>
+            <div class="warning-title"><span>⚠️</span><span>${escapeHtml(b.title || 'Important Note / Misconception')}</span></div>
+            <div class="warning-content">${formatInlineMarkdown(b.content || '')}</div>
           </div>
         `;
       }
@@ -890,27 +1644,42 @@
         return `
           <div class="block-example">
             <div class="example-title"><span>💡</span><span>${escapeHtml(b.title || 'Example Walkthrough')}</span></div>
-            <div class="example-content">${escapeHtml(b.content || '')}</div>
+            <div class="example-content">${formatInlineMarkdown(b.content || '')}</div>
           </div>
         `;
       }
       if (b.type === 'code') {
+        const rawCode = b.code || b.content || '';
+        const escapedForAttr = rawCode.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
         return `
           <div class="block-code">
             <div class="code-header">
-              <span class="code-lang">${escapeHtml(b.language || 'code')}</span>
-              <span style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(b.title || '')}</span>
+              <div style="display: flex; align-items: center;">
+                <span class="code-lang">${escapeHtml(b.language || 'code')}</span>
+                ${b.title ? `<span class="code-title">— ${escapeHtml(b.title)}</span>` : ''}
+              </div>
+              <div class="code-actions">
+                <button type="button" class="copy-btn" onclick="copyCode(this, \`${escapeJsString(rawCode)}\`)">
+                  <span>📋 Copy Code</span>
+                </button>
+              </div>
             </div>
-            <pre class="code-pre"><code>${escapeHtml(b.code || b.content || '')}</code></pre>
+            <pre class="code-pre"><code>${escapeHtml(rawCode)}</code></pre>
           </div>
         `;
       }
       if (b.type === 'diagram') {
+        const diagramRaw = b.diagram_spec || b.content || '';
         return `
           <div class="block-diagram">
-            <div class="diagram-title"><span>📊</span> ${escapeHtml(b.title || 'Architecture Diagram')}</div>
-            <pre class="diagram-spec-pre">${escapeHtml(b.diagram_spec || b.content || '')}</pre>
-            ${b.caption ? `<div class="diagram-caption">${escapeHtml(b.caption)}</div>` : ''}
+            <div class="diagram-header">
+              <div class="diagram-title"><span>📊</span> ${escapeHtml(b.title || 'Architecture Flow')}</div>
+              <button type="button" class="copy-btn" onclick="copyCode(this, \`${escapeJsString(diagramRaw)}\`)">
+                <span>📋 Copy Spec</span>
+              </button>
+            </div>
+            <pre class="diagram-spec-pre">${escapeHtml(diagramRaw)}</pre>
+            ${b.caption ? `<div class="diagram-caption">Figure: ${escapeHtml(b.caption)}</div>` : ''}
           </div>
         `;
       }
@@ -932,19 +1701,39 @@
         }
         return `
           <div class="block-comparison">
-            <div class="comparison-title">${escapeHtml(b.title || 'Comparison')}</div>
-            ${b.content ? `<div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.75rem;">${escapeHtml(b.content)}</div>` : ''}
+            <div class="comparison-title">${escapeHtml(b.title || 'Conceptual Comparison')}</div>
+            ${b.content ? `<div style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 0.75rem;">${formatInlineMarkdown(b.content)}</div>` : ''}
             ${rows}
           </div>
         `;
       }
-      return `<div class="block-paragraph">${escapeHtml(b.content || '')}</div>`;
+      return `<div class="block-paragraph">${formatInlineMarkdown(b.content || '')}</div>`;
     }
 
+    function formatInlineMarkdown(text) {
+      if (!text) return '';
+      let safe = escapeHtml(text);
+      // bold **text**
+      safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      // inline `code`
+      safe = safe.replace(/`([^`]+)`/g, '<code style="font-family: var(--font-mono); background: rgba(255,255,255,0.06); padding: 0.15rem 0.4rem; border-radius: 4px; color: #a5b4fc; font-size: 0.9em;">$1</code>');
+      return safe;
+    }
+
+    function escapeJsString(str) {
+      return (str || '')
+        .replace(/\\/g, '\\\\')
+        .replace(/`/g, '\\`')
+        .replace(/\$/g, '\\$');
+    }
+
+    /* ==========================================================================
+       JOURNEY RESUMPTION & HISTORY
+       ========================================================================== */
     async function loadRecentJourneys() {
       const listEl = document.getElementById('history-list');
       try {
-        const res = await fetch('/journeys?limit=5');
+        const res = await fetch('/journeys?limit=6');
         if (!res.ok) return;
         const data = await res.json();
         if (!data.journeys || data.journeys.length === 0) {
@@ -953,13 +1742,13 @@
         }
 
         listEl.innerHTML = data.journeys.map(j => `
-          <div class="history-item" onclick="startDiscovery('${j.id}', '${escapeHtml(j.topic)}')">
+          <div class="history-item" onclick="resumeJourney('${j.id}', '${escapeHtml(j.topic)}', '${j.status}')">
             <div>
               <div class="history-topic">${escapeHtml(j.topic)}</div>
               <div style="font-size: 0.775rem; color: var(--text-muted); font-family: var(--font-mono); margin-top: 0.2rem;">ID: ${j.id.slice(0, 8)}...</div>
             </div>
             <div style="display: flex; align-items: center; gap: 0.75rem;">
-              <span class="phase-badge">${j.status.toUpperCase()}</span>
+              <span class="phase-badge">${formatStatus(j.status)}</span>
               <span style="font-size: 0.85rem; color: #a5b4fc;">&rarr;</span>
             </div>
           </div>
@@ -969,14 +1758,85 @@
       }
     }
 
+    function formatStatus(status) {
+      if (status === 'note_generated') return 'NOTE READY';
+      if (status === 'architecture_ready') return 'ARCH READY';
+      if (status === 'profile_ready') return 'PROFILE READY';
+      if (status === 'probing') return 'DISCOVERY';
+      return status.toUpperCase();
+    }
+
+    async function resumeJourney(journeyId, topic, status) {
+      currentJourneyId = journeyId;
+      currentTopic = topic;
+
+      if (status === 'note_generated') {
+        try {
+          const res = await fetch(`/journeys/${journeyId}/note`);
+          if (res.ok) {
+            const note = await res.json();
+            renderNote(note);
+            return;
+          }
+        } catch (e) { console.error(e); }
+      }
+
+      if (status === 'architecture_ready') {
+        try {
+          const res = await fetch(`/journeys/${journeyId}/architecture`);
+          if (res.ok) {
+            const arch = await res.json();
+            const archPanel = document.getElementById('architecture-panel');
+            archPanel.style.display = 'block';
+            archPanel.scrollIntoView({ behavior: 'smooth' });
+            renderArchitecture(arch);
+            return;
+          }
+        } catch (e) { console.error(e); }
+      }
+
+      if (status === 'profile_ready') {
+        try {
+          const res = await fetch(`/journeys/${journeyId}/knowledge-profile`);
+          if (res.ok) {
+            const prof = await res.json();
+            const profPanel = document.getElementById('profile-panel');
+            profPanel.style.display = 'block';
+            profPanel.scrollIntoView({ behavior: 'smooth' });
+            renderProfile(prof);
+            return;
+          }
+        } catch (e) { console.error(e); }
+      }
+
+      // Default: continue discovery
+      startDiscovery(journeyId, topic);
+    }
+
     function escapeHtml(str) {
       const div = document.createElement('div');
-      div.textContent = str;
+      div.textContent = str || '';
       return div.innerHTML;
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       loadRecentJourneys();
+
+      // Deep link support via ?journey_id=...
+      const params = new URLSearchParams(window.location.search);
+      const jid = params.get('journey_id');
+      if (jid) {
+        try {
+          const res = await fetch(`/journeys/${jid}/note`);
+          if (res.ok) {
+            const note = await res.json();
+            currentJourneyId = jid;
+            renderNote(note);
+          }
+        } catch (e) {
+          console.warn("Could not load deep-linked journey note", e);
+        }
+      }
     });
   </script>
 </body>
