@@ -6,7 +6,7 @@
 
 ## Development Status
 
-- **Current Phase:** Phase 4 — Personalized Note Architecture
+- **Current Phase:** Phase 5 — Note Generation
 - **Status:** Complete
 - **GitHub Checkpoint:** Pending
 
@@ -19,18 +19,19 @@ ai-notemaker/
 ├── .venv/              # Dedicated local virtual environment (gitignored)
 ├── backend/            # FastAPI backend application
 │   └── app/
-│       ├── api/          # REST API endpoints (Journeys, Discovery, Profile, Architecture)
+│       ├── api/          # REST API endpoints (Journeys, Discovery, Profile, Architecture, Note)
 │       ├── architecture/ # Agent 3 — Personalized Note Architecture Agent
 │       ├── db/           # SQLite database session and engine setup
 │       ├── discovery/    # LangGraph Knowledge Discovery Agent & workflow
+│       ├── models/       # SQLAlchemy models (Journey, Interaction, Profile, Concept, Architecture, Note)
+│       ├── note/         # Agent 4 — Content Generation Agent (Structured Blocks)
 │       ├── profile/      # Agent 2 — Knowledge Profile Agent & synthesis
-│       ├── models/       # SQLAlchemy models (Journey, Interaction, Profile, Concept, Architecture)
 │       ├── providers/    # LLM provider abstraction (Ollama, OpenAI, Groq, Mock)
 │       ├── schemas/      # Pydantic request/response schemas
 │       ├── config.py     # Pydantic Settings
 │       └── main.py       # FastAPI application and lifespan
 ├── frontend/           # HTML, CSS, Vanilla JavaScript web UI
-│   └── index.html      # Topic Intake, Discovery, Profile Matrix & Section Blueprints
+│   └── index.html      # Topic Intake, Discovery, Profile Matrix, Architecture, & Living Note Viewer
 ├── data/               # SQLite database storage (gitignored)
 ├── tests/              # Unit, API, and provider test suite
 ├── .env.example        # Configuration template

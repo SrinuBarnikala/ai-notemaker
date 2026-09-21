@@ -54,35 +54,25 @@
       background: rgba(7, 11, 18, 0.85);
       position: sticky;
       top: 0;
-      z-index: 20;
+      z-index: 30;
     }
 
     .brand { display: flex; align-items: center; gap: 0.75rem; }
-
     .brand-icon {
       width: 34px; height: 34px;
       background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      border-radius: 9px;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; color: #fff; font-size: 1.1rem;
-      box-shadow: 0 0 16px var(--accent-glow);
+      border-radius: 9px; display: flex; align-items: center; justify-content: center;
+      font-weight: 800; color: #fff; font-size: 1.1rem; box-shadow: 0 0 16px var(--accent-glow);
     }
-
     .brand-title { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; }
-
     .phase-badge {
-      font-size: 0.75rem;
-      padding: 0.3rem 0.75rem;
-      border-radius: 9999px;
-      background: rgba(99, 102, 241, 0.15);
-      border: 1px solid var(--border-accent);
-      color: #a5b4fc;
-      font-family: var(--font-mono);
-      font-weight: 600;
+      font-size: 0.75rem; padding: 0.3rem 0.75rem; border-radius: 9999px;
+      background: rgba(99, 102, 241, 0.15); border: 1px solid var(--border-accent);
+      color: #a5b4fc; font-family: var(--font-mono); font-weight: 600;
     }
 
     main {
-      max-width: 980px;
+      max-width: 1000px;
       width: 100%;
       margin: 2.5rem auto;
       padding: 0 1.5rem;
@@ -90,24 +80,12 @@
     }
 
     .hero { text-align: center; margin-bottom: 2.5rem; }
-
     .hero h1 {
-      font-size: 2.6rem;
-      font-weight: 800;
-      line-height: 1.25;
-      margin-bottom: 0.85rem;
+      font-size: 2.6rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.85rem;
       background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: -0.03em;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.03em;
     }
-
-    .hero p {
-      font-size: 1.125rem;
-      color: var(--text-secondary);
-      max-width: 680px;
-      margin: 0 auto;
-    }
+    .hero p { font-size: 1.125rem; color: var(--text-secondary); max-width: 680px; margin: 0 auto; }
 
     .card {
       background: var(--bg-card);
@@ -119,93 +97,46 @@
       margin-bottom: 2rem;
       transition: border-color 0.2s ease;
     }
+    .card:hover { border-color: rgba(255, 255, 255, 0.12); }
 
     .card-title-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.25rem;
-      padding-bottom: 0.85rem;
-      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.25rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--border);
     }
-
-    .card-title {
-      font-size: 1.2rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-
-    .card-tag {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
+    .card-title { font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; gap: 0.6rem; }
+    .card-tag { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
 
     /* Form Styles */
     .intake-group { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.25rem; }
     .intake-label { font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); display: flex; justify-content: space-between; }
     .intake-input {
-      width: 100%;
-      background: rgba(7, 11, 18, 0.8);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
-      font-size: 1.05rem;
-      color: #fff;
-      font-family: var(--font-sans);
-      outline: none;
-      transition: all 0.2s ease;
+      width: 100%; background: rgba(7, 11, 18, 0.8); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1rem 1.25rem; font-size: 1.05rem; color: #fff;
+      font-family: var(--font-sans); outline: none; transition: all 0.2s ease;
     }
     .intake-input:focus, .answer-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
 
     .chip-container { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; align-items: center; }
     .chip-label { font-size: 0.775rem; color: var(--text-muted); font-weight: 600; }
     .chip {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border);
-      color: #cbd5e1;
-      font-size: 0.8125rem;
-      padding: 0.35rem 0.8rem;
-      border-radius: 9999px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); color: #cbd5e1;
+      font-size: 0.8125rem; padding: 0.35rem 0.8rem; border-radius: 9999px; cursor: pointer;
+      transition: all 0.15s ease; font-family: var(--font-mono);
     }
-    .chip:hover {
-      background: rgba(99, 102, 241, 0.15);
-      border-color: var(--border-accent);
-      color: #e0e7ff;
-      transform: translateY(-1px);
-    }
+    .chip:hover { background: rgba(99, 102, 241, 0.15); border-color: var(--border-accent); color: #e0e7ff; transform: translateY(-1px); }
 
     .btn-submit {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.6rem;
-      width: 100%;
-      background: linear-gradient(135deg, #6366f1, #4f46e5);
-      color: #ffffff;
-      padding: 0.95rem 1.5rem;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 1rem;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 16px var(--accent-glow);
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
+      width: 100%; background: linear-gradient(135deg, #6366f1, #4f46e5); color: #ffffff;
+      padding: 0.95rem 1.5rem; border-radius: 12px; font-weight: 700; font-size: 1rem;
+      border: none; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 16px var(--accent-glow);
     }
     .btn-submit:hover:not(:disabled) { background: linear-gradient(135deg, #4f46e5, #4338ca); transform: translateY(-1px); }
     .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
     /* Panels */
-    #discovery-panel, #profile-panel, #architecture-panel {
-      display: none;
-      animation: fadeIn 0.3s ease-in-out;
+    #discovery-panel, #profile-panel, #architecture-panel, #note-panel {
+      display: none; animation: fadeIn 0.3s ease-in-out;
     }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -235,15 +166,9 @@
     .qa-assessment { font-size: 0.825rem; color: #a7f3d0; background: rgba(16, 185, 129, 0.1); padding: 0.4rem 0.75rem; border-radius: 8px; display: inline-block; }
 
     /* Knowledge Profile Styles */
-    .profile-summary-box {
-      background: rgba(99, 102, 241, 0.08); border: 1px solid var(--border-accent);
-      border-radius: 14px; padding: 1.5rem; margin-bottom: 1.75rem; line-height: 1.7;
-    }
+    .profile-summary-box { background: rgba(99, 102, 241, 0.08); border: 1px solid var(--border-accent); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.75rem; line-height: 1.7; }
     .profile-summary-text { font-size: 1.05rem; color: #f1f5f9; }
-    .confidence-badge {
-      font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.06em; padding: 0.3rem 0.85rem; border-radius: 9999px;
-    }
+    .confidence-badge { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.3rem 0.85rem; border-radius: 9999px; }
     .confidence-beginner { background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fbbf24; }
     .confidence-intermediate { background: rgba(99, 102, 241, 0.15); border: 1px solid var(--accent); color: #a5b4fc; }
     .confidence-advanced { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--success); color: #6ee7b7; }
@@ -267,73 +192,120 @@
     .misconception-card { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 10px; padding: 0.85rem 1rem; font-size: 0.85rem; color: #fca5a5; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
 
     /* Note Architecture Section Styles */
-    .arch-summary-box {
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.08));
-      border: 1px solid rgba(168, 85, 247, 0.3);
-      border-radius: 14px; padding: 1.5rem; margin-bottom: 1.75rem;
-    }
+    .arch-summary-box { background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.08)); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.75rem; }
     .arch-summary-title { font-size: 0.8rem; font-family: var(--font-mono); text-transform: uppercase; color: #d8b4fe; margin-bottom: 0.4rem; letter-spacing: 0.05em; font-weight: 700; }
     .arch-summary-text { font-size: 1.05rem; color: #f8fafc; line-height: 1.6; }
 
     .blueprint-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
-    .blueprint-card {
-      background: rgba(7, 11, 18, 0.7);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.4rem;
-      transition: all 0.2s ease;
-      position: relative;
-    }
+    .blueprint-card { background: rgba(7, 11, 18, 0.7); border: 1px solid var(--border); border-radius: 14px; padding: 1.4rem; transition: all 0.2s ease; }
     .blueprint-card:hover { border-color: rgba(99, 102, 241, 0.4); transform: translateX(3px); }
-
     .blueprint-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
     .blueprint-title-row { display: flex; align-items: center; gap: 0.75rem; }
     .blueprint-index {
-      width: 28px; height: 28px; border-radius: 8px;
-      background: rgba(99, 102, 241, 0.2); border: 1px solid var(--border-accent);
-      color: #a5b4fc; font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 8px; background: rgba(99, 102, 241, 0.2);
+      border: 1px solid var(--border-accent); color: #a5b4fc; font-family: var(--font-mono);
+      font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
     }
     .blueprint-title { font-size: 1.1rem; font-weight: 700; color: #ffffff; }
 
-    .blueprint-badges { display: flex; align-items: center; gap: 0.5rem; }
-    .depth-badge {
-      font-size: 0.7rem; font-family: var(--font-mono); font-weight: 700;
-      text-transform: uppercase; padding: 0.2rem 0.6rem; border-radius: 9999px;
-    }
+    .depth-badge { font-size: 0.7rem; font-family: var(--font-mono); font-weight: 700; text-transform: uppercase; padding: 0.2rem 0.6rem; border-radius: 9999px; }
     .depth-brief { background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #7dd3fc; }
     .depth-standard { background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #fde047; }
     .depth-deep { background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #e9d5ff; }
 
-    .blueprint-rationale {
-      font-size: 0.875rem; color: #cbd5e1; margin-top: 0.5rem; padding-left: 0.75rem;
-      border-left: 2px solid var(--border-accent); line-height: 1.5;
-    }
-
+    .blueprint-rationale { font-size: 0.875rem; color: #cbd5e1; margin-top: 0.5rem; padding-left: 0.75rem; border-left: 2px solid var(--border-accent); line-height: 1.5; }
     .blueprint-footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-top: 0.9rem; padding-top: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.05); gap: 0.5rem; }
     .blueprint-features { display: flex; align-items: center; gap: 0.5rem; }
-    .feature-pill {
-      font-size: 0.725rem; font-family: var(--font-mono); padding: 0.2rem 0.55rem;
-      border-radius: 6px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border);
-      color: #94a3b8; display: flex; align-items: center; gap: 0.35rem;
-    }
+    .feature-pill { font-size: 0.725rem; font-family: var(--font-mono); padding: 0.2rem 0.55rem; border-radius: 6px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); color: #94a3b8; display: flex; align-items: center; gap: 0.35rem; }
     .feature-pill.active { background: rgba(99, 102, 241, 0.15); border-color: var(--border-accent); color: #c7d2fe; }
+
+    /* Phase 5: Structured Note Styles */
+    .note-meta-box {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 1.5rem; background: rgba(7, 11, 18, 0.8); border: 1px solid var(--border);
+      border-radius: 12px; margin-bottom: 2rem;
+    }
+    .note-version-tag { font-family: var(--font-mono); font-size: 0.75rem; background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 0.25rem 0.6rem; border-radius: 6px; }
+
+    .note-section-container {
+      margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .note-section-container:last-child { border-bottom: none; margin-bottom: 1rem; }
+
+    .section-header-row { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.25rem; }
+    .section-num { font-family: var(--font-mono); font-size: 1.1rem; color: #a5b4fc; font-weight: 700; }
+    .section-heading { font-size: 1.45rem; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; }
+
+    /* Blocks */
+    .block-paragraph { font-size: 1.05rem; line-height: 1.75; color: #cbd5e1; margin-bottom: 1.25rem; }
+    .block-paragraph strong { color: #ffffff; }
+
+    .block-definition {
+      background: rgba(168, 85, 247, 0.08); border-left: 4px solid var(--purple);
+      border-radius: 0 12px 12px 0; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem;
+    }
+    .def-term { font-weight: 700; font-size: 1.05rem; color: #e9d5ff; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem; }
+    .def-content { font-size: 0.975rem; color: #d8b4fe; line-height: 1.6; }
+
+    .block-warning {
+      background: rgba(245, 158, 11, 0.08); border-left: 4px solid var(--warning);
+      border-radius: 0 12px 12px 0; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem;
+    }
+    .warning-title { font-weight: 700; font-size: 1.05rem; color: #fde047; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem; }
+    .warning-content { font-size: 0.975rem; color: #fef08a; line-height: 1.6; }
+
+    .block-example {
+      background: rgba(99, 102, 241, 0.08); border-left: 4px solid var(--accent);
+      border-radius: 0 12px 12px 0; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem;
+    }
+    .example-title { font-weight: 700; font-size: 1.05rem; color: #c7d2fe; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem; }
+    .example-content { font-size: 0.975rem; color: #e0e7ff; line-height: 1.6; }
+
+    .block-code {
+      background: #050811; border: 1px solid var(--border); border-radius: 12px;
+      margin-bottom: 1.5rem; overflow: hidden;
+    }
+    .code-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.6rem 1rem; background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid var(--border);
+    }
+    .code-lang { font-family: var(--font-mono); font-size: 0.75rem; color: #a5b4fc; text-transform: uppercase; font-weight: 600; }
+    .code-pre {
+      padding: 1.25rem; overflow-x: auto; font-family: var(--font-mono);
+      font-size: 0.9rem; color: #e2e8f0; line-height: 1.6;
+    }
+
+    .block-diagram {
+      background: rgba(7, 11, 18, 0.9); border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;
+    }
+    .diagram-title { font-weight: 700; color: #c7d2fe; font-size: 1rem; margin-bottom: 0.4rem; }
+    .diagram-spec-pre {
+      background: #050811; border: 1px solid var(--border); border-radius: 8px;
+      padding: 1rem; font-family: var(--font-mono); font-size: 0.85rem; color: #38bdf8;
+      overflow-x: auto; margin: 0.75rem 0; line-height: 1.5;
+    }
+    .diagram-caption { font-size: 0.8rem; color: var(--text-muted); font-style: italic; }
+
+    .block-comparison {
+      background: rgba(7, 11, 18, 0.8); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; overflow-x: auto;
+    }
+    .comparison-title { font-weight: 700; color: #f1f5f9; font-size: 1rem; margin-bottom: 0.75rem; }
+    .comparison-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .comparison-table th, .comparison-table td { padding: 0.6rem 0.85rem; text-align: left; border-bottom: 1px solid var(--border); }
+    .comparison-table th { color: #a5b4fc; font-family: var(--font-mono); font-weight: 600; }
+    .comparison-table td { color: #cbd5e1; }
 
     .history-item {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0.85rem 1.1rem; background: rgba(7, 11, 18, 0.6);
-      border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.15s ease;
+      padding: 0.85rem 1.1rem; background: rgba(7, 11, 18, 0.6); border: 1px solid var(--border);
+      border-radius: 10px; cursor: pointer; transition: all 0.15s ease;
     }
     .history-item:hover { border-color: var(--border-accent); background: rgba(7, 11, 18, 0.9); }
     .history-topic { font-weight: 600; color: #e2e8f0; font-size: 0.95rem; }
 
-    .footer {
-      border-top: 1px solid var(--border);
-      text-align: center;
-      padding: 1.5rem;
-      font-size: 0.8125rem;
-      color: var(--text-muted);
-    }
+    .footer { border-top: 1px solid var(--border); text-align: center; padding: 1.5rem; font-size: 0.8125rem; color: var(--text-muted); }
   </style>
 </head>
 <body>
@@ -343,14 +315,14 @@
       <span class="brand-title">Personalized Technical Note Maker</span>
     </div>
     <div class="header-badges">
-      <div class="phase-badge">PHASE 4: NOTE ARCHITECTURE</div>
+      <div class="phase-badge">PHASE 5: NOTE GENERATION</div>
     </div>
   </header>
 
   <main>
     <div class="hero">
-      <h1>Personalized Technical Architecture</h1>
-      <p>Turning your unique mental model into an adaptive, tailored note blueprint that prioritizes your exact knowledge gaps.</p>
+      <h1>Living Technical Notes Built for You</h1>
+      <p>A personalized technical note structured around your mental model, addressing gaps with code, callouts, and diagrams.</p>
     </div>
 
     <!-- Phase 1: Topic Intake Card -->
@@ -512,15 +484,30 @@
 
       <div class="blueprint-list" id="blueprint-list"></div>
 
-      <div style="margin-top: 1.5rem; padding: 1.25rem; background: rgba(99, 102, 241, 0.1); border: 1px dashed var(--border-accent); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <div style="font-weight: 700; color: #fff;">Ready for Phase 5: Structured Note Content Generation</div>
-          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
-            Each structured block (definitions, comparisons, code, and warnings) will be built to this exact blueprint.
-          </div>
+      <button type="button" class="btn-submit" id="btn-gen-note" onclick="triggerNoteGeneration(currentJourneyId)">
+        <span id="btn-note-text">Generate Living Structured Note &rarr;</span>
+        <span id="btn-note-spinner" style="display: none;">🤖 Agent 4 composing structured note...</span>
+      </button>
+    </div>
+
+    <!-- Phase 5: Structured Living Note Panel -->
+    <div class="card" id="note-panel">
+      <div class="card-title-row">
+        <div class="card-title">
+          <span>5. Canonical Living Technical Note</span>
         </div>
-        <span class="phase-badge">READY FOR PHASE 5</span>
+        <span class="card-tag">Structured Blocks</span>
       </div>
+
+      <div class="note-meta-box">
+        <div>
+          <div style="font-size: 1.25rem; font-weight: 800; color: #ffffff;" id="note-topic-heading">--</div>
+          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;" id="note-summary-text">--</div>
+        </div>
+        <div class="note-version-tag" id="note-version-badge">VERSION 1</div>
+      </div>
+
+      <div id="note-content-container"></div>
     </div>
 
     <!-- Recent Journeys History Card -->
@@ -536,7 +523,7 @@
   </main>
 
   <footer class="footer">
-    Personalized Technical Note Maker &bull; Phase 4: Personalized Note Architecture Verified
+    Personalized Technical Note Maker &bull; Phase 5: Note Generation Verified
   </footer>
 
   <script>
@@ -598,9 +585,11 @@
       const discPanel = document.getElementById('discovery-panel');
       const profPanel = document.getElementById('profile-panel');
       const archPanel = document.getElementById('architecture-panel');
+      const notePanel = document.getElementById('note-panel');
       discPanel.style.display = 'block';
       profPanel.style.display = 'none';
       archPanel.style.display = 'none';
+      notePanel.style.display = 'none';
       discPanel.scrollIntoView({ behavior: 'smooth' });
 
       document.getElementById('disc-topic-label').textContent = topic;
@@ -825,6 +814,131 @@
           </div>
         </div>
       `).join('');
+    }
+
+    async function triggerNoteGeneration(journeyId) {
+      const btn = document.getElementById('btn-gen-note');
+      const btnText = document.getElementById('btn-note-text');
+      const btnSpinner = document.getElementById('btn-note-spinner');
+
+      btn.disabled = true;
+      btnText.style.display = 'none';
+      btnSpinner.style.display = 'inline';
+
+      try {
+        const res = await fetch(`/journeys/${journeyId}/generate-note`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ style_preference: 'rigorous_technical' })
+        });
+        if (!res.ok) throw new Error('Failed to generate structured note');
+        const note = await res.json();
+        renderNote(note);
+      } catch (err) {
+        alert('Error generating note: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btnText.style.display = 'inline';
+        btnSpinner.style.display = 'none';
+      }
+    }
+
+    function renderNote(note) {
+      const notePanel = document.getElementById('note-panel');
+      notePanel.style.display = 'block';
+      notePanel.scrollIntoView({ behavior: 'smooth' });
+
+      document.getElementById('note-topic-heading').textContent = note.topic;
+      document.getElementById('note-summary-text').textContent = note.summary;
+      document.getElementById('note-version-badge').textContent = `VERSION ${note.version}`;
+
+      const container = document.getElementById('note-content-container');
+      container.innerHTML = note.sections.map(s => `
+        <div class="note-section-container">
+          <div class="section-header-row">
+            <span class="section-num">${s.order_index}.</span>
+            <h2 class="section-heading">${escapeHtml(s.title)}</h2>
+          </div>
+          <div class="blocks-feed">
+            ${s.blocks.map(renderNoteBlock).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderNoteBlock(b) {
+      if (b.type === 'paragraph') {
+        return `<div class="block-paragraph">${escapeHtml(b.content || '')}</div>`;
+      }
+      if (b.type === 'definition') {
+        return `
+          <div class="block-definition">
+            <div class="def-term"><span>📖</span><span>${escapeHtml(b.term || 'Definition')}</span></div>
+            <div class="def-content">${escapeHtml(b.content || '')}</div>
+          </div>
+        `;
+      }
+      if (b.type === 'warning') {
+        return `
+          <div class="block-warning">
+            <div class="warning-title"><span>⚠️</span><span>${escapeHtml(b.title || 'Important Note')}</span></div>
+            <div class="warning-content">${escapeHtml(b.content || '')}</div>
+          </div>
+        `;
+      }
+      if (b.type === 'example') {
+        return `
+          <div class="block-example">
+            <div class="example-title"><span>💡</span><span>${escapeHtml(b.title || 'Example Walkthrough')}</span></div>
+            <div class="example-content">${escapeHtml(b.content || '')}</div>
+          </div>
+        `;
+      }
+      if (b.type === 'code') {
+        return `
+          <div class="block-code">
+            <div class="code-header">
+              <span class="code-lang">${escapeHtml(b.language || 'code')}</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(b.title || '')}</span>
+            </div>
+            <pre class="code-pre"><code>${escapeHtml(b.code || b.content || '')}</code></pre>
+          </div>
+        `;
+      }
+      if (b.type === 'diagram') {
+        return `
+          <div class="block-diagram">
+            <div class="diagram-title"><span>📊</span> ${escapeHtml(b.title || 'Architecture Diagram')}</div>
+            <pre class="diagram-spec-pre">${escapeHtml(b.diagram_spec || b.content || '')}</pre>
+            ${b.caption ? `<div class="diagram-caption">${escapeHtml(b.caption)}</div>` : ''}
+          </div>
+        `;
+      }
+      if (b.type === 'comparison') {
+        let rows = '';
+        if (b.items && b.items.length) {
+          const keys = Object.keys(b.items[0]);
+          const headers = keys.map(k => `<th>${escapeHtml(k)}</th>`).join('');
+          rows = `
+            <table class="comparison-table">
+              <thead><tr>${headers}</tr></thead>
+              <tbody>
+                ${b.items.map(it => `
+                  <tr>${keys.map(k => `<td>${escapeHtml(String(it[k] || ''))}</td>`).join('')}</tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+        }
+        return `
+          <div class="block-comparison">
+            <div class="comparison-title">${escapeHtml(b.title || 'Comparison')}</div>
+            ${b.content ? `<div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.75rem;">${escapeHtml(b.content)}</div>` : ''}
+            ${rows}
+          </div>
+        `;
+      }
+      return `<div class="block-paragraph">${escapeHtml(b.content || '')}</div>`;
     }
 
     async function loadRecentJourneys() {
