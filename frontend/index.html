@@ -9,29 +9,25 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-primary: #080c14;
-      --bg-secondary: #0f172a;
-      --bg-card: rgba(15, 23, 42, 0.75);
+      --bg-primary: #070b12;
+      --bg-secondary: #0d1424;
+      --bg-card: rgba(13, 20, 36, 0.78);
       --border: rgba(255, 255, 255, 0.08);
-      --border-accent: rgba(99, 102, 241, 0.35);
+      --border-accent: rgba(99, 102, 241, 0.4);
       --text-primary: #f8fafc;
       --text-secondary: #94a3b8;
       --text-muted: #64748b;
       --accent: #6366f1;
       --accent-hover: #4f46e5;
-      --accent-glow: rgba(99, 102, 241, 0.25);
+      --accent-glow: rgba(99, 102, 241, 0.3);
       --success: #10b981;
-      --success-glow: rgba(16, 185, 129, 0.2);
+      --success-glow: rgba(16, 185, 129, 0.25);
       --warning: #f59e0b;
       --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       background-color: var(--bg-primary);
@@ -53,43 +49,26 @@
       justify-content: space-between;
       align-items: center;
       backdrop-filter: blur(12px);
-      background: rgba(8, 12, 20, 0.85);
+      background: rgba(7, 11, 18, 0.85);
       position: sticky;
       top: 0;
       z-index: 20;
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
+    .brand { display: flex; align-items: center; gap: 0.75rem; }
 
     .brand-icon {
-      width: 34px;
-      height: 34px;
+      width: 34px; height: 34px;
       background: linear-gradient(135deg, #6366f1, #8b5cf6);
       border-radius: 9px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      color: #fff;
-      font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; color: #fff; font-size: 1.1rem;
       box-shadow: 0 0 16px var(--accent-glow);
     }
 
-    .brand-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
+    .brand-title { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; }
 
-    .header-badges {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
+    .header-badges { display: flex; align-items: center; gap: 0.75rem; }
 
     .phase-badge {
       font-size: 0.75rem;
@@ -100,7 +79,6 @@
       color: #a5b4fc;
       font-family: var(--font-mono);
       font-weight: 600;
-      letter-spacing: 0.02em;
     }
 
     main {
@@ -111,10 +89,7 @@
       flex: 1;
     }
 
-    .hero {
-      text-align: center;
-      margin-bottom: 2.5rem;
-    }
+    .hero { text-align: center; margin-bottom: 2.5rem; }
 
     .hero h1 {
       font-size: 2.6rem;
@@ -145,10 +120,6 @@
       transition: border-color 0.2s ease;
     }
 
-    .card:hover {
-      border-color: rgba(255, 255, 255, 0.12);
-    }
-
     .card-title-row {
       display: flex;
       align-items: center;
@@ -164,7 +135,6 @@
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      letter-spacing: -0.01em;
     }
 
     .card-tag {
@@ -175,48 +145,32 @@
       letter-spacing: 0.06em;
     }
 
-    /* Topic Intake Form */
-    .intake-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      margin-bottom: 1.25rem;
-    }
+    /* Form Styles */
+    .intake-group { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.25rem; }
 
     .intake-label {
       font-size: 0.875rem;
       font-weight: 600;
       color: var(--text-secondary);
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .input-wrapper {
-      position: relative;
-      display: flex;
-      align-items: center;
+      display: flex; justify-content: space-between;
     }
 
     .intake-input {
       width: 100%;
-      background: rgba(8, 12, 20, 0.8);
+      background: rgba(7, 11, 18, 0.8);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 1rem 1.25rem;
       font-size: 1.05rem;
       color: #fff;
       font-family: var(--font-sans);
-      transition: all 0.2s ease;
       outline: none;
+      transition: all 0.2s ease;
     }
 
-    .intake-input:focus {
+    .intake-input:focus, .answer-textarea:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    .intake-input::placeholder {
-      color: var(--text-muted);
     }
 
     .chip-container {
@@ -227,12 +181,7 @@
       align-items: center;
     }
 
-    .chip-label {
-      font-size: 0.775rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      margin-right: 0.25rem;
-    }
+    .chip-label { font-size: 0.775rem; color: var(--text-muted); font-weight: 600; }
 
     .chip {
       background: rgba(255, 255, 255, 0.04);
@@ -274,22 +223,13 @@
     .btn-submit:hover:not(:disabled) {
       background: linear-gradient(135deg, #4f46e5, #4338ca);
       transform: translateY(-1px);
-      box-shadow: 0 6px 20px var(--accent-glow);
     }
 
-    .btn-submit:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    /* Active Journey Box */
-    .journey-result {
+    /* Discovery Mode Section */
+    #discovery-panel {
       display: none;
-      margin-top: 1.5rem;
-      background: rgba(16, 185, 129, 0.05);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      border-radius: 14px;
-      padding: 1.5rem;
       animation: fadeIn 0.3s ease-in-out;
     }
 
@@ -298,75 +238,115 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .journey-result-header {
+    .discovery-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.75rem;
+      margin-bottom: 1.25rem;
     }
 
-    .journey-status-badge {
+    .concept-pill {
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      padding: 0.25rem 0.75rem;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid var(--border-accent);
+      color: #c7d2fe;
+      padding: 0.3rem 0.8rem;
       border-radius: 9999px;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: #6ee7b7;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
       font-weight: 600;
     }
 
-    .journey-meta-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1rem;
-      margin-top: 1rem;
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
     }
 
-    .meta-box {
-      background: rgba(0, 0, 0, 0.3);
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #10b981);
+      width: 25%;
+      transition: width 0.4s ease;
+    }
+
+    .question-box {
+      background: rgba(7, 11, 18, 0.9);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .question-prompt-text {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.5;
+    }
+
+    .answer-textarea {
+      width: 100%;
+      min-height: 110px;
+      background: rgba(7, 11, 18, 0.8);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      font-size: 1rem;
+      color: #fff;
+      font-family: var(--font-sans);
+      outline: none;
+      resize: vertical;
+      margin-bottom: 1rem;
+      transition: all 0.2s ease;
     }
 
-    .meta-label {
-      font-size: 0.725rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-      margin-bottom: 0.25rem;
-    }
-
-    .meta-val {
-      font-family: var(--font-mono);
-      font-size: 0.875rem;
-      color: #f1f5f9;
-      word-break: break-all;
-    }
-
-    .next-phase-notice {
-      margin-top: 1.25rem;
-      padding: 0.85rem 1rem;
-      border-radius: 10px;
-      background: rgba(99, 102, 241, 0.1);
-      border: 1px dashed var(--border-accent);
-      font-size: 0.85rem;
-      color: #c7d2fe;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    /* Recent Journeys History */
-    .history-list {
+    /* Completed Turn History */
+    .qa-feed {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
-      margin-top: 1rem;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .qa-card {
+      background: rgba(7, 11, 18, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+
+    .qa-q { font-weight: 600; color: #e2e8f0; margin-bottom: 0.5rem; font-size: 0.95rem; }
+    .qa-a { color: #94a3b8; font-size: 0.9rem; margin-bottom: 0.5rem; padding-left: 0.75rem; border-left: 2px solid var(--border-accent); }
+    .qa-assessment {
+      font-size: 0.825rem;
+      color: #a7f3d0;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      display: inline-block;
+    }
+
+    .completion-banner {
+      display: none;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 14px;
+      padding: 1.75rem;
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+
+    .completion-banner h3 {
+      font-size: 1.3rem;
+      color: #34d399;
+      margin-bottom: 0.5rem;
     }
 
     .history-item {
@@ -374,111 +354,30 @@
       align-items: center;
       justify-content: space-between;
       padding: 0.85rem 1.1rem;
-      background: rgba(8, 12, 20, 0.6);
+      background: rgba(7, 11, 18, 0.6);
       border: 1px solid var(--border);
       border-radius: 10px;
+      cursor: pointer;
       transition: all 0.15s ease;
     }
 
     .history-item:hover {
-      border-color: rgba(255, 255, 255, 0.15);
-      background: rgba(8, 12, 20, 0.9);
+      border-color: var(--border-accent);
+      background: rgba(7, 11, 18, 0.9);
     }
 
-    .history-topic {
-      font-weight: 600;
-      color: #e2e8f0;
-      font-size: 0.95rem;
-    }
-
-    .history-meta {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    /* Diagnostics Section */
-    .grid-info {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.25rem;
-    }
-
-    .info-box {
-      background: rgba(0, 0, 0, 0.25);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.85rem 1rem;
-    }
-
-    .info-label {
-      font-size: 0.725rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-secondary);
-      margin-bottom: 0.25rem;
-    }
-
-    .info-value {
-      font-family: var(--font-mono);
-      font-size: 0.9rem;
-      color: #e2e8f0;
-      font-weight: 600;
-    }
-
-    .btn-secondary {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      background: rgba(255, 255, 255, 0.06);
-      color: #cbd5e1;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.8125rem;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-    }
+    .history-topic { font-weight: 600; color: #e2e8f0; font-size: 0.95rem; }
 
     .status-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-family: var(--font-mono);
-      font-size: 0.775rem;
-      padding: 0.2rem 0.65rem;
-      border-radius: 9999px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border);
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-family: var(--font-mono); font-size: 0.775rem;
+      padding: 0.2rem 0.65rem; border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border);
     }
 
-    .status-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #6b7280;
-    }
-
-    .status-dot.active {
-      background: var(--success);
-      box-shadow: 0 0 8px var(--success-glow);
-    }
-
-    .status-dot.error {
-      background: #ef4444;
-      box-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
-    }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #6b7280; }
+    .status-dot.active { background: var(--success); box-shadow: 0 0 8px var(--success-glow); }
+    .status-dot.error { background: #ef4444; }
 
     .footer {
       border-top: 1px solid var(--border);
@@ -498,23 +397,23 @@
     <div class="header-badges">
       <div class="status-indicator" id="header-status">
         <span class="status-dot" id="header-dot"></span>
-        <span id="header-text">Checking</span>
+        <span id="header-text">Ready</span>
       </div>
-      <div class="phase-badge">PHASE 1: TOPIC INTAKE</div>
+      <div class="phase-badge">PHASE 2: KNOWLEDGE DISCOVERY</div>
     </div>
   </header>
 
   <main>
     <div class="hero">
-      <h1>What technical topic are you exploring?</h1>
-      <p>Enter any topic, architecture, or question. The system will discover your current mental model, pinpoint knowledge gaps, and build an evolving technical note.</p>
+      <h1>Map Your Mental Model Before Building the Note</h1>
+      <p>The AI identifies what you already know, your specific knowledge gaps, and misconceptions through 3–5 adaptive questions.</p>
     </div>
 
     <!-- Phase 1: Topic Intake Card -->
     <div class="card" id="intake-card">
       <div class="card-title-row">
         <div class="card-title">
-          <span>1. Begin Learning Journey</span>
+          <span>1. Topic Intake</span>
         </div>
         <span class="card-tag">POST /journeys</span>
       </div>
@@ -522,66 +421,92 @@
       <form id="intake-form" onsubmit="submitTopic(event)">
         <div class="intake-group">
           <label class="intake-label" for="topic-input">
-            <span>Technical Topic or Question</span>
-            <span style="font-size: 0.775rem; color: var(--text-muted);">Specific questions create more tailored notes</span>
+            <span>What do you want to master?</span>
+            <span style="font-size: 0.775rem; color: var(--text-muted);">Topic or open question</span>
           </label>
-          <div class="input-wrapper">
-            <input 
-              type="text" 
-              id="topic-input" 
-              class="intake-input" 
-              placeholder="e.g. How does RAG work internally?" 
-              autocomplete="off"
-              required
-              minlength="2"
-              maxlength="500"
-            />
-          </div>
+          <input 
+            type="text" 
+            id="topic-input" 
+            class="intake-input" 
+            placeholder="e.g. How does RAG work internally?" 
+            autocomplete="off"
+            required
+            minlength="2"
+            maxlength="500"
+          />
         </div>
 
         <div class="chip-container">
           <span class="chip-label">Try an example:</span>
-          <button type="button" class="chip" onclick="setTopic('How does RAG work internally?')">RAG Internal Architecture</button>
+          <button type="button" class="chip" onclick="setTopic('How does RAG work internally?')">RAG Architecture</button>
           <button type="button" class="chip" onclick="setTopic('Transformer Multi-Head Self-Attention')">Transformer Self-Attention</button>
           <button type="button" class="chip" onclick="setTopic('Raft Distributed Consensus Algorithm')">Raft Consensus</button>
           <button type="button" class="chip" onclick="setTopic('eBPF Linux Kernel Observability')">eBPF Tracing</button>
         </div>
 
         <button type="submit" class="btn-submit" id="btn-submit">
-          <span id="btn-submit-text">Start Learning Journey</span>
+          <span id="btn-submit-text">Begin Knowledge Discovery</span>
           <span id="btn-submit-spinner" style="display: none;">⏳ Creating Journey...</span>
         </button>
       </form>
+    </div>
 
-      <!-- Active Journey Result Card -->
-      <div class="journey-result" id="journey-result">
-        <div class="journey-result-header">
-          <span style="font-size: 0.95rem; font-weight: 700; color: #10b981;">&check; Learning Journey Initiated</span>
-          <span class="journey-status-badge" id="res-status">CREATED</span>
+    <!-- Phase 2: Knowledge Discovery Panel -->
+    <div class="card" id="discovery-panel">
+      <div class="card-title-row">
+        <div class="card-title">
+          <span>2. Knowledge Discovery Agent</span>
+        </div>
+        <div class="concept-pill" id="disc-concept">🎯 Initializing...</div>
+      </div>
+
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="disc-progress" style="width: 25%;"></div>
+      </div>
+
+      <div class="discovery-header">
+        <span style="font-size: 0.875rem; color: var(--text-muted); font-family: var(--font-mono);" id="disc-step-label">Question 1 of ~4</span>
+        <span style="font-size: 0.85rem; font-weight: 600; color: #a5b4fc;" id="disc-topic-label">--</span>
+      </div>
+
+      <!-- Active Question Area -->
+      <div id="active-question-section">
+        <div class="question-box">
+          <div class="question-prompt-text" id="disc-question-text">Generating adaptive probe...</div>
         </div>
 
-        <div style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;" id="res-topic">--</div>
-
-        <div class="journey-meta-row">
-          <div class="meta-box">
-            <div class="meta-label">Journey ID</div>
-            <div class="meta-val" id="res-id">--</div>
-          </div>
-          <div class="meta-box">
-            <div class="meta-label">Database Status</div>
-            <div class="meta-val" style="color: #6ee7b7;">Persisted (SQLite)</div>
-          </div>
-          <div class="meta-box">
-            <div class="meta-label">Created At</div>
-            <div class="meta-val" id="res-created">--</div>
-          </div>
+        <div class="chip-container">
+          <span class="chip-label">Quick answer starters:</span>
+          <button type="button" class="chip" onclick="addAnswerStarter('I have built and deployed this in production. Specifically, ')">Production experience</button>
+          <button type="button" class="chip" onclick="addAnswerStarter('I understand the high-level concept: ')">Conceptual basics</button>
+          <button type="button" class="chip" onclick="addAnswerStarter('I have not used this yet and want to understand how it works.')">New to this</button>
         </div>
 
-        <div class="next-phase-notice">
-          <span>&rarr;</span>
-          <span><strong>Next: Phase 2 Knowledge Discovery</strong> — The system will generate 3–5 adaptive questions to evaluate your mental model for this topic.</span>
+        <textarea 
+          id="disc-answer-input" 
+          class="answer-textarea" 
+          placeholder="Type your explanation or thoughts here. Be honest about uncertainty—this shapes your custom note!"
+        ></textarea>
+
+        <button type="button" class="btn-submit" id="btn-answer-submit" onclick="submitAnswer()">
+          <span id="btn-ans-text">Submit Answer & Adapt</span>
+          <span id="btn-ans-spinner" style="display: none;">🤖 Agent analyzing answer...</span>
+        </button>
+      </div>
+
+      <!-- Completion Banner -->
+      <div class="completion-banner" id="completion-banner">
+        <h3>&check; Knowledge Discovery Complete!</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+          Your current mental model and conceptual gaps have been mapped across all core dimensions.
+        </p>
+        <div style="font-family: var(--font-mono); font-size: 0.85rem; color: #6ee7b7; background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: 8px;">
+          Ready for Phase 3: Knowledge Profile Generation & Section Architecture
         </div>
       </div>
+
+      <!-- Q&A History Feed -->
+      <div class="qa-feed" id="qa-feed"></div>
     </div>
 
     <!-- Recent Journeys History Card -->
@@ -590,54 +515,31 @@
         <div class="card-title">
           <span>Recent Learning Journeys</span>
         </div>
-        <button class="btn-secondary" onclick="loadRecentJourneys()">Refresh History</button>
+        <button class="chip" onclick="loadRecentJourneys()">Refresh</button>
       </div>
-      <div class="history-list" id="history-list">
-        <div style="color: var(--text-muted); font-size: 0.875rem; text-align: center; padding: 1rem;">
-          No journeys initiated yet. Enter a topic above to create one.
-        </div>
-      </div>
-    </div>
-
-    <!-- Backend Diagnostics Card (Phase 0) -->
-    <div class="card" style="opacity: 0.85;">
-      <div class="card-title-row">
-        <div class="card-title">
-          <span>System Diagnostics</span>
-        </div>
-        <button class="btn-secondary" onclick="checkHealth()">Ping /health</button>
-      </div>
-
-      <div class="grid-info">
-        <div class="info-box">
-          <div class="info-label">API Health</div>
-          <div class="info-value" id="diag-status">--</div>
-        </div>
-        <div class="info-box">
-          <div class="info-label">Database</div>
-          <div class="info-value" id="diag-db">--</div>
-        </div>
-        <div class="info-box">
-          <div class="info-label">LLM Provider</div>
-          <div class="info-value" id="diag-provider">--</div>
-        </div>
-        <div class="info-box">
-          <div class="info-label">Configured Model</div>
-          <div class="info-value" id="diag-model">--</div>
-        </div>
-      </div>
+      <div class="history-list" id="history-list"></div>
     </div>
   </main>
 
   <footer class="footer">
-    Personalized Technical Note Maker &bull; Phase 1: Topic Intake Complete
+    Personalized Technical Note Maker &bull; Phase 2: Knowledge Discovery Verified
   </footer>
 
   <script>
+    let currentJourneyId = null;
+    let currentTopic = "";
+    let questionIndex = 1;
+
     function setTopic(text) {
       const input = document.getElementById('topic-input');
       input.value = text;
       input.focus();
+    }
+
+    function addAnswerStarter(text) {
+      const textarea = document.getElementById('disc-answer-input');
+      textarea.value = text;
+      textarea.focus();
     }
 
     async function submitTopic(event) {
@@ -649,7 +551,6 @@
       const btn = document.getElementById('btn-submit');
       const btnText = document.getElementById('btn-submit-text');
       const btnSpinner = document.getElementById('btn-submit-spinner');
-      const resultBox = document.getElementById('journey-result');
 
       btn.disabled = true;
       btnText.style.display = 'none';
@@ -659,31 +560,126 @@
         const res = await fetch('/journeys', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ topic: topic })
+          body: JSON.stringify({ topic })
         });
-
-        if (!res.ok) {
-          const errData = await res.json();
-          throw new Error(errData.detail || 'Failed to create journey');
-        }
-
+        if (!res.ok) throw new Error('Failed to create journey');
         const journey = await res.json();
+        currentJourneyId = journey.id;
+        currentTopic = journey.topic;
 
-        // Populate result card
-        document.getElementById('res-topic').textContent = journey.topic;
-        document.getElementById('res-id').textContent = journey.id;
-        document.getElementById('res-status').textContent = journey.status.toUpperCase();
-        document.getElementById('res-created').textContent = new Date(journey.created_at).toLocaleTimeString();
-        resultBox.style.display = 'block';
-
-        // Refresh recent list
+        // Auto-launch Discovery
+        await startDiscovery(journey.id, journey.topic);
         loadRecentJourneys();
       } catch (err) {
-        alert('Error initiating journey: ' + err.message);
+        alert('Error: ' + err.message);
       } finally {
         btn.disabled = false;
         btnText.style.display = 'inline';
         btnSpinner.style.display = 'none';
+      }
+    }
+
+    async function startDiscovery(journeyId, topic) {
+      currentJourneyId = journeyId;
+      currentTopic = topic;
+
+      const panel = document.getElementById('discovery-panel');
+      panel.style.display = 'block';
+      panel.scrollIntoView({ behavior: 'smooth' });
+
+      document.getElementById('disc-topic-label').textContent = topic;
+      document.getElementById('disc-question-text').textContent = 'Consulting Knowledge Discovery Agent...';
+      document.getElementById('disc-concept').textContent = '🎯 Probing baseline...';
+      document.getElementById('completion-banner').style.display = 'none';
+      document.getElementById('active-question-section').style.display = 'block';
+
+      try {
+        const res = await fetch(`/journeys/${journeyId}/discovery/start`, { method: 'POST' });
+        if (!res.ok) throw new Error('Failed to start discovery');
+        const data = await res.json();
+        renderQuestion(data);
+        loadDiscoveryHistory(journeyId);
+      } catch (err) {
+        document.getElementById('disc-question-text').textContent = 'Error: ' + err.message;
+      }
+    }
+
+    function renderQuestion(data) {
+      questionIndex = data.question_index;
+      if (data.is_finished) {
+        document.getElementById('active-question-section').style.display = 'none';
+        document.getElementById('completion-banner').style.display = 'block';
+        document.getElementById('disc-progress').style.width = '100%';
+        document.getElementById('disc-step-label').textContent = 'Discovery Concluded';
+        document.getElementById('disc-concept').textContent = '🎯 Complete';
+        return;
+      }
+
+      document.getElementById('disc-step-label').textContent = `Question ${data.question_index} of ~4`;
+      document.getElementById('disc-question-text').textContent = data.question_text;
+      document.getElementById('disc-concept').textContent = `🎯 ${data.concept_target}`;
+      document.getElementById('disc-progress').style.width = `${Math.min(data.question_index * 25, 95)}%`;
+      document.getElementById('disc-answer-input').value = '';
+      document.getElementById('disc-answer-input').focus();
+    }
+
+    async function submitAnswer() {
+      const textarea = document.getElementById('disc-answer-input');
+      const answer = textarea.value.trim();
+      if (!answer) {
+        alert('Please enter an answer or select a quick starter chip.');
+        return;
+      }
+
+      const btn = document.getElementById('btn-answer-submit');
+      const btnText = document.getElementById('btn-ans-text');
+      const btnSpinner = document.getElementById('btn-ans-spinner');
+
+      btn.disabled = true;
+      btnText.style.display = 'none';
+      btnSpinner.style.display = 'inline';
+
+      try {
+        const res = await fetch(`/journeys/${currentJourneyId}/discovery/answer`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ answer })
+        });
+        if (!res.ok) throw new Error('Failed to submit answer');
+        const data = await res.json();
+        renderQuestion(data);
+        loadDiscoveryHistory(currentJourneyId);
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btnText.style.display = 'inline';
+        btnSpinner.style.display = 'none';
+      }
+    }
+
+    async function loadDiscoveryHistory(journeyId) {
+      try {
+        const res = await fetch(`/journeys/${journeyId}/discovery`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const feed = document.getElementById('qa-feed');
+
+        const answered = data.interactions.filter(i => i.learner_answer);
+        if (answered.length === 0) {
+          feed.innerHTML = '';
+          return;
+        }
+
+        feed.innerHTML = answered.map(item => `
+          <div class="qa-card">
+            <div class="qa-q">Q${item.question_index} (${item.concept_target}): ${escapeHtml(item.question_text)}</div>
+            <div class="qa-a">${escapeHtml(item.learner_answer)}</div>
+            ${item.quick_assessment ? `<div class="qa-assessment">💡 Insight: ${escapeHtml(item.quick_assessment)}</div>` : ''}
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error(e);
       }
     }
 
@@ -694,52 +690,24 @@
         if (!res.ok) return;
         const data = await res.json();
         if (!data.journeys || data.journeys.length === 0) {
-          listEl.innerHTML = '<div style="color: var(--text-muted); font-size: 0.875rem; text-align: center; padding: 1rem;">No journeys initiated yet. Enter a topic above to create one.</div>';
+          listEl.innerHTML = '<div style="color: var(--text-muted); font-size: 0.875rem; text-align: center; padding: 1rem;">No journeys yet.</div>';
           return;
         }
 
         listEl.innerHTML = data.journeys.map(j => `
-          <div class="history-item">
+          <div class="history-item" onclick="startDiscovery('${j.id}', '${escapeHtml(j.topic)}')">
             <div>
               <div class="history-topic">${escapeHtml(j.topic)}</div>
               <div style="font-size: 0.775rem; color: var(--text-muted); font-family: var(--font-mono); margin-top: 0.2rem;">ID: ${j.id.slice(0, 8)}...</div>
             </div>
-            <div class="history-meta">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
               <span class="phase-badge">${j.status.toUpperCase()}</span>
-              <span>${new Date(j.created_at).toLocaleDateString()}</span>
+              <span style="font-size: 0.85rem; color: #a5b4fc;">&rarr;</span>
             </div>
           </div>
         `).join('');
       } catch (e) {
         console.error("Failed to load journeys", e);
-      }
-    }
-
-    async function checkHealth() {
-      const headerDot = document.getElementById('header-dot');
-      const headerText = document.getElementById('header-text');
-      const diagStatus = document.getElementById('diag-status');
-      const diagDb = document.getElementById('diag-db');
-      const diagProvider = document.getElementById('diag-provider');
-      const diagModel = document.getElementById('diag-model');
-
-      try {
-        const res = await fetch('/health');
-        if (res.ok) {
-          const data = await res.json();
-          headerDot.className = 'status-dot active';
-          headerText.textContent = 'Ready';
-          diagStatus.textContent = data.status || 'OK';
-          diagDb.textContent = data.database || 'connected';
-          diagProvider.textContent = data.llm_provider || 'ollama';
-          diagModel.textContent = data.llm_model || 'qwen2.5:7b';
-        } else {
-          throw new Error();
-        }
-      } catch (e) {
-        headerDot.className = 'status-dot error';
-        headerText.textContent = 'Offline';
-        diagStatus.textContent = 'ERROR';
       }
     }
 
@@ -750,7 +718,6 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      checkHealth();
       loadRecentJourneys();
     });
   </script>

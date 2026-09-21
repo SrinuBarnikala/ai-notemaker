@@ -6,7 +6,7 @@
 
 ## Development Status
 
-- **Current Phase:** Phase 1 — Topic Intake
+- **Current Phase:** Phase 2 — Knowledge Discovery
 - **Status:** Complete
 - **GitHub Checkpoint:** Pending
 
@@ -19,15 +19,16 @@ ai-notemaker/
 ├── .venv/              # Dedicated local virtual environment (gitignored)
 ├── backend/            # FastAPI backend application
 │   └── app/
-│       ├── api/        # REST API endpoints (Journeys router)
+│       ├── api/        # REST API endpoints (Journeys, Discovery)
 │       ├── db/         # SQLite database session and engine setup
-│       ├── models/     # SQLAlchemy ORM models (LearningJourney)
+│       ├── discovery/  # LangGraph Knowledge Discovery Agent & workflow
+│       ├── models/     # SQLAlchemy models (LearningJourney, DiscoveryInteraction)
 │       ├── providers/  # LLM provider abstraction (Ollama, OpenAI, Groq, Mock)
 │       ├── schemas/    # Pydantic request/response schemas
 │       ├── config.py   # Pydantic Settings
 │       └── main.py     # FastAPI application and lifespan
 ├── frontend/           # HTML, CSS, Vanilla JavaScript web UI
-│   └── index.html      # Topic Intake UI, journey state, and diagnostics
+│   └── index.html      # Topic Intake & Knowledge Discovery Agent UI
 ├── data/               # SQLite database storage (gitignored)
 ├── tests/              # Unit, API, and provider test suite
 ├── .env.example        # Configuration template
