@@ -28,6 +28,14 @@ class LearningJourney(Base):
         order_by="DiscoveryInteraction.question_index",
     )
 
+    knowledge_profile = relationship(
+        "KnowledgeProfile",
+        back_populates="journey",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
     def __repr__(self):
         return f"<LearningJourney(id={self.id}, topic={self.topic}, status={self.status})>"
+
 

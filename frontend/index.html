@@ -11,7 +11,7 @@
     :root {
       --bg-primary: #070b12;
       --bg-secondary: #0d1424;
-      --bg-card: rgba(13, 20, 36, 0.78);
+      --bg-card: rgba(13, 20, 36, 0.82);
       --border: rgba(255, 255, 255, 0.08);
       --border-accent: rgba(99, 102, 241, 0.4);
       --text-primary: #f8fafc;
@@ -23,6 +23,8 @@
       --success: #10b981;
       --success-glow: rgba(16, 185, 129, 0.25);
       --warning: #f59e0b;
+      --danger: #ef4444;
+      --purple: #a855f7;
       --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
     }
@@ -119,6 +121,8 @@
       margin-bottom: 2rem;
       transition: border-color 0.2s ease;
     }
+
+    .card:hover { border-color: rgba(255, 255, 255, 0.12); }
 
     .card-title-row {
       display: flex;
@@ -227,8 +231,8 @@
 
     .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    /* Discovery Mode Section */
-    #discovery-panel {
+    /* Panels */
+    #discovery-panel, #profile-panel {
       display: none;
       animation: fadeIn 0.3s ease-in-out;
     }
@@ -236,13 +240,6 @@
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
-    }
-
-    .discovery-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.25rem;
     }
 
     .concept-pill {
@@ -281,7 +278,6 @@
       border-radius: 14px;
       padding: 1.5rem;
       margin-bottom: 1.5rem;
-      position: relative;
     }
 
     .question-prompt-text {
@@ -307,13 +303,7 @@
       transition: all 0.2s ease;
     }
 
-    /* Completed Turn History */
-    .qa-feed {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      margin-top: 1.5rem;
-    }
+    .qa-feed { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
 
     .qa-card {
       background: rgba(7, 11, 18, 0.6);
@@ -333,20 +323,123 @@
       display: inline-block;
     }
 
-    .completion-banner {
-      display: none;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.4);
+    /* Knowledge Profile Card Styles */
+    .profile-summary-box {
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid var(--border-accent);
       border-radius: 14px;
-      padding: 1.75rem;
-      text-align: center;
-      margin-top: 1.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1.75rem;
+      line-height: 1.7;
     }
 
-    .completion-banner h3 {
-      font-size: 1.3rem;
-      color: #34d399;
-      margin-bottom: 0.5rem;
+    .profile-summary-text { font-size: 1.05rem; color: #f1f5f9; }
+
+    .confidence-badge {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.3rem 0.85rem;
+      border-radius: 9999px;
+    }
+
+    .confidence-beginner { background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fbbf24; }
+    .confidence-intermediate { background: rgba(99, 102, 241, 0.15); border: 1px solid var(--accent); color: #a5b4fc; }
+    .confidence-advanced { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--success); color: #6ee7b7; }
+    .confidence-mixed { background: rgba(168, 85, 247, 0.15); border: 1px solid var(--purple); color: #d8b4fe; }
+
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .matrix-col {
+      background: rgba(7, 11, 18, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem;
+    }
+
+    .matrix-col-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .matrix-col-title { font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+
+    .concept-item-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .concept-name-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; }
+    .concept-name { font-weight: 600; font-size: 0.9rem; color: #e2e8f0; }
+    .concept-level-tag {
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .tag-strong { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .tag-moderate { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .tag-weak, .tag-unknown { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; }
+
+    .concept-notes { font-size: 0.8rem; color: var(--text-muted); }
+
+    .gaps-list, .misconceptions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .gap-badge {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.825rem;
+      color: #cbd5e1;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .misconception-card {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      font-size: 0.85rem;
+      color: #fca5a5;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .next-phase-cta {
+      margin-top: 1.5rem;
+      padding: 1.25rem;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(16, 185, 129, 0.1));
+      border: 1px dashed var(--border-accent);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
     .history-item {
@@ -361,23 +454,8 @@
       transition: all 0.15s ease;
     }
 
-    .history-item:hover {
-      border-color: var(--border-accent);
-      background: rgba(7, 11, 18, 0.9);
-    }
-
+    .history-item:hover { border-color: var(--border-accent); background: rgba(7, 11, 18, 0.9); }
     .history-topic { font-weight: 600; color: #e2e8f0; font-size: 0.95rem; }
-
-    .status-indicator {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      font-family: var(--font-mono); font-size: 0.775rem;
-      padding: 0.2rem 0.65rem; border-radius: 9999px;
-      background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border);
-    }
-
-    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #6b7280; }
-    .status-dot.active { background: var(--success); box-shadow: 0 0 8px var(--success-glow); }
-    .status-dot.error { background: #ef4444; }
 
     .footer {
       border-top: 1px solid var(--border);
@@ -395,18 +473,14 @@
       <span class="brand-title">Personalized Technical Note Maker</span>
     </div>
     <div class="header-badges">
-      <div class="status-indicator" id="header-status">
-        <span class="status-dot" id="header-dot"></span>
-        <span id="header-text">Ready</span>
-      </div>
-      <div class="phase-badge">PHASE 2: KNOWLEDGE DISCOVERY</div>
+      <div class="phase-badge">PHASE 3: KNOWLEDGE PROFILE</div>
     </div>
   </header>
 
   <main>
     <div class="hero">
-      <h1>Map Your Mental Model Before Building the Note</h1>
-      <p>The AI identifies what you already know, your specific knowledge gaps, and misconceptions through 3–5 adaptive questions.</p>
+      <h1>Personalized Learning Architecture</h1>
+      <p>Discovering what you know and pinpointing conceptual gaps to build evolving, personalized technical notes.</p>
     </div>
 
     <!-- Phase 1: Topic Intake Card -->
@@ -422,7 +496,7 @@
         <div class="intake-group">
           <label class="intake-label" for="topic-input">
             <span>What do you want to master?</span>
-            <span style="font-size: 0.775rem; color: var(--text-muted);">Topic or open question</span>
+            <span style="font-size: 0.775rem; color: var(--text-muted);">Topic or question</span>
           </label>
           <input 
             type="text" 
@@ -464,12 +538,11 @@
         <div class="progress-bar-fill" id="disc-progress" style="width: 25%;"></div>
       </div>
 
-      <div class="discovery-header">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
         <span style="font-size: 0.875rem; color: var(--text-muted); font-family: var(--font-mono);" id="disc-step-label">Question 1 of ~4</span>
         <span style="font-size: 0.85rem; font-weight: 600; color: #a5b4fc;" id="disc-topic-label">--</span>
       </div>
 
-      <!-- Active Question Area -->
       <div id="active-question-section">
         <div class="question-box">
           <div class="question-prompt-text" id="disc-question-text">Generating adaptive probe...</div>
@@ -494,19 +567,71 @@
         </button>
       </div>
 
-      <!-- Completion Banner -->
-      <div class="completion-banner" id="completion-banner">
-        <h3>&check; Knowledge Discovery Complete!</h3>
-        <p style="color: var(--text-secondary); margin-bottom: 1rem;">
-          Your current mental model and conceptual gaps have been mapped across all core dimensions.
-        </p>
-        <div style="font-family: var(--font-mono); font-size: 0.85rem; color: #6ee7b7; background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: 8px;">
-          Ready for Phase 3: Knowledge Profile Generation & Section Architecture
+      <div class="qa-feed" id="qa-feed"></div>
+    </div>
+
+    <!-- Phase 3: Knowledge Profile Panel -->
+    <div class="card" id="profile-panel">
+      <div class="card-title-row">
+        <div class="card-title">
+          <span>3. Synthesized Knowledge Profile</span>
+        </div>
+        <div id="profile-confidence-container">
+          <span class="confidence-badge confidence-intermediate" id="prof-confidence">INTERMEDIATE</span>
         </div>
       </div>
 
-      <!-- Q&A History Feed -->
-      <div class="qa-feed" id="qa-feed"></div>
+      <div class="profile-summary-box">
+        <div style="font-size: 0.775rem; font-family: var(--font-mono); color: #a5b4fc; text-transform: uppercase; margin-bottom: 0.4rem; letter-spacing: 0.05em;">
+          Learner Mental Model Synthesis
+        </div>
+        <div class="profile-summary-text" id="prof-summary">Synthesizing knowledge profile...</div>
+      </div>
+
+      <!-- Misconceptions Alert if any -->
+      <div id="misconceptions-container" style="display: none; margin-bottom: 1.5rem;">
+        <div style="font-size: 0.85rem; font-weight: 700; color: #f87171; margin-bottom: 0.5rem;">
+          ⚠️ Identified Misconceptions to Address:
+        </div>
+        <div id="misconceptions-list"></div>
+      </div>
+
+      <!-- Concept Matrix: Known vs Partial vs Gaps -->
+      <div class="matrix-grid">
+        <div class="matrix-col">
+          <div class="matrix-col-header">
+            <span class="matrix-col-title" style="color: #34d399;">&check; Known Concepts</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);" id="count-known">0</span>
+          </div>
+          <div id="col-known"></div>
+        </div>
+
+        <div class="matrix-col">
+          <div class="matrix-col-header">
+            <span class="matrix-col-title" style="color: #fbbf24;">&bull; Partially Understood</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);" id="count-partial">0</span>
+          </div>
+          <div id="col-partial"></div>
+        </div>
+
+        <div class="matrix-col">
+          <div class="matrix-col-header">
+            <span class="matrix-col-title" style="color: #c084fc;">&quest; Unknowns & Gaps</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);" id="count-gaps">0</span>
+          </div>
+          <div id="col-gaps"></div>
+        </div>
+      </div>
+
+      <div class="next-phase-cta">
+        <div>
+          <div style="font-weight: 700; color: #ffffff;">Phase 4: Personalized Note Architecture</div>
+          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
+            The system will now design a section outline specifically tailored around your gaps and misconceptions.
+          </div>
+        </div>
+        <span class="phase-badge">READY FOR PHASE 4</span>
+      </div>
     </div>
 
     <!-- Recent Journeys History Card -->
@@ -522,13 +647,12 @@
   </main>
 
   <footer class="footer">
-    Personalized Technical Note Maker &bull; Phase 2: Knowledge Discovery Verified
+    Personalized Technical Note Maker &bull; Phase 3: Knowledge Profile Verified
   </footer>
 
   <script>
     let currentJourneyId = null;
     let currentTopic = "";
-    let questionIndex = 1;
 
     function setTopic(text) {
       const input = document.getElementById('topic-input');
@@ -567,7 +691,6 @@
         currentJourneyId = journey.id;
         currentTopic = journey.topic;
 
-        // Auto-launch Discovery
         await startDiscovery(journey.id, journey.topic);
         loadRecentJourneys();
       } catch (err) {
@@ -583,14 +706,15 @@
       currentJourneyId = journeyId;
       currentTopic = topic;
 
-      const panel = document.getElementById('discovery-panel');
-      panel.style.display = 'block';
-      panel.scrollIntoView({ behavior: 'smooth' });
+      const discPanel = document.getElementById('discovery-panel');
+      const profPanel = document.getElementById('profile-panel');
+      discPanel.style.display = 'block';
+      profPanel.style.display = 'none';
+      discPanel.scrollIntoView({ behavior: 'smooth' });
 
       document.getElementById('disc-topic-label').textContent = topic;
       document.getElementById('disc-question-text').textContent = 'Consulting Knowledge Discovery Agent...';
       document.getElementById('disc-concept').textContent = '🎯 Probing baseline...';
-      document.getElementById('completion-banner').style.display = 'none';
       document.getElementById('active-question-section').style.display = 'block';
 
       try {
@@ -599,19 +723,22 @@
         const data = await res.json();
         renderQuestion(data);
         loadDiscoveryHistory(journeyId);
+
+        if (data.is_finished) {
+          triggerProfileGeneration(journeyId);
+        }
       } catch (err) {
         document.getElementById('disc-question-text').textContent = 'Error: ' + err.message;
       }
     }
 
     function renderQuestion(data) {
-      questionIndex = data.question_index;
       if (data.is_finished) {
         document.getElementById('active-question-section').style.display = 'none';
-        document.getElementById('completion-banner').style.display = 'block';
         document.getElementById('disc-progress').style.width = '100%';
         document.getElementById('disc-step-label').textContent = 'Discovery Concluded';
         document.getElementById('disc-concept').textContent = '🎯 Complete';
+        triggerProfileGeneration(currentJourneyId);
         return;
       }
 
@@ -627,7 +754,7 @@
       const textarea = document.getElementById('disc-answer-input');
       const answer = textarea.value.trim();
       if (!answer) {
-        alert('Please enter an answer or select a quick starter chip.');
+        alert('Please enter an answer or select a starter chip.');
         return;
       }
 
@@ -681,6 +808,82 @@
       } catch (e) {
         console.error(e);
       }
+    }
+
+    async function triggerProfileGeneration(journeyId) {
+      const profilePanel = document.getElementById('profile-panel');
+      profilePanel.style.display = 'block';
+      profilePanel.scrollIntoView({ behavior: 'smooth' });
+
+      document.getElementById('prof-summary').textContent = '🤖 Agent 2 analyzing discovery data to build mental model...';
+
+      try {
+        const res = await fetch(`/journeys/${journeyId}/knowledge-profile`, { method: 'POST' });
+        if (!res.ok) throw new Error('Failed to synthesize profile');
+        const profile = await res.json();
+        renderProfile(profile);
+      } catch (err) {
+        document.getElementById('prof-summary').textContent = 'Failed to generate profile: ' + err.message;
+      }
+    }
+
+    function renderProfile(profile) {
+      // Confidence
+      const confBadge = document.getElementById('prof-confidence');
+      confBadge.textContent = profile.overall_confidence.toUpperCase();
+      confBadge.className = `confidence-badge confidence-${profile.overall_confidence}`;
+
+      // Summary
+      document.getElementById('prof-summary').textContent = profile.summary;
+
+      // Misconceptions
+      const misContainer = document.getElementById('misconceptions-container');
+      const misList = document.getElementById('misconceptions-list');
+      if (profile.misconceptions && profile.misconceptions.length > 0) {
+        misList.innerHTML = profile.misconceptions.map(m => `
+          <div class="misconception-card"><span>⚠️</span><span>${escapeHtml(m)}</span></div>
+        `).join('');
+        misContainer.style.display = 'block';
+      } else {
+        misContainer.style.display = 'none';
+      }
+
+      // Matrix
+      const colKnown = document.getElementById('col-known');
+      const colPartial = document.getElementById('col-partial');
+      const colGaps = document.getElementById('col-gaps');
+
+      const knownConcepts = profile.concepts.filter(c => c.category === 'known');
+      const partialConcepts = profile.concepts.filter(c => c.category === 'partially_known');
+      const unknownConcepts = profile.concepts.filter(c => c.category === 'unknown');
+
+      document.getElementById('count-known').textContent = knownConcepts.length;
+      document.getElementById('count-partial').textContent = partialConcepts.length;
+      document.getElementById('count-gaps').textContent = (unknownConcepts.length + (profile.gaps ? profile.gaps.length : 0));
+
+      colKnown.innerHTML = knownConcepts.length ? knownConcepts.map(renderConceptCard).join('') : '<div style="font-size: 0.8rem; color: var(--text-muted);">None identified yet.</div>';
+      colPartial.innerHTML = partialConcepts.length ? partialConcepts.map(renderConceptCard).join('') : '<div style="font-size: 0.8rem; color: var(--text-muted);">None identified yet.</div>';
+
+      let gapsHtml = unknownConcepts.map(renderConceptCard).join('');
+      if (profile.gaps && profile.gaps.length > 0) {
+        gapsHtml += '<div style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono); margin: 0.75rem 0 0.4rem 0;">IDENTIFIED GAPS:</div>';
+        gapsHtml += profile.gaps.map(g => `
+          <div class="gap-badge"><span>&bull;</span><span>${escapeHtml(g)}</span></div>
+        `).join('');
+      }
+      colGaps.innerHTML = gapsHtml || '<div style="font-size: 0.8rem; color: var(--text-muted);">None identified yet.</div>';
+    }
+
+    function renderConceptCard(c) {
+      return `
+        <div class="concept-item-card">
+          <div class="concept-name-row">
+            <span class="concept-name">${escapeHtml(c.name)}</span>
+            <span class="concept-level-tag tag-${c.level}">${c.level}</span>
+          </div>
+          ${c.notes ? `<div class="concept-notes">${escapeHtml(c.notes)}</div>` : ''}
+        </div>
+      `;
     }
 
     async function loadRecentJourneys() {
