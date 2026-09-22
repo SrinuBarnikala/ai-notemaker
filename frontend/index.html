@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <style>
     :root {
       --bg-primary: #070b12;
@@ -672,27 +673,127 @@
       line-height: 1.65;
     }
 
-    /* Diagram Block */
+    /* Phase 9: Architecture Diagram & Visual Planner Styles */
     .block-diagram {
-      background: rgba(7, 11, 18, 0.95);
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      border-radius: 12px;
+      background: rgba(8, 13, 26, 0.95);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      border-radius: 14px;
       padding: 1.4rem 1.6rem;
-      margin-bottom: 1.6rem;
+      margin-bottom: 1.8rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
     }
     .diagram-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.75rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .diagram-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .diagram-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      padding: 0.25rem 0.55rem;
+      border-radius: 6px;
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      color: #67e8f9;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
     }
     .diagram-title {
       font-weight: 700;
-      color: #c7d2fe;
+      color: #f1f5f9;
       font-size: 1.05rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
+    }
+    .diagram-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .diag-action-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-secondary);
+      border-radius: 6px;
+      padding: 0.35rem 0.65rem;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .diag-action-btn:hover {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--accent);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+    .diag-btn-regen:hover {
+      background: rgba(6, 182, 212, 0.2);
+      border-color: var(--cyan);
+      color: #67e8f9;
+    }
+    .diagram-canvas-container {
+      background: radial-gradient(circle at 50% 50%, rgba(13, 20, 36, 0.7) 0%, #03060c 100%);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 10px;
+      padding: 1.5rem 1rem;
+      margin: 0.75rem 0;
+      overflow-x: auto;
+      min-height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mermaid-block {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+    .mermaid-block svg {
+      max-width: 100%;
+      height: auto !important;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+    }
+    .diagram-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .diagram-skeleton {
+      color: var(--text-muted);
+      font-size: 0.825rem;
+      font-family: var(--font-mono);
+    }
+    .diagram-render-fallback {
+      width: 100%;
+    }
+    .fallback-note {
+      font-size: 0.8rem;
+      color: #f59e0b;
+      margin-bottom: 0.5rem;
+      font-family: var(--font-mono);
     }
     .diagram-spec-pre {
       background: #020408;
@@ -711,6 +812,54 @@
       color: var(--text-muted);
       font-style: italic;
       margin-top: 0.5rem;
+    }
+
+    /* Visual Type Selector Grid */
+    .visual-type-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.6rem;
+      margin-top: 0.5rem;
+    }
+    .vtype-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 0.6rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    .vtype-card:hover {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: var(--accent);
+    }
+    .vtype-card.active {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+    .vtype-icon { font-size: 1.3rem; margin-bottom: 0.3rem; }
+    .vtype-name { font-size: 0.8rem; font-weight: 700; color: #f8fafc; }
+    .vtype-desc { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.2rem; line-height: 1.3; }
+
+    /* Diagram Modal Zoom Toolbar */
+    .diag-zoom-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.2rem 0.4rem;
+    }
+    .diag-zoom-pill {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #c7d2fe;
+      min-width: 42px;
+      text-align: center;
     }
 
     /* Comparison Table Block */
@@ -1487,7 +1636,7 @@
       <span class="brand-title">Personalized Technical Note Maker</span>
     </div>
     <div class="header-badges">
-      <div class="phase-badge">PHASE 6, 7 &amp; 8: VIEWER, EVOLUTION &amp; ACTIVE RECALL</div>
+      <div class="phase-badge">PHASE 6, 7, 8 &amp; 9: VIEWER, EVOLUTION, RECALL &amp; VISUAL PLANNER</div>
     </div>
 
 
@@ -1701,6 +1850,9 @@
           </button>
           <button type="button" class="tool-btn" id="btn-assessment-toggle" onclick="openAssessmentModal()" title="Active recall flashcards and scenario quiz" style="background: rgba(99, 102, 241, 0.2); border-color: var(--accent); color: #c7d2fe;">
             <span>🧠 Test Mastery</span>
+          </button>
+          <button type="button" class="tool-btn" id="btn-plan-visuals" onclick="triggerPlanVisuals()" title="Synthesize & enhance architecture diagrams with Agent 7" style="background: rgba(6, 182, 212, 0.15); border-color: var(--cyan); color: #a5f3fc;">
+            <span>📊 Plan Visuals</span>
           </button>
           <button type="button" class="tool-btn" onclick="exportNote('markdown')" title="Export formatted GitHub Markdown (.md)">
             <span>📥 Export .md</span>
@@ -1927,10 +2079,120 @@
         </div>
       </div>
     </div>
+
+    <!-- Phase 9: Interactive Diagram Fullscreen Modal -->
+    <div class="modal-overlay" id="diag-fullscreen-modal" style="display: none;" onclick="closeModalOnOverlay(event)">
+      <div class="modal-card" style="max-width: 95vw; width: 1200px; height: 90vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <span class="diagram-badge" id="diag-modal-badge">⚡ ARCHITECTURE FLOW</span>
+            <h3 class="modal-title" id="diag-modal-title">Interactive System Diagram</h3>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <div class="diag-zoom-toolbar">
+              <button type="button" class="tool-btn" onclick="adjustModalZoom(-0.2)" title="Zoom Out (-)">🔍-</button>
+              <span id="diag-modal-zoom-pill" class="diag-zoom-pill">100%</span>
+              <button type="button" class="tool-btn" onclick="adjustModalZoom(0.2)" title="Zoom In (+)">🔍+</button>
+              <button type="button" class="tool-btn" onclick="resetModalZoom()" title="Reset Zoom">1:1</button>
+            </div>
+            <button type="button" class="tool-btn" onclick="downloadCurrentModalSvg()" title="Download SVG Vector Image">
+              <span>💾 SVG</span>
+            </button>
+            <button type="button" class="tool-btn" onclick="copyCurrentModalSpec()" title="Copy Mermaid Definition">
+              <span>📋 Copy</span>
+            </button>
+            <button type="modal-close" class="modal-close" onclick="closeDiagramModal()">&times;</button>
+          </div>
+        </div>
+        <div class="modal-body" style="flex: 1; overflow: auto; display: flex; align-items: center; justify-content: center; background: #040711; padding: 2rem; border-radius: 8px; position: relative;" id="diag-modal-viewport">
+          <div id="diag-modal-svg-canvas" style="transform-origin: center center; transition: transform 0.15s ease-out; width: 100%; display: flex; justify-content: center;">
+            <!-- Rendered SVG injected here -->
+          </div>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono);">Scroll &amp; pan supported. Press ESC to close.</span>
+          <button type="button" class="tool-btn" onclick="closeDiagramModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 9: Section Visual Customization Modal -->
+    <div class="modal-overlay" id="section-visual-modal" style="display: none;" onclick="closeModalOnOverlay(event)">
+      <div class="modal-card" style="max-width: 600px;">
+        <div class="modal-header">
+          <div>
+            <span class="diagram-badge">🎨 AGENT 7 — VISUAL PLANNER</span>
+            <h3 class="modal-title" id="visual-modal-title">Synthesize Section Diagram</h3>
+          </div>
+          <button type="button" class="modal-close" onclick="closeSectionVisualModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+            Generate or redesign a high-clarity Mermaid.js architecture diagram for this section.
+          </p>
+
+          <div style="margin-bottom: 1.25rem;">
+            <label style="display: block; font-size: 0.825rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">
+              Choose Visual Paradigm:
+            </label>
+            <div class="visual-type-grid" id="visual-type-grid">
+              <div class="vtype-card active" data-type="flowchart" onclick="selectVisualType('flowchart', this)">
+                <div class="vtype-icon">🔀</div>
+                <div class="vtype-name">Flowchart</div>
+                <div class="vtype-desc">Data pipeline &amp; decision logic</div>
+              </div>
+              <div class="vtype-card" data-type="sequence" onclick="selectVisualType('sequence', this)">
+                <div class="vtype-icon">⚡</div>
+                <div class="vtype-name">Sequence</div>
+                <div class="vtype-desc">Protocol &amp; message flow</div>
+              </div>
+              <div class="vtype-card" data-type="architecture" onclick="selectVisualType('architecture', this)">
+                <div class="vtype-icon">🏛️</div>
+                <div class="vtype-name">Architecture</div>
+                <div class="vtype-desc">Layers, services &amp; caches</div>
+              </div>
+              <div class="vtype-card" data-type="state_machine" onclick="selectVisualType('state_machine', this)">
+                <div class="vtype-icon">🔄</div>
+                <div class="vtype-name">State Machine</div>
+                <div class="vtype-desc">Lifecycles &amp; transition rules</div>
+              </div>
+              <div class="vtype-card" data-type="concept_map" onclick="selectVisualType('concept_map', this)">
+                <div class="vtype-icon">🗺️</div>
+                <div class="vtype-name">Concept Map</div>
+                <div class="vtype-desc">Mental models &amp; relationships</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 1.25rem;">
+            <label style="display: block; font-size: 0.825rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;" for="visual-custom-prompt">
+              Specific Focus / Prompt (Optional):
+            </label>
+            <textarea
+              id="visual-custom-prompt"
+              class="intake-input"
+              rows="3"
+              placeholder="e.g. Focus on leader failover timeout and heartbeat acknowledgment..."
+              style="resize: vertical; font-size: 0.875rem;"
+            ></textarea>
+          </div>
+
+          <div id="visual-modal-status" style="display: none; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.85rem;"></div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+            <button type="button" class="tool-btn" onclick="closeSectionVisualModal()">Cancel</button>
+            <button type="button" class="btn-submit" id="btn-submit-visual" onclick="submitSectionVisual()" style="width: auto; padding: 0.65rem 1.4rem;">
+              <span id="btn-visual-text">✨ Generate Diagram</span>
+              <span id="btn-visual-spinner" style="display: none;">⏳ Synthesizing Diagram...</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 
   <footer class="footer">
-    Personalized Technical Note Maker &bull; Phase 6, 7 &amp; 8: Living Note Viewer, Evolution &amp; Active Recall Complete
+    Personalized Technical Note Maker &bull; Phase 6, 7, 8 &amp; 9: Living Note Viewer, Evolution, Active Recall &amp; Visual Planner Complete
   </footer>
 
 
@@ -2417,7 +2679,7 @@
             </div>
           </div>
           <div class="section-blocks-feed">
-            ${s.blocks.map(renderNoteBlock).join('')}
+            ${s.blocks.map(b => renderNoteBlock(b, s.id)).join('')}
           </div>
           <div class="section-evolve-bar">
             <span class="evolve-label">🌱 Evolve section:</span>
@@ -2425,6 +2687,7 @@
               <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'add_code')">⚡ + Code Example</button>
               <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'expand_section')">🔍 Deepen Detail</button>
               <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'clarify')">💡 Clarify Concept</button>
+              <button type="button" class="evolve-chip" onclick="openSectionVisualModal('${s.id}', '${escapeJsString(s.title)}')">🎨 Add Visual Flow</button>
               <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'custom_prompt')">💬 Ask Question...</button>
             </div>
           </div>
@@ -2436,7 +2699,7 @@
         <div class="note-global-evolve-card">
           <div class="evolve-card-left">
             <div class="evolve-card-title">🌱 Expand &amp; Verify Your Technical Mastery</div>
-            <p class="evolve-card-sub">Technical mastery is an ongoing dialogue. Test active recall with personalized flashcards and scenario quizzes, or add new chapters.</p>
+            <p class="evolve-card-sub">Technical mastery is an ongoing dialogue. Test active recall with personalized flashcards, inspect dynamic Mermaid diagrams, or add new chapters.</p>
           </div>
           <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
             <button type="button" class="btn-submit" style="width: auto; padding: 0.65rem 1.4rem;" onclick="openEvolveModal(null, 'Living Note Exploration', 'add_section')">
@@ -2445,12 +2708,18 @@
             <button type="button" class="tool-btn" style="padding: 0.65rem 1.25rem; background: rgba(99, 102, 241, 0.2); border-color: var(--accent); color: #ffffff;" onclick="openAssessmentModal()">
               <span>🧠 Test Mastery &amp; Flashcards</span>
             </button>
+            <button type="button" class="tool-btn" style="padding: 0.65rem 1.25rem; background: rgba(6, 182, 212, 0.18); border-color: var(--cyan); color: #a5f3fc;" onclick="triggerPlanVisuals()">
+              <span>📊 Plan Visual Architecture</span>
+            </button>
           </div>
         </div>
       `;
 
 
       bodyContainer.innerHTML = sectionsHtml + globalEvolveCard;
+
+      // Render interactive Mermaid diagrams
+      setTimeout(renderAllMermaidDiagrams, 80);
 
       // Initialize ScrollSpy
       setTimeout(setupScrollSpy, 150);
@@ -2467,7 +2736,7 @@
       }
     }
 
-    function renderNoteBlock(b) {
+    function renderNoteBlock(b, sectionId = null) {
       if (b.type === 'paragraph') {
         return `<div class="block-paragraph">${formatInlineMarkdown(b.content || '')}</div>`;
       }
@@ -2517,16 +2786,40 @@
       }
       if (b.type === 'diagram') {
         const diagramRaw = b.diagram_spec || b.content || '';
+        const diagId = 'mermaid-' + Math.random().toString(36).substring(2, 9);
+        const diagType = b.diagram_type ? b.diagram_type.toUpperCase() : 'ARCHITECTURE';
+        const diagTitle = b.title || 'Architecture Flow';
         return `
-          <div class="block-diagram">
+          <div class="block-diagram" id="card-${diagId}">
             <div class="diagram-header">
-              <div class="diagram-title"><span>📊</span> ${escapeHtml(b.title || 'Architecture Flow')}</div>
-              <button type="button" class="copy-btn" onclick="copyCode(this, \`${escapeJsString(diagramRaw)}\`)">
-                <span>📋 Copy Spec</span>
-              </button>
+              <div class="diagram-title-wrap">
+                <span class="diagram-badge">⚡ ${escapeHtml(diagType)}</span>
+                <span class="diagram-title">${escapeHtml(diagTitle)}</span>
+              </div>
+              <div class="diagram-actions">
+                <button type="button" class="diag-action-btn" title="Inspect Fullscreen & Zoom" onclick="openDiagramFullscreen('${diagId}', '${escapeJsString(diagTitle)}', '${escapeJsString(diagType)}')">
+                  <span>🔍 Inspect</span>
+                </button>
+                <button type="button" class="diag-action-btn" title="Copy Mermaid Specification" onclick="copyDiagramSpec(this, '${diagId}')">
+                  <span>📋 Copy Spec</span>
+                </button>
+                <button type="button" class="diag-action-btn" title="Download SVG Vector Image" onclick="downloadDiagramSvg('${diagId}', '${escapeJsString(diagTitle)}')">
+                  <span>💾 SVG</span>
+                </button>
+                ${sectionId ? `
+                <button type="button" class="diag-action-btn diag-btn-regen" title="Regenerate / Redesign with Agent 7" onclick="openSectionVisualModal('${sectionId}', '${escapeJsString(diagTitle)}')">
+                  <span>🔄 Redesign</span>
+                </button>` : ''}
+              </div>
             </div>
-            <pre class="diagram-spec-pre">${escapeHtml(diagramRaw)}</pre>
-            ${b.caption ? `<div class="diagram-caption">Figure: ${escapeHtml(b.caption)}</div>` : ''}
+            <div class="diagram-canvas-container" id="container-${diagId}">
+              <div class="mermaid-block" id="${diagId}">
+                <div class="diagram-skeleton">⚡ Rendering architecture flow...</div>
+              </div>
+            </div>
+            ${b.caption ? `<div class="diagram-caption"><strong>Figure:</strong> ${escapeHtml(b.caption)}</div>` : ''}
+            ${b.visual_description ? `<div class="diagram-desc"><strong>Mechanics:</strong> ${formatInlineMarkdown(b.visual_description)}</div>` : ''}
+            <textarea id="raw-${diagId}" style="display:none;">${escapeHtml(diagramRaw)}</textarea>
           </div>
         `;
       }
@@ -3287,6 +3580,361 @@
       // Default: continue discovery
       startDiscovery(journeyId, topic);
     }
+
+    /* ==========================================================================
+       PHASE 9: VISUAL PLANNER & INTERACTIVE ARCHITECTURE ENGINE (AGENT 7)
+       ========================================================================== */
+    async function ensureMermaidLoaded(maxWaitMs = 6000) {
+      const start = Date.now();
+      while (!window.mermaid && (Date.now() - start) < maxWaitMs) {
+        await new Promise(r => setTimeout(r, 100));
+      }
+      if (window.mermaid && !window._mermaidInitialized) {
+        try {
+          mermaid.initialize({
+            startOnLoad: false,
+            theme: 'dark',
+            themeVariables: {
+              darkMode: true,
+              background: '#070b12',
+              primaryColor: '#312e81',
+              primaryTextColor: '#f8fafc',
+              primaryBorderColor: '#6366f1',
+              lineColor: '#818cf8',
+              secondaryColor: '#064e3b',
+              tertiaryColor: '#1e1b4b',
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: '13px',
+            },
+            flowchart: { curve: 'basis', htmlLabels: true },
+            sequence: { showSequenceNumbers: true },
+            securityLevel: 'loose',
+          });
+          window._mermaidInitialized = true;
+        } catch (err) {
+          console.warn("Mermaid initialize warning:", err);
+        }
+      }
+      return !!window.mermaid;
+    }
+
+    async function renderAllMermaidDiagrams() {
+      const loaded = await ensureMermaidLoaded();
+      if (!loaded) {
+        console.warn("Mermaid library could not be loaded from CDN.");
+        return;
+      }
+      const blocks = document.querySelectorAll('.mermaid-block');
+      for (let el of blocks) {
+        const id = el.id;
+        const rawEl = document.getElementById('raw-' + id);
+        const cleanSpec = rawEl ? rawEl.value.trim() : '';
+        if (!cleanSpec) continue;
+
+        try {
+          const cleanId = id.replace(/[^a-zA-Z0-9]/g, '');
+          const svgId = 'svg-' + cleanId + '-' + Math.random().toString(36).substring(2, 7);
+          const { svg } = await mermaid.render(svgId, cleanSpec);
+          el.innerHTML = svg;
+          el.classList.add('rendered');
+        } catch (err) {
+          console.warn('Mermaid rendering fallback for', id, err);
+          el.innerHTML = `
+            <div class="diagram-render-fallback">
+              <div class="fallback-note">⚡ Visual Architecture Specification:</div>
+              <pre class="diagram-spec-pre">${escapeHtml(cleanSpec)}</pre>
+            </div>
+          `;
+        }
+      }
+    }
+
+    function copyDiagramSpec(btn, diagId) {
+      const rawEl = document.getElementById('raw-' + diagId);
+      const spec = rawEl ? rawEl.value : '';
+      if (!spec) return;
+      navigator.clipboard.writeText(spec).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<span>✅ Copied!</span>';
+        setTimeout(() => { btn.innerHTML = orig; }, 1800);
+      });
+    }
+
+    async function downloadDiagramSvg(diagId, title) {
+      const container = document.getElementById(diagId);
+      let svgEl = container ? container.querySelector('svg') : null;
+      if (!svgEl) {
+        const modalCanvas = document.getElementById('diag-modal-svg-canvas');
+        svgEl = modalCanvas ? modalCanvas.querySelector('svg') : null;
+      }
+
+      // If not yet in DOM, render on-the-fly directly from the raw spec!
+      if (!svgEl && window.mermaid) {
+        const rawEl = document.getElementById('raw-' + diagId);
+        const spec = rawEl ? rawEl.value.trim() : '';
+        if (spec) {
+          try {
+            const tempId = 'dl-svg-' + Math.random().toString(36).substring(2, 7);
+            const res = await mermaid.render(tempId, spec);
+            if (res && res.svg) {
+              triggerSvgDownload(res.svg, title);
+              return;
+            }
+          } catch (e) {
+            console.warn('On-the-fly SVG render error:', e);
+          }
+        }
+      }
+
+      if (!svgEl) {
+        alert('Diagram vector is currently unavailable.');
+        return;
+      }
+
+      const svgData = new XMLSerializer().serializeToString(svgEl);
+      triggerSvgDownload(svgData, title);
+    }
+
+    function triggerSvgDownload(svgData, title) {
+      const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = (title ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'architecture-diagram') + '.svg';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    let currentModalZoom = 1.0;
+    let currentModalDiagId = null;
+
+    async function openDiagramFullscreen(diagId, title, diagType) {
+      currentModalDiagId = diagId;
+      currentModalZoom = 1.0;
+      const modal = document.getElementById('diag-fullscreen-modal');
+      const modalTitle = document.getElementById('diag-modal-title');
+      const modalBadge = document.getElementById('diag-modal-badge');
+      const canvas = document.getElementById('diag-modal-svg-canvas');
+      const zoomPill = document.getElementById('diag-modal-zoom-pill');
+
+      if (modalTitle) modalTitle.textContent = title || 'System Architecture Diagram';
+      if (modalBadge) modalBadge.textContent = '⚡ ' + (diagType || 'ARCHITECTURE').toUpperCase();
+      if (zoomPill) zoomPill.textContent = '100%';
+
+      const sourceContainer = document.getElementById(diagId);
+      let svgEl = sourceContainer ? sourceContainer.querySelector('svg') : null;
+
+      if (svgEl) {
+        canvas.innerHTML = svgEl.outerHTML;
+        const newSvg = canvas.querySelector('svg');
+        if (newSvg) {
+          newSvg.style.maxWidth = '100%';
+          newSvg.style.height = 'auto';
+          newSvg.style.maxHeight = '70vh';
+        }
+      } else {
+        const rawEl = document.getElementById('raw-' + diagId);
+        const spec = rawEl ? rawEl.value.trim() : '';
+        let rendered = false;
+        if (window.mermaid && spec) {
+          try {
+            const modalSvgId = 'modal-svg-' + Math.random().toString(36).substring(2, 7);
+            const { svg } = await mermaid.render(modalSvgId, spec);
+            canvas.innerHTML = svg;
+            const newSvg = canvas.querySelector('svg');
+            if (newSvg) {
+              newSvg.style.maxWidth = '100%';
+              newSvg.style.height = 'auto';
+              newSvg.style.maxHeight = '70vh';
+            }
+            rendered = true;
+          } catch (e) {
+            console.warn('Modal on-the-fly render failed:', e);
+          }
+        }
+        if (!rendered) {
+          canvas.innerHTML = `<pre class="diagram-spec-pre" style="font-size: 1rem; padding: 2rem;">${escapeHtml(spec)}</pre>`;
+        }
+      }
+
+      canvas.style.transform = 'scale(1)';
+      modal.style.display = 'flex';
+    }
+
+    function adjustModalZoom(delta) {
+      currentModalZoom = Math.max(0.4, Math.min(3.0, currentModalZoom + delta));
+      const canvas = document.getElementById('diag-modal-svg-canvas');
+      if (canvas) {
+        canvas.style.transform = `scale(${currentModalZoom})`;
+      }
+      const zoomPill = document.getElementById('diag-modal-zoom-pill');
+      if (zoomPill) {
+        zoomPill.textContent = `${Math.round(currentModalZoom * 100)}%`;
+      }
+    }
+
+    function resetModalZoom() {
+      currentModalZoom = 1.0;
+      const canvas = document.getElementById('diag-modal-svg-canvas');
+      if (canvas) {
+        canvas.style.transform = 'scale(1)';
+      }
+      const zoomPill = document.getElementById('diag-modal-zoom-pill');
+      if (zoomPill) {
+        zoomPill.textContent = '100%';
+      }
+    }
+
+    function closeDiagramModal() {
+      const modal = document.getElementById('diag-fullscreen-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function copyCurrentModalSpec() {
+      if (!currentModalDiagId) return;
+      const rawEl = document.getElementById('raw-' + currentModalDiagId);
+      if (rawEl && rawEl.value) {
+        navigator.clipboard.writeText(rawEl.value).then(() => {
+          alert('Mermaid specification copied to clipboard!');
+        });
+      }
+    }
+
+    function downloadCurrentModalSvg() {
+      if (!currentModalDiagId) return;
+      const title = document.getElementById('diag-modal-title').textContent;
+      downloadDiagramSvg(currentModalDiagId, title);
+    }
+
+    let targetSectionForVisual = null;
+    let selectedVisualType = 'flowchart';
+
+    function openSectionVisualModal(secId, secTitle) {
+      targetSectionForVisual = secId;
+      selectedVisualType = 'flowchart';
+      const modal = document.getElementById('section-visual-modal');
+      const titleEl = document.getElementById('visual-modal-title');
+      const promptInput = document.getElementById('visual-custom-prompt');
+      const statusEl = document.getElementById('visual-modal-status');
+
+      if (titleEl) titleEl.textContent = `Visual for: ${secTitle}`;
+      if (promptInput) promptInput.value = '';
+      if (statusEl) statusEl.style.display = 'none';
+
+      document.querySelectorAll('.vtype-card').forEach(c => {
+        c.classList.toggle('active', c.dataset.type === 'flowchart');
+      });
+
+      modal.style.display = 'flex';
+    }
+
+    function closeSectionVisualModal() {
+      const modal = document.getElementById('section-visual-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function selectVisualType(type, cardEl) {
+      selectedVisualType = type;
+      document.querySelectorAll('.vtype-card').forEach(c => c.classList.remove('active'));
+      if (cardEl) cardEl.classList.add('active');
+    }
+
+    async function submitSectionVisual() {
+      if (!currentJourneyId || !targetSectionForVisual) return;
+      const promptVal = document.getElementById('visual-custom-prompt').value.trim();
+      const btn = document.getElementById('btn-submit-visual');
+      const textSpan = document.getElementById('btn-visual-text');
+      const spinnerSpan = document.getElementById('btn-visual-spinner');
+      const statusEl = document.getElementById('visual-modal-status');
+
+      btn.disabled = true;
+      textSpan.style.display = 'none';
+      spinnerSpan.style.display = 'inline';
+      statusEl.style.display = 'none';
+
+      try {
+        const res = await fetch(`/journeys/${currentJourneyId}/sections/${targetSectionForVisual}/visual`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            visual_type: selectedVisualType,
+            custom_prompt: promptVal || undefined,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Failed to generate visual');
+        }
+
+        // Refresh note
+        const noteRes = await fetch(`/journeys/${currentJourneyId}/note`);
+        if (noteRes.ok) {
+          const updatedNote = await noteRes.json();
+          renderNote(updatedNote);
+        }
+        closeSectionVisualModal();
+      } catch (err) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = 'rgba(239, 68, 68, 0.15)';
+        statusEl.style.color = '#fca5a5';
+        statusEl.textContent = `Error: ${err.message}`;
+      } finally {
+        btn.disabled = false;
+        textSpan.style.display = 'inline';
+        spinnerSpan.style.display = 'none';
+      }
+    }
+
+    async function triggerPlanVisuals() {
+      if (!currentJourneyId) {
+        alert('Please start or open a learning journey first.');
+        return;
+      }
+      const btn = document.getElementById('btn-plan-visuals');
+      const origHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳ Planning Visuals...</span>';
+      }
+
+      try {
+        const res = await fetch(`/journeys/${currentJourneyId}/visuals/plan`, {
+          method: 'POST',
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Visual planning failed');
+        }
+        const plan = await res.json();
+
+        // Fetch and re-render updated note
+        const noteRes = await fetch(`/journeys/${currentJourneyId}/note`);
+        if (noteRes.ok) {
+          const updatedNote = await noteRes.json();
+          renderNote(updatedNote);
+        }
+
+        alert(`Agent 7 successfully synthesized & planned ${plan.total_diagrams} architecture diagram(s) across your note!`);
+      } catch (err) {
+        alert(`Visual Planner error: ${err.message}`);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origHtml;
+        }
+      }
+    }
+
+    // Keyboard navigation: Close modals on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeDiagramModal();
+        closeSectionVisualModal();
+      }
+    });
 
     function escapeHtml(str) {
       const div = document.createElement('div');

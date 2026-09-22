@@ -12,6 +12,8 @@ class NoteBlock(BaseModel):
     title: Optional[str] = None  # for warning / example / diagram
     caption: Optional[str] = None  # for diagram
     diagram_spec: Optional[str] = None  # for diagram
+    diagram_type: Optional[str] = None  # e.g. flowchart, sequence, architecture, concept_map
+    visual_description: Optional[str] = None  # semantic explanation of visual flow
     items: Optional[List[Dict[str, Any]]] = None  # for comparison tables
 
     model_config = ConfigDict(from_attributes=True)

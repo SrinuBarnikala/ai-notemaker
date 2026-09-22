@@ -144,16 +144,17 @@ def parse_section_blocks(
 
     # 4. Add Visual Diagram if requested
     if needs_visual:
+        from backend.app.visuals.sanitizer import generate_fallback_mermaid
+        v_type = visual_type or "architecture"
+        diag_title = f"Architectural Flow: {primary_concept}"
         blocks.append(
             NoteBlock(
                 type="diagram",
-                title=f"Architectural Flow: {primary_concept}",
+                title=diag_title,
                 caption=f"Visual representation of data flow and component boundaries for {primary_concept}.",
-                diagram_spec=(
-                    f"┌──────────────┐       ┌───────────────┐       ┌──────────────┐\n"
-                    f"│ Query Input  │ ────> │ {primary_concept[:12]} │ ────> │ Output State │\n"
-                    f"└──────────────┘       └───────────────┘       └──────────────┘"
-                ),
+                diagram_spec=generate_fallback_mermaid(v_type, primary_concept),
+                diagram_type=v_type,
+                visual_description=f"Automated architectural visualization for {primary_concept}.",
             )
         )
 

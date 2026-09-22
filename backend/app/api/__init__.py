@@ -5,6 +5,7 @@ from backend.app.api.profile import router as profile_router
 from backend.app.api.architecture import router as architecture_router
 from backend.app.api.note import router as note_router
 from backend.app.api.assessment import router as assessment_router
+from backend.app.api.visuals import router as visuals_router
 
 api_router = APIRouter()
 api_router.include_router(journeys_router, prefix="/journeys", tags=["Journeys"])
@@ -13,4 +14,5 @@ api_router.include_router(profile_router, prefix="/journeys", tags=["Knowledge P
 api_router.include_router(architecture_router, prefix="/journeys", tags=["Note Architecture"])
 api_router.include_router(note_router)
 api_router.include_router(assessment_router)
+api_router.include_router(visuals_router)
 
