@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
   <style>
     :root {
       --bg-primary: #070b12;
@@ -603,74 +604,286 @@
       line-height: 1.65;
     }
 
-    /* Code Block with Copy Button */
+    /* Phase 10: Interactive Code Block & Sandbox Styles */
     .block-code {
-      background: #03060c;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      margin-bottom: 1.6rem;
+      background: #030712;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      margin-bottom: 1.8rem;
       overflow: hidden;
-      box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.7);
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .block-code:hover {
+      border-color: rgba(99, 102, 241, 0.35);
     }
     .code-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.6rem 1.1rem;
+      padding: 0.75rem 1.25rem;
       background: rgba(255, 255, 255, 0.03);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      flex-wrap: wrap;
+      gap: 0.6rem;
     }
-    .code-lang {
+    .code-header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+    .code-lang-tag {
       font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: #a5b4fc;
-      text-transform: uppercase;
+      font-size: 0.725rem;
       font-weight: 700;
-      letter-spacing: 0.05em;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
     }
-    .code-title {
-      font-size: 0.8rem;
-      color: var(--text-secondary);
+    .tag-python, .tag-py { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.4); color: #93c5fd; }
+    .tag-sql { background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #fde047; }
+    .tag-bash, .tag-sh { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; }
+    .tag-rust, .tag-rs { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; }
+    .tag-go, .tag-golang { background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.4); color: #67e8f9; }
+    .tag-typescript, .tag-ts, .tag-javascript, .tag-js { background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #d8b4fe; }
+
+    .code-title-text {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #e2e8f0;
       font-family: var(--font-sans);
-      margin-left: 0.5rem;
+    }
+    .code-complexity-pill {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: rgba(99, 102, 241, 0.14);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #c7d2fe;
+      padding: 0.18rem 0.55rem;
+      border-radius: 9999px;
     }
     .code-actions {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.45rem;
+      flex-wrap: wrap;
     }
-    .copy-btn {
+    .code-btn-run {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.28), rgba(5, 150, 105, 0.38));
+      border: 1px solid rgba(16, 185, 129, 0.6);
+      color: #ecfdf5;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.35rem 0.85rem;
+      border-radius: 7px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .code-btn-run:hover:not(:disabled) {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.45), rgba(5, 150, 105, 0.55));
+      border-color: #34d399;
+      transform: translateY(-1px);
+      box-shadow: 0 0 18px rgba(16, 185, 129, 0.45);
+    }
+    .code-btn-run:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .code-btn-copy, .code-btn-refine {
       background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       color: #cbd5e1;
       font-family: var(--font-mono);
       font-size: 0.725rem;
-      padding: 0.25rem 0.65rem;
+      font-weight: 600;
+      padding: 0.32rem 0.65rem;
       border-radius: 6px;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.3rem;
       transition: all 0.15s ease;
     }
-    .copy-btn:hover {
+    .code-btn-copy:hover, .code-btn-refine:hover {
       background: rgba(99, 102, 241, 0.2);
       border-color: var(--border-accent);
       color: #fff;
     }
-    .copy-btn.copied {
+    .code-btn-copy.copied {
       background: rgba(16, 185, 129, 0.25);
       border-color: var(--success);
       color: #34d399;
     }
-
     .code-pre {
-      padding: 1.25rem 1.4rem;
+      padding: 1.35rem 1.5rem;
       overflow-x: auto;
       font-family: var(--font-mono);
       font-size: 0.88rem;
       color: #f1f5f9;
+      line-height: 1.7;
+    }
+
+    /* Expected Output Accordion */
+    .code-expected-wrap {
+      border-top: 1px dashed rgba(255, 255, 255, 0.08);
+      padding: 0.65rem 1.25rem;
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .code-expected-details summary {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: #94a3b8;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 600;
+    }
+    .code-expected-details summary:hover {
+      color: #cbd5e1;
+    }
+    .expected-stdout {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: #a7f3d0;
+      margin-top: 0.5rem;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      background: rgba(16, 185, 129, 0.05);
+      padding: 0.6rem 0.85rem;
+      border-radius: 6px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    /* Interactive Terminal Output Console */
+    .code-terminal-console {
+      margin: 0 1.25rem 1.25rem 1.25rem;
+      background: #040813;
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.8), 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+    .terminal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0.9rem;
+      background: rgba(255, 255, 255, 0.035);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .terminal-dots {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+    .terminal-title {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #94a3b8;
+      margin-left: 0.5rem;
+      letter-spacing: 0.06em;
+    }
+    .terminal-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+    .terminal-status {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #34d399;
+    }
+    .terminal-clear-btn {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      cursor: pointer;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      transition: color 0.15s ease;
+    }
+    .terminal-clear-btn:hover {
+      color: #cbd5e1;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .terminal-body {
+      padding: 0.9rem 1.1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
       line-height: 1.65;
+      color: #38bdf8;
+      max-height: 280px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .terminal-body.error-output {
+      color: #f87171;
+    }
+
+    /* Section Code Modal Language Grid */
+    .code-lang-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .clang-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1.5px solid rgba(255, 255, 255, 0.09);
+      border-radius: 10px;
+      padding: 0.85rem 0.65rem;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      text-align: center;
+    }
+    .clang-card:hover {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: rgba(99, 102, 241, 0.4);
+      transform: translateY(-2px);
+    }
+    .clang-card.active {
+      background: rgba(99, 102, 241, 0.18);
+      border-color: var(--accent);
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);
+    }
+    .clang-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.35rem;
+    }
+    .clang-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .clang-tag {
+      font-size: 0.675rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      margin-top: 0.2rem;
     }
 
     /* Phase 9: Architecture Diagram & Visual Planner Styles */
@@ -1058,37 +1271,45 @@
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(0, 0, 0, 0.82);
       backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 999;
-      padding: 1.25rem;
+      padding: 1.25rem 1rem;
       animation: fadeIn 0.15s ease;
+      overflow-y: auto;
     }
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
     }
-    .modal-dialog {
+    .modal-dialog,
+    .modal-card {
       background: var(--bg-secondary);
       border: 1px solid var(--border-accent);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(99, 102, 241, 0.2);
+      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.85), 0 0 35px rgba(99, 102, 241, 0.2);
       border-radius: 16px;
       width: 100%;
       max-width: 620px;
-      max-height: 90vh;
-      overflow-y: auto;
+      max-height: 88vh;
       display: flex;
       flex-direction: column;
+      position: relative;
+      box-sizing: border-box;
+      overflow: hidden;
+      margin: auto;
     }
     .modal-header {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      padding: 1.25rem 1.5rem;
+      gap: 1rem;
+      padding: 1.15rem 1.5rem;
       border-bottom: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.7);
+      flex-shrink: 0;
     }
     .modal-pretitle {
       font-family: var(--font-mono);
@@ -1103,32 +1324,64 @@
       font-size: 1.25rem;
       font-weight: 800;
       color: #ffffff;
+      line-height: 1.3;
     }
-    .modal-close-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.25rem;
+    .modal-close-btn,
+    .modal-close {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+      font-size: 1.35rem;
       cursor: pointer;
-      padding: 0.2rem 0.5rem;
-      border-radius: 6px;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      padding: 0;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+      user-select: none;
     }
-    .modal-close-btn:hover {
+    .modal-close-btn:hover,
+    .modal-close:hover {
       color: #ffffff;
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(239, 68, 68, 0.25);
+      border-color: rgba(239, 68, 68, 0.5);
+      transform: scale(1.05);
     }
     .modal-body {
-      padding: 1.5rem;
+      padding: 1.35rem 1.5rem;
       flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+      overscroll-behavior: contain;
+    }
+    .modal-body::-webkit-scrollbar {
+      width: 6px;
+    }
+    .modal-body::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .modal-body::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
+    }
+    .modal-body::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, 0.5);
     }
     .modal-footer {
       display: flex;
       align-items: center;
       justify-content: flex-end;
       gap: 0.75rem;
-      padding: 1.1rem 1.5rem;
+      padding: 1rem 1.5rem;
       border-top: 1px solid var(--border);
-      background: rgba(7, 11, 18, 0.5);
+      background: rgba(7, 11, 18, 0.85);
+      backdrop-filter: blur(8px);
+      flex-shrink: 0;
     }
 
     .evolve-type-grid {
@@ -1636,7 +1889,7 @@
       <span class="brand-title">Personalized Technical Note Maker</span>
     </div>
     <div class="header-badges">
-      <div class="phase-badge">PHASE 6, 7, 8 &amp; 9: VIEWER, EVOLUTION, RECALL &amp; VISUAL PLANNER</div>
+      <div class="phase-badge">PHASE 6, 7, 8, 9 &amp; 10: CODE PLANNER &amp; EXECUTION SANDBOX</div>
     </div>
 
 
@@ -1853,6 +2106,9 @@
           </button>
           <button type="button" class="tool-btn" id="btn-plan-visuals" onclick="triggerPlanVisuals()" title="Synthesize & enhance architecture diagrams with Agent 7" style="background: rgba(6, 182, 212, 0.15); border-color: var(--cyan); color: #a5f3fc;">
             <span>📊 Plan Visuals</span>
+          </button>
+          <button type="button" class="tool-btn" id="btn-plan-code" onclick="triggerPlanCode()" title="Synthesize & plan executable code implementations with Agent 8" style="background: rgba(16, 185, 129, 0.15); border-color: var(--success); color: #a7f3d0;">
+            <span>💻 Plan Code</span>
           </button>
           <button type="button" class="tool-btn" onclick="exportNote('markdown')" title="Export formatted GitHub Markdown (.md)">
             <span>📥 Export .md</span>
@@ -2101,7 +2357,7 @@
             <button type="button" class="tool-btn" onclick="copyCurrentModalSpec()" title="Copy Mermaid Definition">
               <span>📋 Copy</span>
             </button>
-            <button type="modal-close" class="modal-close" onclick="closeDiagramModal()">&times;</button>
+            <button type="button" class="modal-close" onclick="closeDiagramModal()" aria-label="Close dialog" title="Close (Esc)">&times;</button>
           </div>
         </div>
         <div class="modal-body" style="flex: 1; overflow: auto; display: flex; align-items: center; justify-content: center; background: #040711; padding: 2rem; border-radius: 8px; position: relative;" id="diag-modal-viewport">
@@ -2124,7 +2380,7 @@
             <span class="diagram-badge">🎨 AGENT 7 — VISUAL PLANNER</span>
             <h3 class="modal-title" id="visual-modal-title">Synthesize Section Diagram</h3>
           </div>
-          <button type="button" class="modal-close" onclick="closeSectionVisualModal()">&times;</button>
+          <button type="button" class="modal-close" onclick="closeSectionVisualModal()" aria-label="Close modal" title="Close (Esc)">&times;</button>
         </div>
         <div class="modal-body">
           <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
@@ -2177,22 +2433,106 @@
             ></textarea>
           </div>
 
-          <div id="visual-modal-status" style="display: none; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.85rem;"></div>
+          <div id="visual-modal-status" style="display: none; padding: 0.75rem; border-radius: 8px; margin-bottom: 0.5rem; font-size: 0.85rem;"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="tool-btn" onclick="closeSectionVisualModal()">Cancel</button>
+          <button type="button" class="btn-submit" id="btn-submit-visual" onclick="submitSectionVisual()" style="width: auto; padding: 0.65rem 1.4rem;">
+            <span id="btn-visual-text">✨ Generate Diagram</span>
+            <span id="btn-visual-spinner" style="display: none;">⏳ Synthesizing Diagram...</span>
+          </button>
+        </div>
+      </div>
+    </div>
 
-          <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
-            <button type="button" class="tool-btn" onclick="closeSectionVisualModal()">Cancel</button>
-            <button type="button" class="btn-submit" id="btn-submit-visual" onclick="submitSectionVisual()" style="width: auto; padding: 0.65rem 1.4rem;">
-              <span id="btn-visual-text">✨ Generate Diagram</span>
-              <span id="btn-visual-spinner" style="display: none;">⏳ Synthesizing Diagram...</span>
-            </button>
+    <!-- Phase 10: Section Code Customization Modal -->
+    <div class="modal-overlay" id="section-code-modal" style="display: none;" onclick="closeModalOnOverlay(event)">
+      <div class="modal-card" style="max-width: 620px;">
+        <div class="modal-header">
+          <div>
+            <span class="code-lang-tag tag-python" style="margin-bottom: 0.35rem;">💻 AGENT 8 — CODE PLANNER</span>
+            <h3 class="modal-title" id="code-modal-title">Synthesize Section Implementation</h3>
           </div>
+          <button type="button" class="modal-close" onclick="closeSectionCodeModal()" aria-label="Close modal" title="Close (Esc)">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+            Synthesize or customize an interactive, executable code implementation with complexity metrics and assertions for this section.
+          </p>
+
+          <div style="margin-bottom: 1.25rem;">
+            <label style="display: block; font-size: 0.825rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">
+              Target Execution Language:
+            </label>
+            <div class="code-lang-grid" id="code-lang-grid">
+              <div class="clang-card active" data-lang="python" onclick="selectCodeLanguage('python', this)">
+                <div class="clang-icon">🐍</div>
+                <div class="clang-name">Python</div>
+                <div class="clang-tag">▶ WASM Sandbox</div>
+              </div>
+              <div class="clang-card" data-lang="go" onclick="selectCodeLanguage('go', this)">
+                <div class="clang-icon">🐹</div>
+                <div class="clang-name">Go</div>
+                <div class="clang-tag">Concurrent Systems</div>
+              </div>
+              <div class="clang-card" data-lang="rust" onclick="selectCodeLanguage('rust', this)">
+                <div class="clang-icon">🦀</div>
+                <div class="clang-name">Rust</div>
+                <div class="clang-tag">Memory &amp; Safety</div>
+              </div>
+              <div class="clang-card" data-lang="typescript" onclick="selectCodeLanguage('typescript', this)">
+                <div class="clang-icon">⚡</div>
+                <div class="clang-name">TypeScript</div>
+                <div class="clang-tag">Typed Frontend/Node</div>
+              </div>
+              <div class="clang-card" data-lang="sql" onclick="selectCodeLanguage('sql', this)">
+                <div class="clang-icon">💾</div>
+                <div class="clang-name">SQL</div>
+                <div class="clang-tag">Query Analytics</div>
+              </div>
+              <div class="clang-card" data-lang="bash" onclick="selectCodeLanguage('bash', this)">
+                <div class="clang-icon">⚡</div>
+                <div class="clang-name">Bash</div>
+                <div class="clang-tag">DevOps &amp; OS</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 1.25rem;">
+            <label style="display: block; font-size: 0.825rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;" for="code-custom-prompt">
+              Implementation Requirements / Edge Cases (Optional):
+            </label>
+            <textarea
+              id="code-custom-prompt"
+              class="intake-input"
+              rows="3"
+              placeholder="e.g. Include circular buffer boundary checks, lock-free synchronization, and print benchmark timings..."
+              style="resize: vertical; font-size: 0.875rem;"
+            ></textarea>
+          </div>
+
+          <div style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.6rem;">
+            <input type="checkbox" id="code-include-tests" checked style="accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer;">
+            <label for="code-include-tests" style="font-size: 0.825rem; color: #cbd5e1; cursor: pointer;">
+              Include executable test runner &amp; sample input assertions in <code>if __name__ == '__main__':</code>
+            </label>
+          </div>
+
+          <div id="code-modal-status" style="display: none; padding: 0.75rem; border-radius: 8px; margin-bottom: 0.5rem; font-size: 0.85rem;"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="tool-btn" onclick="closeSectionCodeModal()">Cancel</button>
+          <button type="button" class="btn-submit" id="btn-submit-code" onclick="submitSectionCode()" style="width: auto; padding: 0.65rem 1.4rem;">
+            <span id="btn-code-text">✨ Synthesize Implementation</span>
+            <span id="btn-code-spinner" style="display: none;">⏳ Synthesizing Code...</span>
+          </button>
         </div>
       </div>
     </div>
   </main>
 
   <footer class="footer">
-    Personalized Technical Note Maker &bull; Phase 6, 7, 8 &amp; 9: Living Note Viewer, Evolution, Active Recall &amp; Visual Planner Complete
+    Personalized Technical Note Maker &bull; Phase 6, 7, 8, 9 &amp; 10: Living Note Viewer, Evolution, Active Recall, Visual Planner &amp; Interactive Code Sandbox
   </footer>
 
 
@@ -2684,10 +3024,10 @@
           <div class="section-evolve-bar">
             <span class="evolve-label">🌱 Evolve section:</span>
             <div class="evolve-actions">
-              <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'add_code')">⚡ + Code Example</button>
+              <button type="button" class="evolve-chip" onclick="openSectionCodeModal('${s.id}', '${escapeJsString(s.title)}')">💻 + Code Implementation</button>
+              <button type="button" class="evolve-chip" onclick="openSectionVisualModal('${s.id}', '${escapeJsString(s.title)}')">🎨 Add Visual Flow</button>
               <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'expand_section')">🔍 Deepen Detail</button>
               <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'clarify')">💡 Clarify Concept</button>
-              <button type="button" class="evolve-chip" onclick="openSectionVisualModal('${s.id}', '${escapeJsString(s.title)}')">🎨 Add Visual Flow</button>
               <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'custom_prompt')">💬 Ask Question...</button>
             </div>
           </div>
@@ -2699,11 +3039,14 @@
         <div class="note-global-evolve-card">
           <div class="evolve-card-left">
             <div class="evolve-card-title">🌱 Expand &amp; Verify Your Technical Mastery</div>
-            <p class="evolve-card-sub">Technical mastery is an ongoing dialogue. Test active recall with personalized flashcards, inspect dynamic Mermaid diagrams, or add new chapters.</p>
+            <p class="evolve-card-sub">Technical mastery is an ongoing dialogue. Test active recall with personalized flashcards, inspect dynamic Mermaid diagrams, execute runnable sandbox code, or add new chapters.</p>
           </div>
           <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
             <button type="button" class="btn-submit" style="width: auto; padding: 0.65rem 1.4rem;" onclick="openEvolveModal(null, 'Living Note Exploration', 'add_section')">
               <span>+ Add New Section</span>
+            </button>
+            <button type="button" class="tool-btn" style="padding: 0.65rem 1.25rem; background: rgba(16, 185, 129, 0.18); border-color: var(--success); color: #a7f3d0;" onclick="triggerPlanCode()">
+              <span>💻 Plan Interactive Code</span>
             </button>
             <button type="button" class="tool-btn" style="padding: 0.65rem 1.25rem; background: rgba(99, 102, 241, 0.2); border-color: var(--accent); color: #ffffff;" onclick="openAssessmentModal()">
               <span>🧠 Test Mastery &amp; Flashcards</span>
@@ -2766,21 +3109,75 @@
       }
       if (b.type === 'code') {
         const rawCode = b.code || b.content || '';
-        const escapedForAttr = rawCode.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        const codeId = 'code-' + Math.random().toString(36).substring(2, 9);
+        const lang = (b.language || 'python').toLowerCase();
+        const isPython = lang === 'python' || lang === 'py';
+        const isRunnable = b.runnable !== undefined ? Boolean(b.runnable) : isPython;
+        const codeTitle = b.title || (isPython ? 'Python Implementation' : `${lang.toUpperCase()} Implementation`);
+        const langIcons = {
+          python: '🐍',
+          py: '🐍',
+          go: '🐹',
+          golang: '🐹',
+          rust: '🦀',
+          rs: '🦀',
+          typescript: '⚡',
+          ts: '⚡',
+          javascript: '🟨',
+          js: '🟨',
+          sql: '💾',
+          bash: '⚡',
+          sh: '⚡'
+        };
+        const langIcon = langIcons[lang] || '💻';
+
         return `
-          <div class="block-code">
+          <div class="block-code" id="card-${codeId}">
             <div class="code-header">
-              <div style="display: flex; align-items: center;">
-                <span class="code-lang">${escapeHtml(b.language || 'code')}</span>
-                ${b.title ? `<span class="code-title">— ${escapeHtml(b.title)}</span>` : ''}
+              <div class="code-header-left">
+                <span class="code-lang-tag tag-${lang}">${langIcon} ${lang.toUpperCase()}</span>
+                <span class="code-title-text">${escapeHtml(codeTitle)}</span>
+                ${b.complexity ? `<span class="code-complexity-pill" title="Algorithmic Complexity">⚡ ${escapeHtml(b.complexity)}</span>` : ''}
               </div>
               <div class="code-actions">
-                <button type="button" class="copy-btn" onclick="copyCode(this, \`${escapeJsString(rawCode)}\`)">
-                  <span>📋 Copy Code</span>
+                ${isRunnable ? `
+                <button type="button" class="code-btn-run" id="btn-run-${codeId}" onclick="runCodeInSandbox('${codeId}')" title="Execute Python in browser WebAssembly sandbox">
+                  <span id="run-text-${codeId}">▶ Run Code</span>
+                  <span id="run-spinner-${codeId}" style="display:none;">⏳ Executing...</span>
+                </button>` : ''}
+                <button type="button" class="code-btn-copy" onclick="copyCodeFromBlock(this, '${codeId}')" title="Copy code">
+                  <span>📋 Copy</span>
                 </button>
+                ${sectionId ? `
+                <button type="button" class="code-btn-refine" onclick="openSectionCodeModal('${sectionId}', '${escapeJsString(codeTitle)}')" title="Regenerate or customize with Agent 8">
+                  <span>🔄 Refine</span>
+                </button>` : ''}
               </div>
             </div>
-            <pre class="code-pre"><code>${escapeHtml(rawCode)}</code></pre>
+            <pre class="code-pre" id="pre-${codeId}"><code>${escapeHtml(rawCode)}</code></pre>
+            ${b.expected_output ? `
+            <div class="code-expected-wrap">
+              <details class="code-expected-details">
+                <summary>📋 Expected Output</summary>
+                <pre class="expected-stdout">${escapeHtml(b.expected_output)}</pre>
+              </details>
+            </div>` : ''}
+            <div class="code-terminal-console" id="term-${codeId}" style="display: none;">
+              <div class="terminal-header">
+                <div class="terminal-dots">
+                  <span class="dot dot-red"></span>
+                  <span class="dot dot-yellow"></span>
+                  <span class="dot dot-green"></span>
+                  <span class="terminal-title">TERMINAL STDOUT</span>
+                </div>
+                <div class="terminal-actions">
+                  <span class="terminal-status" id="term-status-${codeId}">Execution finished</span>
+                  <button type="button" class="terminal-clear-btn" onclick="clearTerminal('${codeId}')">Clear</button>
+                </div>
+              </div>
+              <pre class="terminal-body" id="stdout-${codeId}"></pre>
+            </div>
+            <textarea id="raw-code-${codeId}" style="display:none;">${escapeHtml(rawCode)}</textarea>
           </div>
         `;
       }
@@ -3928,11 +4325,290 @@
       }
     }
 
+    /* ==========================================================================
+       PHASE 10: CODE PLANNER & WEBASSEMBLY SANDBOX EXECUTION (AGENT 8)
+       ========================================================================== */
+    let pyodideInstance = null;
+    let pyodideLoadingPromise = null;
+
+    async function ensurePyodide() {
+      if (pyodideInstance) return pyodideInstance;
+      if (pyodideLoadingPromise) return pyodideLoadingPromise;
+
+      pyodideLoadingPromise = (async () => {
+        if (typeof loadPyodide === 'undefined') {
+          await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js';
+            s.onload = resolve;
+            s.onerror = () => reject(new Error('Failed to load Pyodide WebAssembly runtime from CDN.'));
+            document.head.appendChild(s);
+          });
+        }
+        const py = await loadPyodide();
+        pyodideInstance = py;
+        return py;
+      })();
+
+      return pyodideLoadingPromise;
+    }
+
+    async function runCodeInSandbox(codeId) {
+      const rawEl = document.getElementById('raw-code-' + codeId);
+      if (!rawEl) return;
+      const code = rawEl.value;
+
+      const runBtn = document.getElementById('btn-run-' + codeId);
+      const runText = document.getElementById('run-text-' + codeId);
+      const runSpinner = document.getElementById('run-spinner-' + codeId);
+      const term = document.getElementById('term-' + codeId);
+      const stdoutEl = document.getElementById('stdout-' + codeId);
+      const statusEl = document.getElementById('term-status-' + codeId);
+
+      if (runBtn) runBtn.disabled = true;
+      if (runText) runText.style.display = 'none';
+      if (runSpinner) runSpinner.style.display = 'inline';
+
+      if (term) term.style.display = 'block';
+      if (stdoutEl) {
+        stdoutEl.className = 'terminal-body';
+        stdoutEl.textContent = '⏳ Initializing Pyodide WebAssembly sandbox & executing...\n';
+      }
+      if (statusEl) {
+        statusEl.textContent = 'Executing...';
+        statusEl.style.color = '#38bdf8';
+      }
+
+      const startTime = performance.now();
+
+      try {
+        const pyodide = await ensurePyodide();
+
+        // Redirect stdout & stderr to capture output in real-time
+        pyodide.runPython(`
+import sys
+import io
+sys_stdout_backup = sys.stdout
+sys_stderr_backup = sys.stderr
+sys.stdout = io.StringIO()
+sys.stderr = io.StringIO()
+`);
+
+        let executionError = null;
+        let result = null;
+
+        try {
+          result = await pyodide.runPythonAsync(code);
+        } catch (execErr) {
+          executionError = execErr;
+        }
+
+        const capturedStdout = pyodide.runPython("sys.stdout.getvalue()");
+        const capturedStderr = pyodide.runPython("sys.stderr.getvalue()");
+
+        // Restore stdout/stderr
+        pyodide.runPython(`
+sys.stdout = sys_stdout_backup
+sys.stderr = sys_stderr_backup
+`);
+
+        const durationMs = Math.round(performance.now() - startTime);
+
+        if (executionError) {
+          if (statusEl) {
+            statusEl.textContent = `Error in ${durationMs}ms`;
+            statusEl.style.color = '#f87171';
+          }
+          if (stdoutEl) {
+            stdoutEl.className = 'terminal-body error-output';
+            let errText = (capturedStdout ? capturedStdout + '\n' : '') + (capturedStderr ? capturedStderr + '\n' : '') + String(executionError);
+            stdoutEl.textContent = errText;
+          }
+        } else {
+          if (statusEl) {
+            statusEl.textContent = `Success in ${durationMs}ms`;
+            statusEl.style.color = '#34d399';
+          }
+          let out = capturedStdout || '';
+          if (capturedStderr) out += (out ? '\n' : '') + '[stderr] ' + capturedStderr;
+          if (result !== undefined && result !== null && String(result) !== 'None') {
+            out += (out ? '\n' : '') + `=> Return: ${result}`;
+          }
+          if (!out.trim()) {
+            out = 'Code executed successfully (no stdout produced).';
+          }
+          if (stdoutEl) {
+            stdoutEl.className = 'terminal-body';
+            stdoutEl.textContent = out;
+          }
+        }
+      } catch (loadErr) {
+        if (statusEl) {
+          statusEl.textContent = 'Failed to load Sandbox';
+          statusEl.style.color = '#f87171';
+        }
+        if (stdoutEl) {
+          stdoutEl.className = 'terminal-body error-output';
+          stdoutEl.textContent = `Sandbox runtime error: ${loadErr.message}\nMake sure you have an active internet connection to load Pyodide WebAssembly runtime.`;
+        }
+      } finally {
+        if (runBtn) runBtn.disabled = false;
+        if (runText) runText.style.display = 'inline';
+        if (runSpinner) runSpinner.style.display = 'none';
+      }
+    }
+
+    function clearTerminal(codeId) {
+      const term = document.getElementById('term-' + codeId);
+      const stdoutEl = document.getElementById('stdout-' + codeId);
+      if (stdoutEl) stdoutEl.textContent = '';
+      if (term) term.style.display = 'none';
+    }
+
+    function copyCodeFromBlock(btn, codeId) {
+      const rawEl = document.getElementById('raw-code-' + codeId);
+      const codeText = rawEl ? rawEl.value : '';
+      if (!codeText) return;
+
+      navigator.clipboard.writeText(codeText).then(() => {
+        const orig = btn.innerHTML;
+        btn.classList.add('copied');
+        btn.innerHTML = '<span>✓ Copied!</span>';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = orig;
+        }, 2000);
+      });
+    }
+
+    async function triggerPlanCode() {
+      if (!currentJourneyId) {
+        alert('Please start or open a learning journey first.');
+        return;
+      }
+      const btn = document.getElementById('btn-plan-code');
+      const origHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳ Planning Code...</span>';
+      }
+
+      try {
+        const res = await fetch(`/journeys/${currentJourneyId}/code/plan`, {
+          method: 'POST',
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Code planning failed');
+        }
+        const plan = await res.json();
+
+        // Fetch and re-render updated note
+        const noteRes = await fetch(`/journeys/${currentJourneyId}/note`);
+        if (noteRes.ok) {
+          const updatedNote = await noteRes.json();
+          renderNote(updatedNote);
+        }
+
+        alert(`Agent 8 successfully synthesized & planned ${plan.total_code_blocks} runnable code implementation(s) across your note!`);
+      } catch (err) {
+        alert(`Code Planner error: ${err.message}`);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origHtml;
+        }
+      }
+    }
+
+    let targetSectionForCode = null;
+    let selectedCodeLanguage = 'python';
+
+    function openSectionCodeModal(secId, secTitle) {
+      targetSectionForCode = secId;
+      selectedCodeLanguage = 'python';
+      const modal = document.getElementById('section-code-modal');
+      const titleEl = document.getElementById('code-modal-title');
+      const promptInput = document.getElementById('code-custom-prompt');
+      const statusEl = document.getElementById('code-modal-status');
+
+      if (titleEl) titleEl.textContent = `Code Implementation for: ${secTitle}`;
+      if (promptInput) promptInput.value = '';
+      if (statusEl) statusEl.style.display = 'none';
+
+      document.querySelectorAll('.clang-card').forEach(c => {
+        c.classList.toggle('active', c.dataset.lang === 'python');
+      });
+
+      modal.style.display = 'flex';
+    }
+
+    function closeSectionCodeModal() {
+      const modal = document.getElementById('section-code-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function selectCodeLanguage(lang, cardEl) {
+      selectedCodeLanguage = lang;
+      document.querySelectorAll('.clang-card').forEach(c => c.classList.remove('active'));
+      if (cardEl) cardEl.classList.add('active');
+    }
+
+    async function submitSectionCode() {
+      if (!currentJourneyId || !targetSectionForCode) return;
+      const promptVal = document.getElementById('code-custom-prompt').value.trim();
+      const includeTests = document.getElementById('code-include-tests').checked;
+      const btn = document.getElementById('btn-submit-code');
+      const textSpan = document.getElementById('btn-code-text');
+      const spinnerSpan = document.getElementById('btn-code-spinner');
+      const statusEl = document.getElementById('code-modal-status');
+
+      btn.disabled = true;
+      textSpan.style.display = 'none';
+      spinnerSpan.style.display = 'inline';
+      statusEl.style.display = 'none';
+
+      try {
+        const res = await fetch(`/journeys/${currentJourneyId}/sections/${targetSectionForCode}/code`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            language: selectedCodeLanguage,
+            custom_prompt: promptVal || undefined,
+            include_tests: includeTests,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Failed to synthesize code');
+        }
+
+        // Refresh note
+        const noteRes = await fetch(`/journeys/${currentJourneyId}/note`);
+        if (noteRes.ok) {
+          const updatedNote = await noteRes.json();
+          renderNote(updatedNote);
+        }
+        closeSectionCodeModal();
+      } catch (err) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = 'rgba(239, 68, 68, 0.15)';
+        statusEl.style.color = '#fca5a5';
+        statusEl.textContent = `Error: ${err.message}`;
+      } finally {
+        btn.disabled = false;
+        textSpan.style.display = 'inline';
+        spinnerSpan.style.display = 'none';
+      }
+    }
+
     // Keyboard navigation: Close modals on Escape
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeDiagramModal();
         closeSectionVisualModal();
+        closeSectionCodeModal();
       }
     });
 

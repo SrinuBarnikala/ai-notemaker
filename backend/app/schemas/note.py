@@ -15,6 +15,10 @@ class NoteBlock(BaseModel):
     diagram_type: Optional[str] = None  # e.g. flowchart, sequence, architecture, concept_map
     visual_description: Optional[str] = None  # semantic explanation of visual flow
     items: Optional[List[Dict[str, Any]]] = None  # for comparison tables
+    runnable: Optional[bool] = False  # for code
+    expected_output: Optional[str] = None  # for code
+    complexity: Optional[str] = None  # for code (e.g. Time: O(N) | Space: O(1))
+    test_cases: Optional[List[Dict[str, Any]]] = None  # for code
 
     model_config = ConfigDict(from_attributes=True)
 

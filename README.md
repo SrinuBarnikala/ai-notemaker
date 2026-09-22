@@ -6,8 +6,8 @@
 
 ## Development Status
 
-- **Current Phase:** Phase 9 — Visual Planner & Architecture Engine
-- **Status:** Complete (55 tests passing)
+- **Current Phase:** Phase 10 — Code Planner & Interactive Code Sandbox
+- **Status:** Complete (59 tests passing)
 - **Features:**
   - Agent 1: Topic Intake & Journey Orchestration
   - Agent 2: Adaptive Knowledge Discovery Probe
@@ -19,6 +19,7 @@
   - Note Export: Direct GitHub-Flavored Markdown (`.md`) download with frontmatter and structured formatting
   - Agent 6 (Active Recall & Mastery Assessment): Personalized 3D flip flashcards and scenario-based technical quiz with automatic knowledge profile progression (promoting gaps &rarr; mastered)
   - Agent 7 (Visual Planner & Architecture Engine): High-clarity Mermaid.js diagrams (flowcharts, sequence, component architecture, state machines, concept maps) with dark-theme rendering, pan/zoom, fullscreen inspection modal, vector SVG download, and on-demand section diagram synthesis
+  - Agent 8 (Code Planner & Interactive Code Sandbox): Automatic note-wide code planning, language-specific on-demand section code synthesis (Python, Go, Rust, TypeScript, SQL, Bash), runtime complexity metrics (`O(N)`), test runners, and client-side in-browser WebAssembly Python execution sandbox (Pyodide) with real-time stdout terminal console output
 
 
 
