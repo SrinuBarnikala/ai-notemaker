@@ -6,9 +6,18 @@
 
 ## Development Status
 
-- **Current Phase:** Phase 6 — Web Note Viewer
-- **Status:** Complete
-- **GitHub Checkpoint:** Pending
+- **Current Phase:** Phase 7 — Living Note Evolution & Export
+- **Status:** Complete (48 tests passing)
+- **Features:**
+  - Agent 1: Topic Intake & Journey Orchestration
+  - Agent 2: Adaptive Knowledge Discovery Probe
+  - Agent 3: Mental Model & Knowledge Profile Synthesizer
+  - Agent 4: Personalized Architecture Blueprinting
+  - Agent 5: Living Structured Note Generator
+  - Web Note Viewer: Responsive reader with TOC, Focus Mode, and print-ready styles
+  - Living Note Evolution: Interactive section evolution (add code, deepen detail, clarify, add new chapters) with version incrementing (v1 &rarr; v2) and revision history
+  - Note Export: Direct GitHub-Flavored Markdown (`.md`) download with frontmatter and structured formatting
+
 
 ---
 

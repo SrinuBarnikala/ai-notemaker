@@ -37,9 +37,41 @@ class Note(Base):
         cascade="all, delete-orphan",
         order_by="NoteSection.order_index",
     )
+    revisions = relationship(
+        "NoteRevision",
+        back_populates="note",
+        cascade="all, delete-orphan",
+        order_by="NoteRevision.version",
+    )
 
     def __repr__(self):
         return f"<Note(id={self.id}, topic={self.topic}, version={self.version})>"
+
+
+class NoteRevision(Base):
+    """
+    Historical log of note evolutions, capturing what was requested and changed.
+    """
+    __tablename__ = "note_revisions"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    note_id = Column(
+        String(36),
+        ForeignKey("notes.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    version = Column(Integer, nullable=False)
+    evolution_type = Column(String(50), nullable=False)
+    section_title = Column(String(300), nullable=True)
+    user_prompt = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=get_utc_now, nullable=False)
+
+    note = relationship("Note", back_populates="revisions")
+
+    def __repr__(self):
+        return f"<NoteRevision(id={self.id}, version={self.version}, type={self.evolution_type})>"
+
 
 
 class NoteSection(Base):

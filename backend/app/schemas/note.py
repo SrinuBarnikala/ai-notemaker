@@ -28,6 +28,17 @@ class NoteSectionData(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class NoteRevisionData(BaseModel):
+    id: str
+    version: int
+    evolution_type: str
+    section_title: Optional[str] = None
+    user_prompt: str
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class NoteResponse(BaseModel):
     id: str
     journey_id: str
@@ -35,6 +46,7 @@ class NoteResponse(BaseModel):
     version: int
     summary: str
     sections: List[NoteSectionData]
+    revisions: List[NoteRevisionData] = []
     created_at: datetime
     updated_at: datetime
 
@@ -43,3 +55,16 @@ class NoteResponse(BaseModel):
 
 class GenerateNoteRequest(BaseModel):
     style_preference: Optional[str] = "rigorous_technical"
+
+
+class EvolveNoteRequest(BaseModel):
+    evolution_type: Literal[
+        "expand_section",
+        "add_code",
+        "clarify",
+        "custom_prompt",
+        "add_section",
+    ] = "custom_prompt"
+    section_id: Optional[str] = None
+    user_prompt: str
+

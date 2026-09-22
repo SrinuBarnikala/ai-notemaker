@@ -820,9 +820,255 @@
       margin-bottom: 0.6rem;
     }
     .history-item:hover { border-color: var(--border-accent); background: rgba(7, 11, 18, 0.9); transform: translateX(3px); }
-    .history-topic { font-weight: 600; color: #e2e8f0; font-size: 0.95rem; }
+    /* Phase 7: Living Note Evolution & Revisions Styling */
+    .section-evolve-bar {
+      margin-top: 1.25rem;
+      padding: 0.75rem 1rem;
+      background: rgba(13, 20, 36, 0.6);
+      border: 1px dashed rgba(99, 102, 241, 0.35);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      transition: all 0.2s ease;
+    }
+    .section-evolve-bar:hover {
+      background: rgba(13, 20, 36, 0.9);
+      border-color: var(--accent);
+    }
+    .evolve-label {
+      font-size: 0.775rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #a5b4fc;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .evolve-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .evolve-chip {
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #c7d2fe;
+      font-size: 0.75rem;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .evolve-chip:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    /* Global Evolve Card */
+    .note-global-evolve-card {
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+      padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(16, 185, 129, 0.08) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .evolve-card-left {
+      flex: 1;
+      min-width: 260px;
+    }
+    .evolve-card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.3rem;
+    }
+    .evolve-card-sub {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 1.25rem;
+      animation: fadeIn 0.15s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .modal-dialog {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-accent);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(99, 102, 241, 0.2);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 620px;
+      max-height: 90vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-pretitle {
+      font-family: var(--font-mono);
+      font-size: 0.725rem;
+      color: #a5b4fc;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.2rem;
+    }
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+    }
+    .modal-close-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .modal-body {
+      padding: 1.5rem;
+      flex: 1;
+    }
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1.1rem 1.5rem;
+      border-top: 1px solid var(--border);
+      background: rgba(7, 11, 18, 0.5);
+    }
+
+    .evolve-type-grid {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .type-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .type-pill:hover {
+      background: rgba(99, 102, 241, 0.2);
+      color: #fff;
+    }
+    .type-pill.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    /* Revision Timeline Cards */
+    .revision-item {
+      padding: 1rem;
+      border: 1px solid var(--border);
+      background: rgba(7, 11, 18, 0.6);
+      border-radius: 10px;
+      margin-bottom: 0.85rem;
+    }
+    .rev-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.4rem;
+    }
+    .rev-badge {
+      font-family: var(--font-mono);
+      font-size: 0.725rem;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+    }
+    .rev-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .rev-type-tag {
+      font-size: 0.75rem;
+      color: #a5b4fc;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      margin-bottom: 0.3rem;
+    }
+    .rev-prompt {
+      font-size: 0.875rem;
+      color: #cbd5e1;
+      font-style: italic;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      border-left: 2px solid var(--accent);
+    }
+
+    /* Version pulse animation */
+    .pulse-green {
+      animation: greenPulse 1.5s ease;
+    }
+    @keyframes greenPulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 rgba(16, 185, 129, 0.8); }
+      50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(16, 185, 129, 0.6); }
+      100% { transform: scale(1); box-shadow: none; }
+    }
 
     .footer { border-top: 1px solid var(--border); text-align: center; padding: 1.5rem; font-size: 0.8125rem; color: var(--text-muted); }
+
 
     /* Responsive adjustments */
     @media (max-width: 880px) {
@@ -867,8 +1113,9 @@
       <span class="brand-title">Personalized Technical Note Maker</span>
     </div>
     <div class="header-badges">
-      <div class="phase-badge">PHASE 6: WEB NOTE VIEWER</div>
+      <div class="phase-badge">PHASE 6 &amp; 7: LIVING NOTE VIEWER &amp; EVOLUTION</div>
     </div>
+
   </header>
 
   <main>
@@ -1075,15 +1322,22 @@
 
         <div class="reader-toolbar-group">
           <button type="button" class="tool-btn" id="btn-focus-toggle" onclick="toggleFocusMode()">
-            <span>📖 Focus Mode</span>
+            <span>📖 Focus</span>
+          </button>
+          <button type="button" class="tool-btn" onclick="exportNote('markdown')" title="Export formatted GitHub Markdown (.md)">
+            <span>📥 Export .md</span>
+          </button>
+          <button type="button" class="tool-btn" id="btn-revisions-toggle" onclick="toggleRevisionsDrawer()" title="View living note evolution history">
+            <span>📜 History (<span id="rev-count-pill">0</span>)</span>
           </button>
           <button type="button" class="tool-btn" onclick="copyNoteLink()" title="Copy link to this note">
-            <span id="btn-link-text">🔗 Copy Link</span>
+            <span id="btn-link-text">🔗 Link</span>
           </button>
           <button type="button" class="tool-btn" onclick="window.print()" title="Print or save as PDF">
             <span>🖨️ Print</span>
           </button>
         </div>
+
       </div>
 
       <!-- Two-column Reader Layout: TOC on left, Body on right -->
@@ -1127,11 +1381,73 @@
       </div>
       <div class="history-list" id="history-list"></div>
     </div>
+    <!-- Evolution Modal -->
+    <div class="modal-overlay" id="evolve-modal" style="display: none;" onclick="closeModalOnOverlay(event)">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <div>
+            <div class="modal-pretitle">AGENT 5 &bull; LIVING NOTE EVOLUTION</div>
+            <h3 class="modal-title" id="evolve-modal-title">Evolve Section</h3>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="closeEvolveModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <label class="intake-label">Evolution Goal</label>
+          <div class="evolve-type-grid" id="evolve-type-selector">
+            <button type="button" class="type-pill active" data-type="add_code" onclick="selectEvolveType(this, 'add_code')">⚡ + Code Example</button>
+            <button type="button" class="type-pill" data-type="expand_section" onclick="selectEvolveType(this, 'expand_section')">🔍 Deepen Detail</button>
+            <button type="button" class="type-pill" data-type="clarify" onclick="selectEvolveType(this, 'clarify')">💡 Clarify Concept</button>
+            <button type="button" class="type-pill" data-type="add_section" onclick="selectEvolveType(this, 'add_section')">+ New Section</button>
+            <button type="button" class="type-pill" data-type="custom_prompt" onclick="selectEvolveType(this, 'custom_prompt')">💬 Custom Request</button>
+          </div>
+
+          <label class="intake-label" style="margin-top: 1rem;" for="evolve-prompt-input">
+            <span>What should be added, explained, or updated?</span>
+          </label>
+          <textarea id="evolve-prompt-input" class="answer-textarea" rows="4" placeholder="e.g. Provide a realistic Python example with connection pooling and retry logic..."></textarea>
+
+          <div class="chip-container" style="margin-top: 0.6rem;">
+            <span class="chip-label">Quick prompts:</span>
+            <button type="button" class="chip" onclick="setEvolvePrompt('Add a production-grade code implementation with error handling and edge-cases.')">+ Production Code</button>
+            <button type="button" class="chip" onclick="setEvolvePrompt('Break down the internal failure modes and recovery sequence step-by-step.')">Failure Modes</button>
+            <button type="button" class="chip" onclick="setEvolvePrompt('Explain performance trade-offs and memory implications in high-throughput systems.')">High-Load Tradeoffs</button>
+          </div>
+
+          <div id="evolve-status-msg" style="display: none; margin-top: 0.85rem; font-size: 0.85rem; color: #38bdf8;"></div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="tool-btn" onclick="closeEvolveModal()">Cancel</button>
+          <button type="button" class="btn-submit" id="btn-submit-evolve" style="width: auto; padding: 0.65rem 1.6rem;" onclick="submitEvolution()">
+            <span id="btn-evolve-text">Evolve &amp; Update Note</span>
+            <span id="btn-evolve-spinner" style="display: none;">🤖 Agent evolving note...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Revisions Modal -->
+    <div class="modal-overlay" id="revisions-modal" style="display: none;" onclick="closeModalOnOverlay(event)">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <div>
+            <div class="modal-pretitle">VERSION TIMELINE</div>
+            <h3 class="modal-title">Living Note Evolution History</h3>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="toggleRevisionsDrawer()">✕</button>
+        </div>
+        <div class="modal-body" id="revisions-list-body">
+          <div style="color: var(--text-muted); font-size: 0.875rem;">No revisions recorded yet. This is Version 1.</div>
+        </div>
+      </div>
+    </div>
   </main>
 
   <footer class="footer">
-    Personalized Technical Note Maker &bull; Phase 6: Web Note Viewer Verified
+    Personalized Technical Note Maker &bull; Phase 6 &amp; 7: Living Note Viewer &amp; Evolution Complete
   </footer>
+
 
   <script>
     let currentJourneyId = null;
@@ -1552,7 +1868,10 @@
     /* ==========================================================================
        PHASE 6: WEB NOTE VIEWER RENDERER
        ========================================================================== */
+    let currentNote = null;
+
     function renderNote(note) {
+      currentNote = note;
       const notePanel = document.getElementById('note-panel');
       notePanel.style.display = 'block';
       notePanel.scrollIntoView({ behavior: 'smooth' });
@@ -1560,8 +1879,19 @@
       // Note Header
       document.getElementById('note-topic-heading').textContent = note.topic;
       document.getElementById('note-summary-text').textContent = note.summary;
-      document.getElementById('note-version-badge').textContent = `VERSION ${note.version}`;
+      
+      const verBadge = document.getElementById('note-version-badge');
+      verBadge.textContent = `VERSION ${note.version}`;
+      verBadge.classList.remove('pulse-green');
+      void verBadge.offsetWidth; // trigger reflow
+      verBadge.classList.add('pulse-green');
+
       document.getElementById('note-sections-count').textContent = `${note.sections.length} Sections`;
+
+      const revPill = document.getElementById('rev-count-pill');
+      if (revPill) {
+        revPill.textContent = (note.revisions || []).length;
+      }
 
       // Word count & estimated reading time calculation
       let totalWords = (note.summary || '').split(/\s+/).length;
@@ -1586,9 +1916,9 @@
         </li>
       `).join('');
 
-      // Render Note Sections & Blocks
+      // Render Note Sections & Blocks with Section Evolution Bar
       const bodyContainer = document.getElementById('note-content-body');
-      bodyContainer.innerHTML = note.sections.map(s => `
+      const sectionsHtml = note.sections.map(s => `
         <section class="note-section-container" id="sec-${s.order_index}">
           <div class="section-header-row">
             <div class="section-title-wrap">
@@ -1603,12 +1933,37 @@
           <div class="section-blocks-feed">
             ${s.blocks.map(renderNoteBlock).join('')}
           </div>
+          <div class="section-evolve-bar">
+            <span class="evolve-label">🌱 Evolve section:</span>
+            <div class="evolve-actions">
+              <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'add_code')">⚡ + Code Example</button>
+              <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'expand_section')">🔍 Deepen Detail</button>
+              <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'clarify')">💡 Clarify Concept</button>
+              <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'custom_prompt')">💬 Ask Question...</button>
+            </div>
+          </div>
         </section>
       `).join('');
+
+      // Global Note Evolution Callout Card
+      const globalEvolveCard = `
+        <div class="note-global-evolve-card">
+          <div class="evolve-card-left">
+            <div class="evolve-card-title">🌱 Expand Your Living Note</div>
+            <p class="evolve-card-sub">Technical mastery is an ongoing dialogue. Ask follow-up questions, explore adjacent concepts, or add an entirely new section.</p>
+          </div>
+          <button type="button" class="btn-submit" style="width: auto; padding: 0.65rem 1.4rem;" onclick="openEvolveModal(null, 'Living Note Exploration', 'add_section')">
+            <span>+ Add New Section</span>
+          </button>
+        </div>
+      `;
+
+      bodyContainer.innerHTML = sectionsHtml + globalEvolveCard;
 
       // Initialize ScrollSpy
       setTimeout(setupScrollSpy, 150);
     }
+
 
     function smoothScrollTo(event, elementId) {
       event.preventDefault();
@@ -1728,8 +2083,220 @@
     }
 
     /* ==========================================================================
+       PHASE 7: LIVING NOTE EVOLUTION & EXPORT CONTROLS
+       ========================================================================== */
+    let activeEvolveSectionId = null;
+    let activeEvolveType = 'add_code';
+
+    function openEvolveModal(sectionId, sectionTitle, initialType = 'add_code') {
+      activeEvolveSectionId = sectionId;
+      const titleEl = document.getElementById('evolve-modal-title');
+      if (sectionId) {
+        titleEl.textContent = `Evolve: "${sectionTitle}"`;
+      } else {
+        titleEl.textContent = 'Expand Living Note';
+      }
+
+      // Reset and select type
+      selectEvolveType(null, initialType);
+
+      // Default prompt suggestions based on type
+      const input = document.getElementById('evolve-prompt-input');
+      input.value = '';
+      if (initialType === 'add_code') {
+        input.placeholder = 'e.g. Add a production-ready Python example with connection pooling and retry logic...';
+      } else if (initialType === 'expand_section') {
+        input.placeholder = 'e.g. Deepen the explanation of internal algorithms and state transitions...';
+      } else if (initialType === 'clarify') {
+        input.placeholder = 'e.g. Clarify common misconceptions and edge case handling...';
+      } else if (initialType === 'add_section') {
+        input.placeholder = 'e.g. Add a section exploring Kubernetes sidecar observability patterns...';
+      } else {
+        input.placeholder = 'e.g. What happens when leader network partitions occur?';
+      }
+
+      const statusMsg = document.getElementById('evolve-status-msg');
+      if (statusMsg) statusMsg.style.display = 'none';
+
+      const modal = document.getElementById('evolve-modal');
+      modal.style.display = 'flex';
+      input.focus();
+    }
+
+    function closeEvolveModal() {
+      const modal = document.getElementById('evolve-modal');
+      modal.style.display = 'none';
+      activeEvolveSectionId = null;
+    }
+
+    function closeModalOnOverlay(event) {
+      if (event.target.classList.contains('modal-overlay')) {
+        event.target.style.display = 'none';
+        activeEvolveSectionId = null;
+      }
+    }
+
+    function selectEvolveType(targetBtn, type) {
+      activeEvolveType = type;
+      const pills = document.querySelectorAll('#evolve-type-selector .type-pill');
+      pills.forEach(p => {
+        if (p.getAttribute('data-type') === type) {
+          p.classList.add('active');
+        } else {
+          p.classList.remove('active');
+        }
+      });
+    }
+
+    function setEvolvePrompt(text) {
+      const input = document.getElementById('evolve-prompt-input');
+      input.value = text;
+      input.focus();
+    }
+
+    async function submitEvolution() {
+      const promptInput = document.getElementById('evolve-prompt-input');
+      const userPrompt = promptInput.value.trim();
+      if (!userPrompt) {
+        alert('Please enter instructions for how you want to evolve this note.');
+        promptInput.focus();
+        return;
+      }
+
+      if (!currentNote && !currentJourneyId) {
+        alert('No active living note to evolve.');
+        return;
+      }
+
+      const btn = document.getElementById('btn-submit-evolve');
+      const btnText = document.getElementById('btn-evolve-text');
+      const btnSpinner = document.getElementById('btn-evolve-spinner');
+      const statusMsg = document.getElementById('evolve-status-msg');
+
+      btn.disabled = true;
+      btnText.style.display = 'none';
+      btnSpinner.style.display = 'inline';
+      statusMsg.style.display = 'block';
+      statusMsg.textContent = 'Agent 5 synthesizing evolution updates and blocks...';
+
+      const payload = {
+        evolution_type: activeEvolveType,
+        section_id: activeEvolveSectionId,
+        user_prompt: userPrompt
+      };
+
+      const noteId = currentNote ? currentNote.id : null;
+      const endpoint = noteId ? `/notes/${noteId}/evolve` : `/journeys/${currentJourneyId}/note/evolve`;
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.detail || 'Failed to evolve living note');
+        }
+
+        const updatedNote = await res.json();
+        closeEvolveModal();
+        renderNote(updatedNote);
+
+        // Highlight updated section or scroll to it
+        if (activeEvolveSectionId) {
+          const targetSec = updatedNote.sections.find(s => s.id === activeEvolveSectionId);
+          if (targetSec) {
+            smoothScrollTo(new Event('click'), `sec-${targetSec.order_index}`);
+          }
+        }
+      } catch (err) {
+        statusMsg.style.color = '#f87171';
+        statusMsg.textContent = 'Evolution Error: ' + err.message;
+      } finally {
+        btn.disabled = false;
+        btnText.style.display = 'inline';
+        btnSpinner.style.display = 'none';
+      }
+    }
+
+    async function exportNote(format = 'markdown') {
+      if (!currentNote && !currentJourneyId) {
+        alert('Please generate or open a living note before exporting.');
+        return;
+      }
+
+      const noteId = currentNote ? currentNote.id : null;
+      const exportUrl = noteId ? `/notes/${noteId}/export?format=${format}` : `/journeys/${currentJourneyId}/note/export?format=${format}`;
+
+      try {
+        const res = await fetch(exportUrl);
+        if (!res.ok) throw new Error('Failed to download note export');
+
+        const blob = await res.blob();
+        const disposition = res.headers.get('content-disposition') || '';
+        let filename = `${(currentTopic || 'technical_note').toLowerCase().replace(/\s+/g, '_')}_v${currentNote ? currentNote.version : 1}.md`;
+        const match = disposition.match(/filename="?([^"]+)"?/);
+        if (match && match[1]) filename = match[1];
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+      } catch (err) {
+        alert('Export failed: ' + err.message);
+      }
+    }
+
+    function toggleRevisionsDrawer() {
+      const modal = document.getElementById('revisions-modal');
+      if (modal.style.display === 'flex') {
+        modal.style.display = 'none';
+        return;
+      }
+
+      const body = document.getElementById('revisions-list-body');
+      const revisions = (currentNote && currentNote.revisions) ? currentNote.revisions : [];
+
+      if (revisions.length === 0) {
+        body.innerHTML = `
+          <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌱</div>
+            <div style="font-weight: 600; color: #cbd5e1;">Version 1 (Initial Generation)</div>
+            <p style="font-size: 0.85rem; margin-top: 0.4rem;">No evolutions yet. Use the "🌱 Evolve section" buttons to expand and refine your living note.</p>
+          </div>
+        `;
+      } else {
+        body.innerHTML = `
+          <div style="margin-bottom: 1rem; font-size: 0.85rem; color: #a5b4fc;">
+            Showing <strong>${revisions.length}</strong> evolution checkpoint(s):
+          </div>
+          ${revisions.map(r => `
+            <div class="revision-item">
+              <div class="rev-top-row">
+                <span class="rev-badge">VERSION ${r.version}</span>
+                <span class="rev-time">${new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              <div class="rev-type-tag">
+                🎯 ${r.evolution_type.replace('_', ' ').toUpperCase()} ${r.section_title ? `&bull; "${escapeHtml(r.section_title)}"` : ''}
+              </div>
+              <div class="rev-prompt">"${escapeHtml(r.user_prompt)}"</div>
+            </div>
+          `).join('')}
+        `;
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    /* ==========================================================================
        JOURNEY RESUMPTION & HISTORY
        ========================================================================== */
+
     async function loadRecentJourneys() {
       const listEl = document.getElementById('history-list');
       try {
