@@ -1066,8 +1066,382 @@
       50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(16, 185, 129, 0.6); }
       100% { transform: scale(1); box-shadow: none; }
     }
+    /* Phase 8: Active Recall & Mastery Assessment Styling */
+    .assessment-tabs {
+      display: flex;
+      gap: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0.85rem 1.5rem;
+      background: rgba(10, 15, 29, 0.6);
+    }
+    .assessment-tab {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1.5px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.7rem 1.25rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .assessment-tab:hover {
+      background: rgba(99, 102, 241, 0.12);
+      color: #ffffff;
+      border-color: rgba(99, 102, 241, 0.35);
+      transform: translateY(-1px);
+    }
+    .assessment-tab.active {
+      background: rgba(99, 102, 241, 0.2);
+      color: #ffffff;
+      border-color: #818cf8;
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.3);
+    }
+
+    /* 3D Flashcard Deck */
+    .flashcard-stage {
+      perspective: 1200px;
+      -webkit-perspective: 1200px;
+      width: 100%;
+      height: 280px;
+      min-height: 280px;
+      margin: 1.25rem 0;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .flashcard-card {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      -webkit-transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      -webkit-transition: -webkit-transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 16px;
+    }
+    .flashcard-card.flipped {
+      transform: rotateY(180deg);
+      -webkit-transform: rotateY(180deg);
+    }
+    .card-side {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+      border-radius: 16px;
+      padding: 1.85rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform-style: preserve-3d;
+      -webkit-transform-style: preserve-3d;
+      transition: opacity 0.25s ease, visibility 0.25s ease, box-shadow 0.3s ease;
+    }
+    .card-side.front {
+      background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.18), transparent 70%), linear-gradient(135deg, #0b1329 0%, #111a36 100%);
+      border: 1.5px solid rgba(99, 102, 241, 0.4);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 24px rgba(99, 102, 241, 0.15);
+      transform: rotateY(0deg);
+      -webkit-transform: rotateY(0deg);
+      z-index: 2;
+      opacity: 1;
+      visibility: visible;
+    }
+    .card-side.back {
+      background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.22), transparent 70%), linear-gradient(135deg, #081f1b 0%, #0c2b23 100%);
+      border: 1.5px solid rgba(16, 185, 129, 0.55);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 24px rgba(16, 185, 129, 0.2);
+      transform: rotateY(180deg);
+      -webkit-transform: rotateY(180deg);
+      z-index: 1;
+      opacity: 0;
+      visibility: hidden;
+    }
+    .flashcard-card.flipped .card-side.front {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      z-index: 1 !important;
+      pointer-events: none !important;
+    }
+    .flashcard-card.flipped .card-side.back {
+      opacity: 1 !important;
+      visibility: visible !important;
+      z-index: 2 !important;
+      pointer-events: auto !important;
+    }
+    .flashcard-stage:hover .flashcard-card:not(.flipped) {
+      box-shadow: 0 18px 40px rgba(99, 102, 241, 0.25);
+    }
+    .flashcard-stage:hover .flashcard-card.flipped {
+      box-shadow: 0 18px 40px rgba(16, 185, 129, 0.25);
+    }
+    .card-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-concept-badge {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #a5b4fc;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+    }
+    .card-diff-badge {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+    }
+    .diff-easy { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .diff-medium { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .diff-hard { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    .card-body-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.6;
+      margin: auto 0;
+      letter-spacing: -0.01em;
+    }
+    .card-side.back .card-body-text {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: #d1fae5;
+      line-height: 1.65;
+    }
+    .card-footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .flashcard-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 1.25rem;
+      gap: 0.75rem;
+    }
+
+    /* Scenario Quiz Styling */
+    .quiz-question-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1.5px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .quiz-question-card.answered {
+      border-color: rgba(99, 102, 241, 0.45);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    .quiz-question-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 1.15rem;
+      line-height: 1.6;
+    }
+    .quiz-options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .quiz-opt-btn {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1.5px solid rgba(255, 255, 255, 0.09);
+      border-radius: 12px;
+      padding: 0.95rem 1.25rem;
+      color: #cbd5e1;
+      font-size: 0.925rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 100%;
+      box-sizing: border-box;
+      user-select: none;
+      position: relative;
+    }
+    .quiz-opt-btn:hover:not(:disabled) {
+      background: rgba(99, 102, 241, 0.12);
+      border-color: rgba(99, 102, 241, 0.5);
+      color: #ffffff;
+      transform: translateX(4px);
+    }
+    .opt-radio-circle {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .opt-radio-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: transparent;
+      transition: all 0.2s ease;
+    }
+    .quiz-opt-btn.selected {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.28) 0%, rgba(79, 70, 229, 0.2) 100%) !important;
+      border: 2px solid #818cf8 !important;
+      color: #ffffff !important;
+      font-weight: 600;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.35), inset 0 0 12px rgba(99, 102, 241, 0.12) !important;
+      transform: scale(1.008);
+    }
+    .quiz-opt-btn.selected .opt-radio-circle {
+      border-color: #a5b4fc !important;
+      background: #6366f1 !important;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.8);
+    }
+    .quiz-opt-btn.selected .opt-radio-dot {
+      background: #ffffff !important;
+    }
+    .quiz-opt-btn.selected .opt-letter {
+      background: #6366f1 !important;
+      color: #ffffff !important;
+      font-weight: 800;
+      border-color: #818cf8 !important;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.6);
+    }
+    .opt-letter {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.8rem;
+      background: rgba(255, 255, 255, 0.08);
+      color: #94a3b8;
+      padding: 0.3rem 0.6rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+    .opt-text {
+      flex: 1;
+      line-height: 1.5;
+    }
+    .opt-selected-tag {
+      font-family: var(--font-mono);
+      font-size: 0.725rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      background: rgba(99, 102, 241, 0.35);
+      border: 1px solid #818cf8;
+      color: #e0e7ff;
+      margin-left: auto;
+      display: none;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    }
+    .quiz-opt-btn.selected .opt-selected-tag {
+      display: inline-flex !important;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .quiz-opt-btn.correct {
+      background: rgba(16, 185, 129, 0.2) !important;
+      border: 2px solid #34d399 !important;
+      color: #ecfdf5 !important;
+      font-weight: 700;
+      box-shadow: 0 0 18px rgba(16, 185, 129, 0.3);
+    }
+    .quiz-opt-btn.correct .opt-radio-circle {
+      border-color: #34d399;
+      background: #10b981;
+    }
+    .quiz-opt-btn.correct .opt-radio-dot {
+      background: #ffffff;
+    }
+    .quiz-opt-btn.correct .opt-letter {
+      background: #10b981;
+      color: #ffffff;
+    }
+    .quiz-opt-btn.incorrect {
+      background: rgba(239, 68, 68, 0.18) !important;
+      border: 2px solid #f87171 !important;
+      color: #fef2f2 !important;
+      box-shadow: 0 0 18px rgba(239, 68, 68, 0.25);
+    }
+    .quiz-opt-btn.incorrect .opt-radio-circle {
+      border-color: #f87171;
+      background: #ef4444;
+    }
+    .quiz-opt-btn.incorrect .opt-radio-dot {
+      background: #ffffff;
+    }
+    .quiz-opt-btn.incorrect .opt-letter {
+      background: #ef4444;
+      color: #ffffff;
+    }
+    .quiz-explanation-box {
+      margin-top: 1rem;
+      padding: 1rem 1.25rem;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+    .quiz-explanation-box.correct-expl {
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 4px solid #10b981;
+      color: #d1fae5;
+    }
+    .quiz-explanation-box.incorrect-expl {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 4px solid #ef4444;
+      color: #fee2e2;
+    }
+    .quiz-score-banner {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.18) 0%, rgba(16, 185, 129, 0.18) 100%);
+      border: 1.5px solid var(--border-accent);
+      border-radius: 14px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+    }
+    .score-badge-num {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: #34d399;
+      font-family: var(--font-mono);
+      line-height: 1.1;
+    }
 
     .footer { border-top: 1px solid var(--border); text-align: center; padding: 1.5rem; font-size: 0.8125rem; color: var(--text-muted); }
+
 
 
     /* Responsive adjustments */
@@ -1113,8 +1487,9 @@
       <span class="brand-title">Personalized Technical Note Maker</span>
     </div>
     <div class="header-badges">
-      <div class="phase-badge">PHASE 6 &amp; 7: LIVING NOTE VIEWER &amp; EVOLUTION</div>
+      <div class="phase-badge">PHASE 6, 7 &amp; 8: VIEWER, EVOLUTION &amp; ACTIVE RECALL</div>
     </div>
+
 
   </header>
 
@@ -1324,6 +1699,9 @@
           <button type="button" class="tool-btn" id="btn-focus-toggle" onclick="toggleFocusMode()">
             <span>📖 Focus</span>
           </button>
+          <button type="button" class="tool-btn" id="btn-assessment-toggle" onclick="openAssessmentModal()" title="Active recall flashcards and scenario quiz" style="background: rgba(99, 102, 241, 0.2); border-color: var(--accent); color: #c7d2fe;">
+            <span>🧠 Test Mastery</span>
+          </button>
           <button type="button" class="tool-btn" onclick="exportNote('markdown')" title="Export formatted GitHub Markdown (.md)">
             <span>📥 Export .md</span>
           </button>
@@ -1337,6 +1715,7 @@
             <span>🖨️ Print</span>
           </button>
         </div>
+
 
       </div>
 
@@ -1442,11 +1821,118 @@
         </div>
       </div>
     </div>
+    <!-- Assessment Modal: Flashcards & Technical Scenario Quiz -->
+    <div class="modal-overlay" id="assessment-modal" style="display: none;" onclick="closeModalOnOverlay(event)">
+      <div class="modal-dialog" style="max-width: 720px;">
+        <div class="modal-header">
+          <div>
+            <div class="modal-pretitle">AGENT 6 &bull; ACTIVE RECALL &amp; MASTERY</div>
+            <h3 class="modal-title" id="assessment-modal-title">Active Recall &amp; Mastery Assessment</h3>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="closeAssessmentModal()">✕</button>
+        </div>
+
+        <div class="assessment-tabs">
+          <button type="button" class="assessment-tab active" id="tab-flashcards" onclick="switchAssessmentTab('flashcards')">
+            <span>📇 Conceptual Flashcards</span>
+          </button>
+          <button type="button" class="assessment-tab" id="tab-quiz" onclick="switchAssessmentTab('quiz')">
+            <span>🎯 Scenario Mastery Quiz</span>
+          </button>
+        </div>
+
+        <div class="modal-body" id="assessment-modal-body">
+          <div id="assessment-loading" style="display: none; text-align: center; padding: 3rem;">
+            <div style="font-size: 2rem; margin-bottom: 0.75rem;">🤖</div>
+            <div style="font-weight: 700; color: #a5b4fc;">Agent 6 Synthesizing Active Recall Materials...</div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.3rem;">Targeting your living note sections, architecture, and knowledge gaps.</p>
+          </div>
+
+          <!-- Flashcards Tab Content -->
+          <div id="flashcards-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <span style="font-size: 0.85rem; color: var(--text-muted); font-family: var(--font-mono); font-weight: 600;" id="fc-counter">Card 1 of 3</span>
+              <span style="font-size: 0.775rem; color: #a5b4fc; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.35); padding: 0.25rem 0.65rem; border-radius: 9999px;">💡 Click card or press Space to flip</span>
+            </div>
+
+            <div class="flashcard-stage" onclick="flipFlashcard()">
+              <div class="flashcard-card" id="active-flashcard">
+                <div class="card-side front">
+                  <div class="card-header-row">
+                    <span class="card-concept-badge" id="fc-concept">Concept</span>
+                    <span class="card-diff-badge diff-medium" id="fc-diff">MEDIUM</span>
+                  </div>
+                  <div class="card-body-text" id="fc-front-text">Flashcard Question / Prompt</div>
+                  <div class="card-footer-row">
+                    <span>Target Recall Concept</span>
+                    <span>Click to Reveal Answer &rarr;</span>
+                  </div>
+                </div>
+                <div class="card-side back">
+                  <div class="card-header-row">
+                    <span class="card-concept-badge" style="color: #34d399; background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3);">Verified Answer</span>
+                    <span style="font-size: 0.75rem; color: #34d399; font-family: var(--font-mono); font-weight: 700;">&check; Technical Invariant</span>
+                  </div>
+                  <div class="card-body-text" id="fc-back-text">Detailed Explanation</div>
+                  <div class="card-footer-row">
+                    <span>Living Note Knowledge Point</span>
+                    <span>Click to Flip Back</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flashcard-controls">
+              <button type="button" class="tool-btn" id="btn-prev-card" onclick="navigateFlashcard(-1)" style="padding: 0.65rem 1.25rem;">
+                <span>&larr; Previous</span>
+              </button>
+              <button type="button" class="tool-btn" onclick="flipFlashcard()" style="background: rgba(99, 102, 241, 0.25); border-color: var(--accent); color: #ffffff; font-weight: 700; padding: 0.65rem 1.4rem; box-shadow: 0 0 14px rgba(99, 102, 241, 0.3);">
+                <span>🔄 Flip Card (Space)</span>
+              </button>
+              <button type="button" class="tool-btn" id="btn-next-card" onclick="navigateFlashcard(1)" style="padding: 0.65rem 1.25rem;">
+                <span>Next &rarr;</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Scenario Quiz Tab Content -->
+          <div id="quiz-panel" style="display: none;">
+            <div id="quiz-score-container" style="display: none;"></div>
+            
+            <div id="quiz-progress-bar-wrap" style="margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; font-size: 0.825rem; color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 0.5rem 0.85rem; border-radius: 8px; border: 1px solid var(--border);">
+              <span id="quiz-progress-label" style="font-family: var(--font-mono); font-weight: 600;">0 of 0 Answered</span>
+              <div style="width: 140px; height: 6px; background: rgba(255,255,255,0.08); border-radius: 9999px; overflow: hidden;">
+                <div id="quiz-progress-fill" style="width: 0%; height: 100%; background: #6366f1; transition: width 0.3s ease;"></div>
+              </div>
+            </div>
+
+            <div id="quiz-questions-list"></div>
+
+            <div id="quiz-bottom-score-container" style="display: none; margin-top: 1.5rem;"></div>
+
+            <div id="quiz-action-bar" style="margin-top: 1.25rem; display: flex; gap: 0.75rem; align-items: center;">
+              <button type="button" class="btn-submit" id="btn-submit-quiz" onclick="submitQuizAnswers()" style="flex: 1;">
+                <span id="btn-quiz-text">Submit Quiz &amp; Update Mastery Profile</span>
+                <span id="btn-quiz-spinner" style="display: none;">Evaluating Answers &amp; Promoting Concepts...</span>
+              </button>
+              <button type="button" class="tool-btn" id="btn-retake-quiz" onclick="retakeQuiz()" style="display: none; padding: 0.75rem 1.25rem; background: rgba(99, 102, 241, 0.2); border-color: var(--accent); color: #ffffff;">
+                <span>🔄 Retake Quiz</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="tool-btn" onclick="closeAssessmentModal()">Done</button>
+        </div>
+      </div>
+    </div>
   </main>
 
   <footer class="footer">
-    Personalized Technical Note Maker &bull; Phase 6 &amp; 7: Living Note Viewer &amp; Evolution Complete
+    Personalized Technical Note Maker &bull; Phase 6, 7 &amp; 8: Living Note Viewer, Evolution &amp; Active Recall Complete
   </footer>
+
 
 
   <script>
@@ -1945,18 +2431,24 @@
         </section>
       `).join('');
 
-      // Global Note Evolution Callout Card
+      // Global Note Evolution & Assessment Callout Card
       const globalEvolveCard = `
         <div class="note-global-evolve-card">
           <div class="evolve-card-left">
-            <div class="evolve-card-title">🌱 Expand Your Living Note</div>
-            <p class="evolve-card-sub">Technical mastery is an ongoing dialogue. Ask follow-up questions, explore adjacent concepts, or add an entirely new section.</p>
+            <div class="evolve-card-title">🌱 Expand &amp; Verify Your Technical Mastery</div>
+            <p class="evolve-card-sub">Technical mastery is an ongoing dialogue. Test active recall with personalized flashcards and scenario quizzes, or add new chapters.</p>
           </div>
-          <button type="button" class="btn-submit" style="width: auto; padding: 0.65rem 1.4rem;" onclick="openEvolveModal(null, 'Living Note Exploration', 'add_section')">
-            <span>+ Add New Section</span>
-          </button>
+          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <button type="button" class="btn-submit" style="width: auto; padding: 0.65rem 1.4rem;" onclick="openEvolveModal(null, 'Living Note Exploration', 'add_section')">
+              <span>+ Add New Section</span>
+            </button>
+            <button type="button" class="tool-btn" style="padding: 0.65rem 1.25rem; background: rgba(99, 102, 241, 0.2); border-color: var(--accent); color: #ffffff;" onclick="openAssessmentModal()">
+              <span>🧠 Test Mastery &amp; Flashcards</span>
+            </button>
+          </div>
         </div>
       `;
+
 
       bodyContainer.innerHTML = sectionsHtml + globalEvolveCard;
 
@@ -2294,8 +2786,424 @@
     }
 
     /* ==========================================================================
+       PHASE 8: ACTIVE RECALL & MASTERY ASSESSMENT LOGIC
+       ========================================================================== */
+    let currentAssessment = null;
+    let activeCardIndex = 0;
+    let userQuizAnswers = {};
+
+    async function openAssessmentModal() {
+      const journeyId = (currentNote && currentNote.journey_id) || currentJourneyId;
+      if (!journeyId) {
+        alert('Please create or load a living note first to test your mastery.');
+        return;
+      }
+
+      const modal = document.getElementById('assessment-modal');
+      modal.style.display = 'flex';
+      switchAssessmentTab('flashcards');
+
+      if (!currentAssessment || currentAssessment.journey_id !== journeyId) {
+        await loadAssessment();
+      } else {
+        renderFlashcardsUI();
+        renderQuizUI();
+      }
+    }
+
+    function closeAssessmentModal() {
+      const modal = document.getElementById('assessment-modal');
+      modal.style.display = 'none';
+    }
+
+    function switchAssessmentTab(tab) {
+      const tabFc = document.getElementById('tab-flashcards');
+      const tabQz = document.getElementById('tab-quiz');
+      const panelFc = document.getElementById('flashcards-panel');
+      const panelQz = document.getElementById('quiz-panel');
+
+      if (tab === 'flashcards') {
+        tabFc.classList.add('active');
+        tabQz.classList.remove('active');
+        panelFc.style.display = 'block';
+        panelQz.style.display = 'none';
+      } else {
+        tabFc.classList.remove('active');
+        tabQz.classList.add('active');
+        panelFc.style.display = 'none';
+        panelQz.style.display = 'block';
+      }
+    }
+
+    async function loadAssessment(forceGenerate = false) {
+      const loading = document.getElementById('assessment-loading');
+      const panelFc = document.getElementById('flashcards-panel');
+      const panelQz = document.getElementById('quiz-panel');
+
+      loading.style.display = 'block';
+      panelFc.style.display = 'none';
+      panelQz.style.display = 'none';
+
+      const journeyId = (currentNote && currentNote.journey_id) || currentJourneyId;
+      if (!journeyId) return;
+
+      try {
+        let res = null;
+        if (!forceGenerate) {
+          res = await fetch(`/journeys/${journeyId}/assessment`);
+        }
+        if (!res || !res.ok) {
+          // Generate new assessment
+          res = await fetch(`/journeys/${journeyId}/assessment/generate`, { method: 'POST' });
+        }
+
+        if (!res.ok) throw new Error('Failed to load assessment materials');
+        currentAssessment = await res.json();
+        activeCardIndex = 0;
+        userQuizAnswers = {};
+
+        renderFlashcardsUI();
+        renderQuizUI();
+        switchAssessmentTab('flashcards');
+      } catch (err) {
+        alert('Error loading assessment: ' + err.message);
+      } finally {
+        loading.style.display = 'none';
+      }
+    }
+
+    function renderFlashcardsUI() {
+      if (!currentAssessment || !currentAssessment.flashcards || currentAssessment.flashcards.length === 0) return;
+      activeCardIndex = 0;
+      updateFlashcardDisplay();
+    }
+
+    function updateFlashcardDisplay() {
+      const cards = currentAssessment.flashcards;
+      if (!cards || cards.length === 0) return;
+
+      if (activeCardIndex < 0) activeCardIndex = 0;
+      if (activeCardIndex >= cards.length) activeCardIndex = cards.length - 1;
+
+      const card = cards[activeCardIndex];
+      const cardEl = document.getElementById('active-flashcard');
+      if (cardEl) {
+        cardEl.classList.remove('flipped');
+      }
+
+      const counterEl = document.getElementById('fc-counter');
+      if (counterEl) counterEl.textContent = `Card ${activeCardIndex + 1} of ${cards.length}`;
+
+      const conceptEl = document.getElementById('fc-concept');
+      if (conceptEl) conceptEl.textContent = card.concept;
+      
+      const diffEl = document.getElementById('fc-diff');
+      if (diffEl) {
+        diffEl.textContent = card.difficulty.toUpperCase();
+        diffEl.className = `card-diff-badge diff-${card.difficulty}`;
+      }
+
+      const frontText = document.getElementById('fc-front-text');
+      if (frontText) frontText.textContent = card.front;
+
+      const backText = document.getElementById('fc-back-text');
+      if (backText) backText.textContent = card.back;
+
+      const prevBtn = document.getElementById('btn-prev-card');
+      if (prevBtn) prevBtn.disabled = (activeCardIndex === 0);
+
+      const nextBtn = document.getElementById('btn-next-card');
+      if (nextBtn) nextBtn.disabled = (activeCardIndex === cards.length - 1);
+    }
+
+    function flipFlashcard() {
+      const cardEl = document.getElementById('active-flashcard');
+      if (cardEl) {
+        cardEl.classList.toggle('flipped');
+      }
+    }
+
+    function navigateFlashcard(step) {
+      activeCardIndex += step;
+      updateFlashcardDisplay();
+    }
+
+    // Keyboard support for flashcards (Space to flip, Left/Right arrows to navigate)
+    document.addEventListener('keydown', function(e) {
+      const modal = document.getElementById('assessment-modal');
+      if (!modal || modal.style.display === 'none') return;
+
+      const tabFc = document.getElementById('tab-flashcards');
+      if (!tabFc || !tabFc.classList.contains('active')) return;
+
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+
+      if (e.code === 'Space' || e.key === ' ') {
+        e.preventDefault();
+        flipFlashcard();
+      } else if (e.code === 'ArrowLeft' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        navigateFlashcard(-1);
+      } else if (e.code === 'ArrowRight' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        navigateFlashcard(1);
+      }
+    });
+
+    function updateQuizProgress() {
+      if (!currentAssessment || !currentAssessment.quiz_questions) return;
+      const total = currentAssessment.quiz_questions.length;
+      const answered = Object.keys(userQuizAnswers).length;
+      const pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+
+      const label = document.getElementById('quiz-progress-label');
+      if (label) label.textContent = `${answered} of ${total} Questions Answered (${pct}%)`;
+
+      const fill = document.getElementById('quiz-progress-fill');
+      if (fill) fill.style.width = `${pct}%`;
+    }
+
+    function renderQuizUI() {
+      if (!currentAssessment || !currentAssessment.quiz_questions) return;
+      const container = document.getElementById('quiz-questions-list');
+      const questions = currentAssessment.quiz_questions;
+
+      container.innerHTML = questions.map((q, qIdx) => {
+        const letters = ['A', 'B', 'C', 'D', 'E'];
+        const isAnswered = userQuizAnswers[q.id] !== undefined;
+        return `
+          <div class="quiz-question-card ${isAnswered ? 'answered' : ''}" id="quiz-card-${q.id}">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
+              <span style="font-family: var(--font-mono); font-size: 0.75rem; color: #a5b4fc; font-weight: 700; letter-spacing: 0.05em;">QUESTION ${qIdx + 1} OF ${questions.length} &bull; ${escapeHtml(q.concept)}</span>
+              <span class="card-diff-badge diff-medium" style="font-size: 0.675rem;">SCENARIO</span>
+            </div>
+            <div class="quiz-question-title">${escapeHtml(q.question)}</div>
+            <div class="quiz-options-list">
+              ${q.options.map((opt, oIdx) => {
+                const isSelected = userQuizAnswers[q.id] === oIdx;
+                return `
+                  <button type="button" class="quiz-opt-btn ${isSelected ? 'selected' : ''}" id="opt-${q.id}-${oIdx}" onclick="selectQuizOption('${q.id}', ${oIdx})">
+                    <span class="opt-radio-circle"><span class="opt-radio-dot"></span></span>
+                    <span class="opt-letter">${letters[oIdx] || oIdx}</span>
+                    <span class="opt-text">${escapeHtml(opt)}</span>
+                    <span class="opt-selected-tag" style="display: ${isSelected ? 'inline-flex' : 'none'};">✓ Selected</span>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+            <div class="quiz-explanation-box" id="expl-${q.id}" style="display: none;"></div>
+          </div>
+        `;
+      }).join('');
+
+      updateQuizProgress();
+    }
+
+    function selectQuizOption(qId, optIdx) {
+      userQuizAnswers[qId] = optIdx;
+      const q = currentAssessment.quiz_questions.find(item => item.id === qId);
+      if (!q) return;
+
+      const card = document.getElementById(`quiz-card-${qId}`);
+      if (card) card.classList.add('answered');
+
+      q.options.forEach((_, idx) => {
+        const btn = document.getElementById(`opt-${qId}-${idx}`);
+        if (btn) {
+          const tag = btn.querySelector('.opt-selected-tag');
+          if (idx === optIdx) {
+            btn.classList.add('selected');
+            if (tag) tag.style.display = 'inline-flex';
+          } else {
+            btn.classList.remove('selected');
+            if (tag) tag.style.display = 'none';
+          }
+        }
+      });
+
+      updateQuizProgress();
+    }
+
+    async function submitQuizAnswers() {
+      const questions = (currentAssessment && currentAssessment.quiz_questions) || [];
+      if (questions.length === 0) return;
+
+      const unanswered = questions.filter(q => userQuizAnswers[q.id] === undefined);
+      if (unanswered.length > 0) {
+        const proceed = confirm(`You have ${unanswered.length} unanswered question(s). Unanswered questions will be scored as incorrect. Do you want to submit anyway?`);
+        if (!proceed) {
+          return;
+        }
+      }
+
+      const btn = document.getElementById('btn-submit-quiz');
+      const btnText = document.getElementById('btn-quiz-text');
+      const btnSpinner = document.getElementById('btn-quiz-spinner');
+
+      btn.disabled = true;
+      btnText.style.display = 'none';
+      btnSpinner.style.display = 'inline';
+
+      const journeyId = (currentAssessment && currentAssessment.journey_id) || currentJourneyId || (currentNote ? currentNote.journey_id : null);
+      if (!journeyId) {
+        alert('Could not find active journey ID for submission.');
+        btn.disabled = false;
+        btnText.style.display = 'inline';
+        btnSpinner.style.display = 'none';
+        return;
+      }
+
+      try {
+        const res = await fetch(`/journeys/${journeyId}/assessment/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ answers: userQuizAnswers })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.detail || 'Failed to evaluate quiz submission');
+        }
+        const result = await res.json();
+
+        // Render Score Banner HTML
+        const masteredHtml = (result.mastered_concepts && result.mastered_concepts.length > 0) ? `
+          <div style="margin-top: 0.6rem; font-size: 0.8rem; color: #e0e7ff; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+            <strong style="color: #818cf8;">🚀 Promoted to Mastered:</strong>
+            ${result.mastered_concepts.map(c => `<span class="card-concept-badge" style="color: #34d399; border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.15);">${escapeHtml(c)}</span>`).join('')}
+          </div>
+        ` : '';
+
+        const scoreHtml = `
+          <div class="quiz-score-banner">
+            <div>
+              <div style="font-size: 0.75rem; font-family: var(--font-mono); color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">AGENT 6 &bull; MASTERY EVALUATION</div>
+              <div style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-top: 0.25rem;">${escapeHtml(result.message)}</div>
+              <div style="font-size: 0.85rem; color: #a7f3d0; margin-top: 0.4rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <span>🧠 Mental Model Confidence:</span>
+                <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-weight: 700; padding: 0.15rem 0.6rem; border-radius: 9999px; font-size: 0.75rem;">${escapeHtml(result.updated_confidence.toUpperCase())}</span>
+              </div>
+              ${masteredHtml}
+            </div>
+            <div style="text-align: right; min-width: 130px;">
+              <div class="score-badge-num">${result.percentage}%</div>
+              <div style="font-size: 0.85rem; font-family: var(--font-mono); font-weight: 700; color: #cbd5e1;">${result.score} of ${result.total} Correct</div>
+              <div style="font-size: 0.725rem; color: ${result.percentage >= 70 ? '#34d399' : '#f59e0b'}; margin-top: 0.25rem; font-weight: 600;">${result.percentage >= 70 ? '🎯 Technical Mastery Standard Met' : '📖 Knowledge Gaps Retained for Review'}</div>
+            </div>
+          </div>
+        `;
+
+        // Render into BOTH top and bottom containers
+        const topScoreBox = document.getElementById('quiz-score-container');
+        if (topScoreBox) {
+          topScoreBox.style.display = 'block';
+          topScoreBox.innerHTML = scoreHtml;
+        }
+
+        const bottomScoreBox = document.getElementById('quiz-bottom-score-container');
+        if (bottomScoreBox) {
+          bottomScoreBox.style.display = 'block';
+          bottomScoreBox.innerHTML = scoreHtml;
+        }
+
+        // Highlight correct/incorrect options & show rich explanations
+        result.breakdown.forEach(item => {
+          const q = questions.find(question => question.id === item.question_id);
+          if (!q) return;
+
+          const card = document.getElementById(`quiz-card-${item.question_id}`);
+          if (card) {
+            card.style.borderColor = item.is_correct ? 'rgba(16, 185, 129, 0.5)' : 'rgba(239, 68, 68, 0.5)';
+          }
+
+          q.options.forEach((_, oIdx) => {
+            const optBtn = document.getElementById(`opt-${item.question_id}-${oIdx}`);
+            if (optBtn) {
+              optBtn.disabled = true;
+              optBtn.classList.remove('selected');
+              if (oIdx === item.correct_index) {
+                optBtn.classList.add('correct');
+              } else if (oIdx === item.selected_index && !item.is_correct) {
+                optBtn.classList.add('incorrect');
+              }
+            }
+          });
+
+          const explBox = document.getElementById(`expl-${item.question_id}`);
+          if (explBox) {
+            explBox.style.display = 'block';
+            explBox.className = `quiz-explanation-box ${item.is_correct ? 'correct-expl' : 'incorrect-expl'}`;
+            explBox.innerHTML = `
+              <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 700; color: ${item.is_correct ? '#34d399' : '#f87171'}; margin-bottom: 0.35rem;">
+                <span>${item.is_correct ? '✅ Correct Answer (+1)' : '❌ Incorrect Selection (0/1)'}</span>
+              </div>
+              <div style="font-size: 0.85rem; line-height: 1.5; color: #e2e8f0;">${escapeHtml(item.explanation)}</div>
+            `;
+          }
+        });
+
+        // Hide submit button and show retake quiz button
+        btn.style.display = 'none';
+        const retakeBtn = document.getElementById('btn-retake-quiz');
+        if (retakeBtn) retakeBtn.style.display = 'inline-flex';
+
+        // Auto-scroll modal body smoothly to the top so learner sees the full score banner
+        const modalBody = document.getElementById('assessment-modal-body');
+        if (modalBody) {
+          modalBody.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // If profile exists, reload it to reflect newly mastered concepts
+        if (currentJourneyId) {
+          fetch(`/journeys/${currentJourneyId}/knowledge-profile`)
+            .then(r => r.ok ? r.json() : null)
+            .then(p => { if (p) renderProfile(p); })
+            .catch(() => {});
+        }
+      } catch (err) {
+        alert('Submission error: ' + err.message);
+        btn.disabled = false;
+        btnText.style.display = 'inline';
+        btnSpinner.style.display = 'none';
+      }
+    }
+
+    function retakeQuiz() {
+      userQuizAnswers = {};
+      const topScoreBox = document.getElementById('quiz-score-container');
+      if (topScoreBox) {
+        topScoreBox.style.display = 'none';
+        topScoreBox.innerHTML = '';
+      }
+      const bottomScoreBox = document.getElementById('quiz-bottom-score-container');
+      if (bottomScoreBox) {
+        bottomScoreBox.style.display = 'none';
+        bottomScoreBox.innerHTML = '';
+      }
+      const submitBtn = document.getElementById('btn-submit-quiz');
+      if (submitBtn) {
+        submitBtn.style.display = 'block';
+        submitBtn.disabled = false;
+        const btnText = document.getElementById('btn-quiz-text');
+        if (btnText) {
+          btnText.style.display = 'inline';
+          btnText.textContent = 'Submit Quiz & Update Mastery Profile';
+        }
+        const btnSpinner = document.getElementById('btn-quiz-spinner');
+        if (btnSpinner) btnSpinner.style.display = 'none';
+      }
+      const retakeBtn = document.getElementById('btn-retake-quiz');
+      if (retakeBtn) retakeBtn.style.display = 'none';
+
+      renderQuizUI();
+      const modalBody = document.getElementById('assessment-modal-body');
+      if (modalBody) modalBody.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ==========================================================================
        JOURNEY RESUMPTION & HISTORY
        ========================================================================== */
+
 
     async function loadRecentJourneys() {
       const listEl = document.getElementById('history-list');

@@ -6,8 +6,8 @@
 
 ## Development Status
 
-- **Current Phase:** Phase 7 — Living Note Evolution & Export
-- **Status:** Complete (48 tests passing)
+- **Current Phase:** Phase 8 — Active Recall & Technical Mastery Assessment
+- **Status:** Complete (51 tests passing)
 - **Features:**
   - Agent 1: Topic Intake & Journey Orchestration
   - Agent 2: Adaptive Knowledge Discovery Probe
@@ -17,6 +17,8 @@
   - Web Note Viewer: Responsive reader with TOC, Focus Mode, and print-ready styles
   - Living Note Evolution: Interactive section evolution (add code, deepen detail, clarify, add new chapters) with version incrementing (v1 &rarr; v2) and revision history
   - Note Export: Direct GitHub-Flavored Markdown (`.md`) download with frontmatter and structured formatting
+  - Agent 6 (Active Recall & Mastery Assessment): Personalized 3D flip flashcards and scenario-based technical quiz with automatic knowledge profile progression (promoting gaps &rarr; mastered)
+
 
 
 ---
