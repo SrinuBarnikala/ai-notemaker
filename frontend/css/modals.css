@@ -1,0 +1,429 @@
+/* modals.css — Modal Dialogs, Overlays, Selection Grids & Evolution Controls */
+
+    /* Section Code Modal Language Grid */
+    .code-lang-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .clang-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1.5px solid rgba(255, 255, 255, 0.09);
+      border-radius: 10px;
+      padding: 0.85rem 0.65rem;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      text-align: center;
+    }
+    .clang-card:hover {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: rgba(99, 102, 241, 0.4);
+      transform: translateY(-2px);
+    }
+    .clang-card.active {
+      background: rgba(99, 102, 241, 0.18);
+      border-color: var(--accent);
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);
+    }
+    .clang-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.35rem;
+    }
+    .clang-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .clang-tag {
+      font-size: 0.675rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      margin-top: 0.2rem;
+    }
+
+
+    /* Visual Type Selector Grid */
+    .visual-type-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.6rem;
+      margin-top: 0.5rem;
+    }
+    .vtype-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 0.6rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    .vtype-card:hover {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: var(--accent);
+    }
+    .vtype-card.active {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+    .vtype-icon { font-size: 1.3rem; margin-bottom: 0.3rem; }
+    .vtype-name { font-size: 0.8rem; font-weight: 700; color: #f8fafc; }
+    .vtype-desc { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.2rem; line-height: 1.3; }
+
+    /* Diagram Modal Zoom Toolbar */
+    .diag-zoom-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.2rem 0.4rem;
+    }
+    .diag-zoom-pill {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #c7d2fe;
+      min-width: 42px;
+      text-align: center;
+    }
+
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 1.25rem 1rem;
+      animation: fadeIn 0.15s ease;
+      overflow-y: auto;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .modal-dialog,
+    .modal-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-accent);
+      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.85), 0 0 35px rgba(99, 102, 241, 0.2);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 620px;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-sizing: border-box;
+      overflow: hidden;
+      margin: auto;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1.15rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.7);
+      flex-shrink: 0;
+    }
+    .modal-pretitle {
+      font-family: var(--font-mono);
+      font-size: 0.725rem;
+      color: #a5b4fc;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.2rem;
+    }
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.3;
+    }
+    .modal-close-btn,
+    .modal-close {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+      font-size: 1.35rem;
+      cursor: pointer;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      padding: 0;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .modal-close-btn:hover,
+    .modal-close:hover {
+      color: #ffffff;
+      background: rgba(239, 68, 68, 0.25);
+      border-color: rgba(239, 68, 68, 0.5);
+      transform: scale(1.05);
+    }
+    .modal-body {
+      padding: 1.35rem 1.5rem;
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+      overscroll-behavior: contain;
+    }
+    .modal-body::-webkit-scrollbar {
+      width: 6px;
+    }
+    .modal-body::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .modal-body::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
+    }
+    .modal-body::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, 0.5);
+    }
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border);
+      background: rgba(7, 11, 18, 0.85);
+      backdrop-filter: blur(8px);
+      flex-shrink: 0;
+    }
+
+    .evolve-type-grid {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .type-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .type-pill:hover {
+      background: rgba(99, 102, 241, 0.2);
+      color: #fff;
+    }
+    .type-pill.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    /* Revision Timeline Cards */
+    .revision-item {
+      padding: 1rem;
+      border: 1px solid var(--border);
+      background: rgba(7, 11, 18, 0.6);
+      border-radius: 10px;
+      margin-bottom: 0.85rem;
+    }
+    .rev-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.4rem;
+    }
+    .rev-badge {
+      font-family: var(--font-mono);
+      font-size: 0.725rem;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+    }
+    .rev-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .rev-type-tag {
+      font-size: 0.75rem;
+      color: #a5b4fc;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      margin-bottom: 0.3rem;
+    }
+    .rev-prompt {
+      font-size: 0.875rem;
+      color: #cbd5e1;
+      font-style: italic;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      border-left: 2px solid var(--accent);
+    }
+
+    /* Version pulse animation */
+    .pulse-green {
+      animation: greenPulse 1.5s ease;
+    }
+    @keyframes greenPulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 rgba(16, 185, 129, 0.8); }
+      50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(16, 185, 129, 0.6); }
+      100% { transform: scale(1); box-shadow: none; }
+    }
+    /* Phase 8: Active Recall & Mastery Assessment Styling */
+    .assessment-tabs {
+      display: flex;
+      gap: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0.85rem 1.5rem;
+      background: rgba(10, 15, 29, 0.6);
+    }
+    .assessment-tab {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1.5px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.7rem 1.25rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .assessment-tab:hover {
+      background: rgba(99, 102, 241, 0.12);
+      color: #ffffff;
+      border-color: rgba(99, 102, 241, 0.35);
+      transform: translateY(-1px);
+    }
+    .assessment-tab.active {
+      background: rgba(99, 102, 241, 0.2);
+      color: #ffffff;
+      border-color: #818cf8;
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.3);
+    }
+
+    /* Specialized Modal Sizing & Fullscreen Modes */
+    #assessment-modal .modal-dialog {
+      max-width: 960px;
+      width: 92vw;
+      max-height: 92vh;
+      transition: max-width 0.25s ease, height 0.25s ease;
+    }
+    #assessment-modal .modal-dialog.is-maximized {
+      max-width: 98vw;
+      width: 98vw;
+      max-height: 96vh;
+      height: 96vh;
+    }
+    #evolve-modal .modal-dialog {
+      max-width: 780px;
+      width: 92vw;
+      max-height: 90vh;
+      transition: max-width 0.25s ease;
+    }
+    #evolve-modal .modal-dialog.is-maximized {
+      max-width: 96vw;
+      width: 96vw;
+      max-height: 95vh;
+    }
+    #evolve-modal .modal-body {
+      padding: 1.15rem 1.4rem;
+    }
+    #evolve-prompt-input {
+      min-height: 75px;
+      font-size: 0.875rem;
+    }
+    #section-visual-modal .modal-card,
+    #section-code-modal .modal-card {
+      max-width: 780px;
+      width: 92vw;
+    }
+
+    /* Modal Header Controls (Font Scaler & Maximize) */
+    .modal-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .modal-scale-controls {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2px;
+      gap: 2px;
+    }
+    .scale-pill-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.55rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .scale-pill-btn:hover {
+      background: rgba(99, 102, 241, 0.2);
+      color: #fff;
+    }
+    .scale-pill-val {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #a5b4fc;
+      padding: 0 0.4rem;
+      min-width: 42px;
+      text-align: center;
+    }
+    .modal-expand-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+      font-size: 1rem;
+      cursor: pointer;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .modal-expand-btn:hover {
+      color: #ffffff;
+      background: rgba(99, 102, 241, 0.25);
+      border-color: rgba(99, 102, 241, 0.5);
+      transform: scale(1.05);
+    }

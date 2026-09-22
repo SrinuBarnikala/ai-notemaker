@@ -44,7 +44,9 @@ ai-notemaker/
 │       ├── config.py     # Pydantic Settings
 │       └── main.py       # FastAPI application and lifespan
 ├── frontend/           # HTML, CSS, Vanilla JavaScript web UI
-│   └── index.html      # Topic Intake, Discovery, Profile Matrix, Architecture, & Living Note Viewer
+│   ├── css/            # Modular stylesheets (main, viewer, modals, components)
+│   ├── js/             # Modular domain scripts (state, api, journey, viewer, evolution, assessment, visuals, sandbox, app)
+│   └── index.html      # Clean semantic HTML layout & entrypoint
 ├── data/               # SQLite database storage (gitignored)
 ├── tests/              # Unit, API, and provider test suite
 ├── .env.example        # Configuration template
