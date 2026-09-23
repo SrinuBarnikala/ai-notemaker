@@ -32,7 +32,7 @@
       <span class="brand-title">Personalized Technical Note Maker</span>
     </div>
     <div class="header-badges">
-      <div class="phase-badge">PHASE 6 TO 11: LIVING NOTE VIEWER &amp; SOCRATIC COPILOT</div>
+      <div class="phase-badge">PHASE 6 TO 12: LIVING NOTE VIEWER &amp; CONCEPT KNOWLEDGE GRAPH</div>
     </div>
 
 
@@ -255,6 +255,9 @@
           </button>
           <button type="button" class="tool-btn" id="btn-plan-code" onclick="triggerPlanCode()" title="Synthesize & plan executable code implementations with Agent 8" style="background: rgba(16, 185, 129, 0.15); border-color: var(--success); color: #a7f3d0;">
             <span>💻 Plan Code</span>
+          </button>
+          <button type="button" class="tool-btn" id="btn-graph-toggle" onclick="openGraphModal(false)" title="Inspect Concept Knowledge Graph &amp; Prerequisite Flow" style="background: rgba(168, 85, 247, 0.18); border-color: #a855f7; color: #d8b4fe;">
+            <span>🕸️ Knowledge Graph</span>
           </button>
           <button type="button" class="tool-btn" onclick="exportNote('markdown')" title="Export formatted GitHub Markdown (.md)">
             <span>📥 Export .md</span>
@@ -754,10 +757,190 @@
         </div>
       </div>
     </aside>
+
+    <!-- Phase 12: Concept Knowledge Graph & Dependency Visualizer Modal -->
+    <div class="modal-overlay" id="graph-modal" style="display: none;" onclick="closeModalOnOverlay(event)">
+      <div class="modal-card" id="graph-modal-card">
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
+            <span class="diagram-badge" style="background: rgba(168, 85, 247, 0.2); border-color: #a855f7; color: #e9d5ff;">🕸️ AGENT 10 &bull; KNOWLEDGE GRAPH</span>
+            <h3 class="modal-title" id="graph-modal-title">Concept Dependency Graph</h3>
+            <span class="fullscreen-workspace-badge" id="graph-workspace-badge" style="display: none;">WORKSPACE MODE</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <div class="graph-scope-toggle">
+              <button type="button" class="graph-scope-btn active" id="btn-graph-mode-journey" onclick="switchGraphMode('journey')">Active Note</button>
+              <button type="button" class="graph-scope-btn" id="btn-graph-mode-global" onclick="switchGraphMode('global')">🌐 Explore Knowledge</button>
+            </div>
+            <div class="diag-zoom-toolbar">
+              <button type="button" class="tool-btn" onclick="adjustGraphZoom(-0.2)" title="Zoom Out (-)">🔍-</button>
+              <span id="graph-zoom-pill" class="diag-zoom-pill">100%</span>
+              <button type="button" class="tool-btn" onclick="adjustGraphZoom(0.2)" title="Zoom In (+)">🔍+</button>
+              <button type="button" class="tool-btn" onclick="resetGraphZoom()" title="Reset Zoom">1:1</button>
+            </div>
+            <button type="button" class="tool-btn" id="btn-graph-fullscreen" onclick="toggleGraphFullscreen()" title="Toggle Fullscreen Workspace (F)">
+              <span id="graph-fullscreen-icon">⛶</span>
+              <span id="graph-fullscreen-label">Fullscreen</span>
+            </button>
+            <button type="button" class="modal-close" onclick="closeGraphModal()" aria-label="Close modal" title="Close (Esc)">&times;</button>
+          </div>
+        </div>
+
+        <div class="graph-top-controls">
+          <div class="graph-filter-group">
+            <span class="control-label-text">VIEW:</span>
+            <button type="button" class="graph-filter-btn active" id="btn-graph-scope-neighbor" onclick="setNeighborhoodScope('neighbor')">🎯 1-Hop Focus</button>
+            <button type="button" class="graph-filter-btn" id="btn-graph-scope-all" onclick="setNeighborhoodScope('all')">🌐 Full Network</button>
+            <button type="button" class="graph-filter-btn" id="btn-graph-learning-path" onclick="toggleLearningPathMode()" title="Highlight prerequisite chain to selected concept">
+              <span>🛤️ Learning Path</span>
+            </button>
+          </div>
+
+          <div class="graph-filter-group">
+            <span class="control-label-text">FILTER:</span>
+            <button type="button" class="graph-filter-btn active" onclick="setGraphFilter('all', this)">All (<span id="gcount-total">0</span>)</button>
+            <button type="button" class="graph-filter-btn" onclick="setGraphFilter('known', this)" style="border-color: rgba(52, 211, 153, 0.4); color: #a7f3d0;">&check; Mastered (<span id="gcount-known">0</span>)</button>
+            <button type="button" class="graph-filter-btn" onclick="setGraphFilter('gaps', this)" style="border-color: rgba(192, 132, 252, 0.4); color: #e9d5ff;">&quest; Gaps (<span id="gcount-gaps">0</span>)</button>
+            <button type="button" class="graph-filter-btn" onclick="setGraphFilter('misc', this)" style="border-color: rgba(248, 113, 113, 0.4); color: #fecaca;">⚠️ Pitfalls (<span id="gcount-misc">0</span>)</button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 0.5rem; position: relative;">
+            <span class="graph-subgraph-pill" id="graph-subgraph-hud" style="display: none;">🎯 Subgraph</span>
+            <input type="text" id="graph-search-input" class="graph-search-input" placeholder="Search concepts..." oninput="handleGraphSearch(this)" onfocus="handleGraphSearchFocus(this)" autocomplete="off" />
+            <div id="graph-search-dropdown" class="graph-search-dropdown" style="display: none;"></div>
+          </div>
+        </div>
+
+        <!-- Split View: Canvas + Concept Learning Inspector -->
+        <div id="graph-body-layout">
+          <div id="graph-canvas-container">
+            <!-- Explore Knowledge Mode Banner / Quick Pivoting HUD -->
+            <div id="graph-explore-hud" class="graph-explore-hud" style="display: none;">
+              <span class="explore-hud-tag">EXPLORE KNOWLEDGE</span>
+              <span id="graph-explore-text" class="explore-hud-text">Select or search any concept to explore its cross-journey neighborhood.</span>
+              <button type="button" class="explore-hud-btn" id="btn-explore-reset-hub" onclick="resetExploreOverview()" style="display: none;">Domain Overview</button>
+            </div>
+
+            <!-- Learning Path Breadcrumbs Banner (Visible in Learning Path Mode) -->
+            <div id="graph-path-banner" style="display: none;">
+              <span class="path-banner-icon">🛤️</span>
+              <div class="path-banner-content">
+                <span class="path-banner-title">Prerequisite Learning Path:</span>
+                <span id="graph-path-steps" class="path-banner-steps">Select a concept to trace prerequisite chain</span>
+              </div>
+              <button type="button" class="path-banner-close" onclick="exitLearningPathMode()" title="Exit Learning Path">✕</button>
+            </div>
+
+            <div id="graph-loading" style="position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(4, 7, 17, 0.85); z-index: 10; flex-direction: column; gap: 0.75rem;">
+              <div style="font-size: 2rem;">🕸️</div>
+              <div style="font-weight: 700; color: #c084fc;">Agent 10 Synthesizing Dependency Topology...</div>
+            </div>
+            <canvas id="graph-canvas"></canvas>
+            <div id="graph-tooltip"></div>
+          </div>
+
+          <!-- Concept Detail Learning Inspector Panel -->
+          <aside id="graph-inspector-panel" style="display: none;">
+            <div class="inspector-header">
+              <div>
+                <div class="inspector-pretitle">CONCEPT INSPECTOR</div>
+                <h4 class="inspector-title" id="inspector-concept-title">Concept Name</h4>
+              </div>
+              <button type="button" class="modal-close-btn" onclick="closeConceptInspector()" title="Close Inspector">✕</button>
+            </div>
+
+            <div class="inspector-body">
+              <div class="inspector-meta-row">
+                <span class="inspector-status-badge" id="inspector-status-badge">KNOWN</span>
+                <span class="inspector-group-pill" id="inspector-group-pill">CONCEPT</span>
+              </div>
+
+              <!-- Recommendation Card -->
+              <div class="inspector-recommendation-box" id="inspector-recommendation-box">
+                <div class="rec-header">💡 Learning Recommendation</div>
+                <div class="rec-text" id="inspector-recommendation-text">Study direct prerequisites before attempting advanced mechanisms.</div>
+              </div>
+
+              <!-- Summary / Rationale -->
+              <div class="inspector-section-block">
+                <div class="inspector-block-title">Overview &amp; Mental Model</div>
+                <p class="inspector-block-desc" id="inspector-concept-desc">Concept description will appear here.</p>
+              </div>
+
+              <!-- Associated Section -->
+              <div class="inspector-section-block" id="inspector-section-block">
+                <div class="inspector-block-title">Living Note Location</div>
+                <div class="inspector-section-card" id="inspector-section-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span id="inspector-sec-num" style="font-family: var(--font-mono); font-size: 0.75rem; color: #a5b4fc; font-weight: 700;">Section 1</span>
+                    <span id="inspector-sec-depth" class="depth-badge depth-standard">standard</span>
+                  </div>
+                  <div id="inspector-sec-title" style="font-weight: 700; font-size: 0.85rem; color: #ffffff; margin-top: 0.25rem;">Section Title</div>
+                </div>
+              </div>
+
+              <!-- Prerequisites (What You Need to Know First) -->
+              <div class="inspector-section-block">
+                <div class="inspector-block-title">Prerequisites Required Before This (<span id="inspector-prereq-count">0</span>)</div>
+                <div class="inspector-chips-list" id="inspector-prereqs-list">
+                  <span style="font-size: 0.78rem; color: var(--text-muted);">None — This is a foundational concept!</span>
+                </div>
+              </div>
+
+              <!-- Unlocks (Concepts Unlocked by This) -->
+              <div class="inspector-section-block">
+                <div class="inspector-block-title">Unlocks Downstream Mastery (<span id="inspector-unlock-count">0</span>)</div>
+                <div class="inspector-chips-list" id="inspector-unlocks-list">
+                  <span style="font-size: 0.78rem; color: var(--text-muted);">Terminal concept or independent topic.</span>
+                </div>
+              </div>
+
+              <!-- Detected Misconceptions / Gaps -->
+              <div class="inspector-section-block" id="inspector-gap-block" style="display: none;">
+                <div class="inspector-block-title" style="color: #f87171;">⚠️ Flagged Misconception / Gap</div>
+                <div class="inspector-warning-box" id="inspector-gap-text">Details about the gap.</div>
+              </div>
+            </div>
+
+            <!-- Action Buttons Footer -->
+            <div class="inspector-footer">
+              <button type="button" class="btn-submit" id="btn-graph-goto-note" onclick="goToSectionFromInspector()" style="flex: 1; padding: 0.55rem 0.85rem; font-size: 0.82rem;">
+                <span>📖 Go to Note</span>
+              </button>
+              <button type="button" class="tool-btn" id="btn-graph-ask-copilot" onclick="askCopilotFromInspector()" title="Ask Agent 9 Copilot about this concept" style="background: rgba(99, 102, 241, 0.25); border-color: var(--accent); color: #ffffff; padding: 0.55rem 0.85rem; font-size: 0.82rem; font-weight: 700;">
+                <span>🤖 Copilot</span>
+              </button>
+              <button type="button" class="tool-btn" id="btn-graph-trace-path" onclick="tracePathFromInspector()" title="Highlight Learning Path to this concept" style="background: rgba(168, 85, 247, 0.2); border-color: #a855f7; color: #e9d5ff; padding: 0.55rem 0.85rem; font-size: 0.82rem;">
+                <span>🛤️ Path</span>
+              </button>
+            </div>
+          </aside>
+        </div>
+
+        <div class="graph-footer-hud">
+          <div class="graph-legend-bar">
+            <!-- Node Status Legend -->
+            <div class="graph-legend-item"><span class="legend-dot legend-topic"></span><span>Topic Hub</span></div>
+            <div class="graph-legend-item"><span class="legend-dot legend-known"></span><span>Mastered</span></div>
+            <div class="graph-legend-item"><span class="legend-dot legend-partial"></span><span>In Progress</span></div>
+            <div class="graph-legend-item"><span class="legend-dot legend-gap"></span><span>Knowledge Gap</span></div>
+            <div class="graph-legend-item"><span class="legend-dot legend-misc"></span><span>Misconception</span></div>
+            <span style="color: rgba(255,255,255,0.15);">|</span>
+            <!-- Edge Type Legend -->
+            <div class="graph-legend-item"><span class="edge-legend-line edge-prereq"></span><span>Prerequisite</span></div>
+            <div class="graph-legend-item"><span class="edge-legend-line edge-subconcept"></span><span>Subconcept</span></div>
+            <div class="graph-legend-item"><span class="edge-legend-line edge-implements"></span><span>Implements</span></div>
+            <div class="graph-legend-item"><span class="edge-legend-line edge-contrasts"></span><span>Contrasts</span></div>
+          </div>
+          <div id="graph-summary-hud" style="font-family: var(--font-mono); font-size: 0.72rem; color: #a5b4fc; max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></div>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <footer class="footer">
-    Personalized Technical Note Maker &bull; Phase 6 to 11: Living Note Viewer, Evolution, Active Recall, Visual Planner, Interactive Sandbox &amp; Socratic Copilot
+    Personalized Technical Note Maker &bull; Phase 6 to 12: Living Note Viewer, Evolution, Active Recall, Visual Planner, Interactive Sandbox, Socratic Copilot &amp; Knowledge Graph
   </footer>
 
 
@@ -771,7 +954,9 @@
   <script src="/static/js/visuals.js"></script>
   <script src="/static/js/sandbox.js"></script>
   <script src="/static/js/copilot.js"></script>
+  <script src="/static/js/graph.js"></script>
   <script src="/static/js/app.js"></script>
 </body>
 </html>
+
 

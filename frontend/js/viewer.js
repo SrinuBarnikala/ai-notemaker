@@ -226,6 +226,9 @@
             <button type="button" class="tool-btn" style="padding: 0.65rem 1.3rem; background: rgba(99, 102, 241, 0.25); border-color: var(--accent); color: #ffffff; font-weight: 700; box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);" onclick="openCopilotDrawer(null, null)">
               <span>🤖 Consult Copilot</span>
             </button>
+            <button type="button" class="tool-btn" style="padding: 0.65rem 1.25rem; background: rgba(168, 85, 247, 0.2); border-color: #a855f7; color: #e9d5ff; font-weight: 700;" onclick="openGraphModal(false)">
+              <span>🕸️ Knowledge Graph</span>
+            </button>
             <button type="button" class="btn-submit" style="width: auto; padding: 0.65rem 1.4rem;" onclick="openEvolveModal(null, 'Living Note Exploration', 'add_section')">
               <span>+ Add New Section</span>
             </button>
