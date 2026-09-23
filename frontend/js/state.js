@@ -28,6 +28,12 @@ let pyodideLoadingPromise = null;
 let targetSectionForCode = null;
 let selectedCodeLanguage = 'python';
 
+let activeCopilotSectionId = null;
+let activeCopilotSectionTitle = null;
+let activeCopilotSelectedText = null;
+let copilotHistory = [];
+let lastPinCandidate = null;
+
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str || '';

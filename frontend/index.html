@@ -32,7 +32,7 @@
       <span class="brand-title">Personalized Technical Note Maker</span>
     </div>
     <div class="header-badges">
-      <div class="phase-badge">PHASE 6, 7, 8, 9 &amp; 10: CODE PLANNER &amp; EXECUTION SANDBOX</div>
+      <div class="phase-badge">PHASE 6 TO 11: LIVING NOTE VIEWER &amp; SOCRATIC COPILOT</div>
     </div>
 
 
@@ -243,6 +243,9 @@
         <div class="reader-toolbar-group">
           <button type="button" class="tool-btn" id="btn-focus-toggle" onclick="toggleFocusMode()">
             <span>📖 Focus</span>
+          </button>
+          <button type="button" class="tool-btn" id="btn-copilot-toggle" onclick="openCopilotDrawer(null, null)" title="Consult Agent 9 Socratic In-Note Copilot" style="background: rgba(99, 102, 241, 0.25); border-color: var(--accent); color: #ffffff; font-weight: 700; box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);">
+            <span>🤖 Ask Copilot</span>
           </button>
           <button type="button" class="tool-btn" id="btn-assessment-toggle" onclick="openAssessmentModal()" title="Active recall flashcards and scenario quiz" style="background: rgba(99, 102, 241, 0.2); border-color: var(--accent); color: #c7d2fe;">
             <span>🧠 Test Mastery</span>
@@ -706,10 +709,55 @@
         </div>
       </div>
     </div>
+
+    <!-- Floating "Ask Copilot" selection badge -->
+    <div id="floating-ask-badge" title="Ask Agent 9 Socratic Copilot about this selection">
+      <span>🤖 Ask Copilot</span>
+    </div>
+
+    <!-- Phase 11: Agent 9 Socratic Copilot Slide-Over Drawer & Backdrop -->
+    <div id="copilot-backdrop" onclick="closeCopilotDrawer()"></div>
+
+    <aside id="copilot-drawer" aria-label="Agent 9 Socratic Copilot Drawer">
+      <div class="copilot-drawer-header">
+        <div>
+          <div class="copilot-header-pretitle">AGENT 9 &bull; SOCRATIC COPILOT</div>
+          <div class="copilot-header-title">
+            <span>Ask Living Note</span>
+            <span class="copilot-context-pill" id="copilot-context-pill">📍 All Sections</span>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeCopilotDrawer()" title="Close Copilot (Esc)">✕</button>
+      </div>
+
+      <div id="copilot-messages-container">
+        <div id="copilot-messages">
+          <!-- Dynamically populated chat bubbles -->
+        </div>
+      </div>
+
+      <div class="copilot-drawer-footer">
+        <div id="copilot-selected-quote" style="display: none;">
+          <span style="font-size: 0.72rem; color: #a5b4fc; margin-right: 0.35rem; font-weight: 700;">CONTEXT:</span>
+          <span id="copilot-quote-text" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+          <button type="button" class="quote-dismiss-btn" onclick="clearCopilotSelectedQuote()" title="Clear excerpt context">✕</button>
+        </div>
+        <div class="copilot-input-row">
+          <textarea
+            id="copilot-input"
+            placeholder="Ask a question about this section, code, or concept..."
+            onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendCopilotMessage(); }"
+          ></textarea>
+          <button type="button" class="copilot-send-btn" id="btn-send-copilot" onclick="sendCopilotMessage()" title="Send Question (Enter)">
+            <span>Ask ↵</span>
+          </button>
+        </div>
+      </div>
+    </aside>
   </main>
 
   <footer class="footer">
-    Personalized Technical Note Maker &bull; Phase 6, 7, 8, 9 &amp; 10: Living Note Viewer, Evolution, Active Recall, Visual Planner &amp; Interactive Code Sandbox
+    Personalized Technical Note Maker &bull; Phase 6 to 11: Living Note Viewer, Evolution, Active Recall, Visual Planner, Interactive Sandbox &amp; Socratic Copilot
   </footer>
 
 
@@ -722,6 +770,8 @@
   <script src="/static/js/assessment.js"></script>
   <script src="/static/js/visuals.js"></script>
   <script src="/static/js/sandbox.js"></script>
+  <script src="/static/js/copilot.js"></script>
   <script src="/static/js/app.js"></script>
 </body>
 </html>
+

@@ -191,6 +191,9 @@
               <h2 class="section-heading">${escapeHtml(s.title)}</h2>
             </div>
             <div class="section-meta-tags">
+              <button type="button" class="tool-btn" onclick="openCopilotDrawer('${s.id}', '${escapeJsString(s.title)}')" title="Ask Agent 9 Socratic Copilot about this section" style="padding: 0.2rem 0.55rem; font-size: 0.75rem; background: rgba(99, 102, 241, 0.18); border-color: var(--accent); color: #c7d2fe;">
+                <span>🤖 Ask AI</span>
+              </button>
               <span class="depth-badge depth-${s.depth}">${s.depth}</span>
               <span class="section-type-pill">${escapeHtml(s.section_type)}</span>
             </div>
@@ -201,6 +204,7 @@
           <div class="section-evolve-bar">
             <span class="evolve-label">🌱 Evolve section:</span>
             <div class="evolve-actions">
+              <button type="button" class="evolve-chip evolve-chip-copilot" onclick="openCopilotDrawer('${s.id}', '${escapeJsString(s.title)}')">🤖 Ask Copilot</button>
               <button type="button" class="evolve-chip" onclick="openSectionCodeModal('${s.id}', '${escapeJsString(s.title)}')">💻 + Code Implementation</button>
               <button type="button" class="evolve-chip" onclick="openSectionVisualModal('${s.id}', '${escapeJsString(s.title)}')">🎨 Add Visual Flow</button>
               <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'expand_section')">🔍 Deepen Detail</button>
@@ -216,9 +220,12 @@
         <div class="note-global-evolve-card">
           <div class="evolve-card-left">
             <div class="evolve-card-title">🌱 Expand &amp; Verify Your Technical Mastery</div>
-            <p class="evolve-card-sub">Technical mastery is an ongoing dialogue. Test active recall with personalized flashcards, inspect dynamic Mermaid diagrams, execute runnable sandbox code, or add new chapters.</p>
+            <p class="evolve-card-sub">Technical mastery is an ongoing dialogue. Ask Agent 9 Socratic Copilot for instant clarification, test recall with 3D flashcards, inspect Mermaid diagrams, or execute runnable sandbox code.</p>
           </div>
           <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <button type="button" class="tool-btn" style="padding: 0.65rem 1.3rem; background: rgba(99, 102, 241, 0.25); border-color: var(--accent); color: #ffffff; font-weight: 700; box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);" onclick="openCopilotDrawer(null, null)">
+              <span>🤖 Consult Copilot</span>
+            </button>
             <button type="button" class="btn-submit" style="width: auto; padding: 0.65rem 1.4rem;" onclick="openEvolveModal(null, 'Living Note Exploration', 'add_section')">
               <span>+ Add New Section</span>
             </button>
