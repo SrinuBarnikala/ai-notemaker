@@ -15,6 +15,7 @@ from backend.app.schemas.note import (
 )
 from backend.app.providers.factory import get_llm_provider
 from backend.app.note.parser import parse_section_blocks, extract_json_array_or_object
+from backend.app.note.versioning import serialize_note_snapshot
 
 logger = logging.getLogger(__name__)
 
@@ -254,6 +255,26 @@ async def evolve_structured_note(
     # Increment version
     note.version += 1
 
+    # Serialize snapshot of current sections for the new version
+    current_sections = (
+        db.query(NoteSection)
+        .filter(NoteSection.note_id == note.id)
+        .order_by(NoteSection.order_index.asc())
+        .all()
+    )
+    snapshot_json = serialize_note_snapshot(note, current_sections)
+
+    if request.evolution_type == "add_section":
+        change_summary = f"Added new section: '{target_section_title}'."
+    elif request.evolution_type == "add_code":
+        change_summary = f"Enhanced section '{target_section_title}' with practical code blocks."
+    elif request.evolution_type == "expand_section":
+        change_summary = f"Expanded section '{target_section_title}' with in-depth technical detail."
+    elif request.evolution_type == "clarify":
+        change_summary = f"Clarified conceptual nuances in '{target_section_title}'."
+    else:
+        change_summary = f"Evolved note: {request.user_prompt[:80]}"
+
     # Log revision entry
     revision = NoteRevision(
         note_id=note.id,
@@ -261,6 +282,8 @@ async def evolve_structured_note(
         evolution_type=request.evolution_type,
         section_title=target_section_title,
         user_prompt=request.user_prompt,
+        change_summary=change_summary,
+        snapshot=snapshot_json,
     )
     db.add(revision)
 

@@ -131,5 +131,30 @@ const API = {
     const res = await fetch('/journeys');
     if (!res.ok) throw new Error('Failed to load journeys');
     return res.json();
+  },
+
+  async listVersions(noteId) {
+    const res = await fetch(`/notes/${noteId}/versions`);
+    if (!res.ok) throw new Error((await res.json()).detail || 'Failed to load note versions');
+    return res.json();
+  },
+
+  async getVersion(noteId, version) {
+    const res = await fetch(`/notes/${noteId}/versions/${version}`);
+    if (!res.ok) throw new Error((await res.json()).detail || `Failed to load version ${version}`);
+    return res.json();
+  },
+
+  async getDiff(noteId, fromVersion, toVersion) {
+    const res = await fetch(`/notes/${noteId}/diff?from_version=${fromVersion}&to_version=${toVersion}`);
+    if (!res.ok) throw new Error((await res.json()).detail || 'Failed to compute version diff');
+    return res.json();
+  },
+
+  async restoreVersion(noteId, version) {
+    const res = await fetch(`/notes/${noteId}/versions/${version}/restore`, { method: 'POST' });
+    if (!res.ok) throw new Error((await res.json()).detail || `Failed to restore version ${version}`);
+    return res.json();
   }
 };
+

@@ -40,7 +40,80 @@ class NoteRevisionData(BaseModel):
     evolution_type: str
     section_title: Optional[str] = None
     user_prompt: str
+    change_summary: Optional[str] = None
     created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class NoteVersionItem(BaseModel):
+    version: int
+    evolution_type: str
+    section_title: Optional[str] = None
+    user_prompt: str
+    change_summary: Optional[str] = None
+    created_at: datetime
+    total_sections: int = 0
+    is_current: bool = False
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class NoteVersionsListResponse(BaseModel):
+    note_id: str
+    journey_id: str
+    topic: str
+    current_version: int
+    total_versions: int
+    versions: List[NoteVersionItem]
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BlockDiff(BaseModel):
+    block_index: int
+    type: str
+    status: Literal["added", "removed", "modified", "unchanged"]
+    old_content: Optional[str] = None
+    new_content: Optional[str] = None
+    details: Optional[Dict[str, Any]] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class SectionDiff(BaseModel):
+    section_id: str
+    title: str
+    status: Literal["added", "removed", "modified", "unchanged"]
+    old_section_type: Optional[str] = None
+    new_section_type: Optional[str] = None
+    old_depth: Optional[str] = None
+    new_depth: Optional[str] = None
+    summary: Optional[str] = None
+    block_diffs: List[BlockDiff] = []
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class NoteVersionDiffResponse(BaseModel):
+    note_id: str
+    journey_id: str
+    topic: str
+    from_version: int
+    to_version: int
+    summary: str
+    stats: Dict[str, int]
+    sections: List[SectionDiff]
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RestoreVersionResponse(BaseModel):
+    success: bool
+    message: str
+    restored_from_version: int
+    new_version: int
+    note: "NoteResponse"
 
     model_config = ConfigDict(from_attributes=True)
 

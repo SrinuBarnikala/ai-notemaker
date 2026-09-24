@@ -13,10 +13,20 @@ from backend.app.schemas.note import (
     NoteSectionData,
     NoteBlock,
     NoteRevisionData,
+    NoteVersionItem,
+    NoteVersionsListResponse,
+    NoteVersionDiffResponse,
+    RestoreVersionResponse,
     EvolveNoteRequest,
 )
 from backend.app.note.generator import generate_structured_note
 from backend.app.note.evolver import evolve_structured_note, export_note_to_markdown
+from backend.app.note.versioning import (
+    list_note_versions,
+    get_note_version_response,
+    compute_note_diff,
+    restore_note_version,
+)
 
 router = APIRouter()
 
@@ -46,7 +56,10 @@ def build_note_response(note: Note, db: Session) -> NoteResponse:
 
     revisions = (
         db.query(NoteRevision)
-        .filter(NoteRevision.note_id == note.id)
+        .filter(
+            NoteRevision.note_id == note.id,
+            NoteRevision.evolution_type != "initial_generation",
+        )
         .order_by(NoteRevision.version.asc())
         .all()
     )
@@ -57,6 +70,7 @@ def build_note_response(note: Note, db: Session) -> NoteResponse:
             evolution_type=r.evolution_type,
             section_title=r.section_title,
             user_prompt=r.user_prompt,
+            change_summary=r.change_summary,
             created_at=r.created_at,
         )
         for r in revisions
@@ -251,4 +265,178 @@ def export_note_by_journey(
             detail=f"Note for journey '{journey_id}' has not been generated yet.",
         )
     return export_note_by_id(note_id=note.id, format=format, db=db)
+
+
+# ==========================================
+# PHASE 13 — NOTE VERSIONING & DIFF APIS
+# ==========================================
+
+@router.get(
+    "/notes/{note_id}/versions",
+    response_model=NoteVersionsListResponse,
+    status_code=status.HTTP_200_OK,
+    tags=["Note Versioning"],
+    summary="List all versions of a living note",
+)
+def get_note_versions_endpoint(
+    note_id: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Returns an audit list of all version snapshots for the specified note,
+    including version number, timestamp, evolution triggers, and change summaries.
+    """
+    return list_note_versions(note_id=note_id, db=db)
+
+
+@router.get(
+    "/journeys/{journey_id}/note/versions",
+    response_model=NoteVersionsListResponse,
+    status_code=status.HTTP_200_OK,
+    tags=["Note Versioning"],
+    summary="List all versions of a living note for a journey",
+)
+def get_journey_note_versions_endpoint(
+    journey_id: str,
+    db: Session = Depends(get_db),
+):
+    note = db.query(Note).filter(Note.journey_id == journey_id).first()
+    if not note:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Note for journey '{journey_id}' has not been generated yet.",
+        )
+    return list_note_versions(note_id=note.id, db=db)
+
+
+@router.get(
+    "/notes/{note_id}/versions/{version}",
+    response_model=NoteResponse,
+    status_code=status.HTTP_200_OK,
+    tags=["Note Versioning"],
+    summary="Retrieve exact historical snapshot of a note version",
+)
+def get_note_version_snapshot_endpoint(
+    note_id: str,
+    version: int,
+    db: Session = Depends(get_db),
+):
+    """
+    Returns the complete structured note as it existed at the specified historical version.
+    """
+    return get_note_version_response(note_id=note_id, version=version, db=db)
+
+
+@router.get(
+    "/journeys/{journey_id}/note/versions/{version}",
+    response_model=NoteResponse,
+    status_code=status.HTTP_200_OK,
+    tags=["Note Versioning"],
+    summary="Retrieve exact historical snapshot of a note version by journey",
+)
+def get_journey_note_version_snapshot_endpoint(
+    journey_id: str,
+    version: int,
+    db: Session = Depends(get_db),
+):
+    note = db.query(Note).filter(Note.journey_id == journey_id).first()
+    if not note:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Note for journey '{journey_id}' has not been generated yet.",
+        )
+    return get_note_version_response(note_id=note.id, version=version, db=db)
+
+
+@router.get(
+    "/notes/{note_id}/diff",
+    response_model=NoteVersionDiffResponse,
+    status_code=status.HTTP_200_OK,
+    tags=["Note Versioning"],
+    summary="Compute semantic diff between two versions of a note",
+)
+def get_note_diff_endpoint(
+    note_id: str,
+    from_version: int = Query(..., ge=1, description="Base historical version"),
+    to_version: int = Query(..., ge=1, description="Target version to compare against"),
+    db: Session = Depends(get_db),
+):
+    """
+    Compares two note versions and generates a granular section and block-level diff
+    highlighting additions, removals, and modifications.
+    """
+    return compute_note_diff(
+        note_id=note_id,
+        from_version=from_version,
+        to_version=to_version,
+        db=db,
+    )
+
+
+@router.get(
+    "/journeys/{journey_id}/note/diff",
+    response_model=NoteVersionDiffResponse,
+    status_code=status.HTTP_200_OK,
+    tags=["Note Versioning"],
+    summary="Compute semantic diff between two versions of a note by journey",
+)
+def get_journey_note_diff_endpoint(
+    journey_id: str,
+    from_version: int = Query(..., ge=1, description="Base historical version"),
+    to_version: int = Query(..., ge=1, description="Target version to compare against"),
+    db: Session = Depends(get_db),
+):
+    note = db.query(Note).filter(Note.journey_id == journey_id).first()
+    if not note:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Note for journey '{journey_id}' has not been generated yet.",
+        )
+    return compute_note_diff(
+        note_id=note.id,
+        from_version=from_version,
+        to_version=to_version,
+        db=db,
+    )
+
+
+@router.post(
+    "/notes/{note_id}/versions/{version}/restore",
+    response_model=RestoreVersionResponse,
+    status_code=status.HTTP_200_OK,
+    tags=["Note Versioning"],
+    summary="Restore living note to match a historical version snapshot",
+)
+def restore_note_version_endpoint(
+    note_id: str,
+    version: int,
+    db: Session = Depends(get_db),
+):
+    """
+    Restores the living note state to match a selected historical version,
+    creating a new version checkpoint (non-destructive rollback).
+    """
+    return restore_note_version(note_id=note_id, target_version=version, db=db)
+
+
+@router.post(
+    "/journeys/{journey_id}/note/versions/{version}/restore",
+    response_model=RestoreVersionResponse,
+    status_code=status.HTTP_200_OK,
+    tags=["Note Versioning"],
+    summary="Restore living note to match a historical version snapshot by journey",
+)
+def restore_journey_note_version_endpoint(
+    journey_id: str,
+    version: int,
+    db: Session = Depends(get_db),
+):
+    note = db.query(Note).filter(Note.journey_id == journey_id).first()
+    if not note:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Note for journey '{journey_id}' has not been generated yet.",
+        )
+    return restore_note_version(note_id=note.id, target_version=version, db=db)
+
 

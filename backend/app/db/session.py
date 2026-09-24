@@ -43,3 +43,19 @@ def check_db_health() -> bool:
             return True
     except Exception:
         return False
+
+
+def ensure_schema_migrations():
+    """Add any missing columns to existing SQLite tables automatically."""
+    try:
+        with engine.begin() as conn:
+            # Check note_revisions columns
+            res = conn.execute(text("PRAGMA table_info(note_revisions)")).fetchall()
+            cols = [row[1] for row in res]
+            if cols:
+                if "snapshot" not in cols:
+                    conn.execute(text("ALTER TABLE note_revisions ADD COLUMN snapshot TEXT"))
+                if "change_summary" not in cols:
+                    conn.execute(text("ALTER TABLE note_revisions ADD COLUMN change_summary TEXT"))
+    except Exception:
+        pass

@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 from backend.app.config import Settings, get_settings
-from backend.app.db.session import engine, Base, check_db_health
+from backend.app.db.session import engine, Base, check_db_health, ensure_schema_migrations
 from backend.app.providers.factory import get_llm_provider
 from backend.app.api import api_router
 # Ensure models are imported so Base.metadata knows about them
@@ -19,6 +19,7 @@ async def lifespan(app: FastAPI):
     Path("./data").mkdir(parents=True, exist_ok=True)
     # Create tables if not exist
     Base.metadata.create_all(bind=engine)
+    ensure_schema_migrations()
     yield
 
 

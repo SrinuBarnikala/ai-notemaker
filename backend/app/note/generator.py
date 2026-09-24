@@ -7,9 +7,10 @@ from fastapi import HTTPException, status
 from backend.app.config import Settings
 from backend.app.models.journey import LearningJourney
 from backend.app.models.architecture import NoteArchitecture, NoteArchitectureSection
-from backend.app.models.note import Note, NoteSection
-from backend.app.schemas.note import NoteResponse, NoteSectionData, NoteBlock
+from backend.app.models.note import Note, NoteSection, NoteRevision
+from backend.app.schemas.note import NoteResponse, NoteSectionData, NoteBlock, NoteRevisionData
 from backend.app.providers.factory import get_llm_provider
+from backend.app.note.versioning import serialize_note_snapshot
 from backend.app.note.prompts import (
     NOTE_GENERATION_SYSTEM_PROMPT,
     SECTION_GENERATION_PROMPT_TEMPLATE,
@@ -137,9 +138,31 @@ async def generate_structured_note(
             )
         )
 
+    # Save Version 1 snapshot and revision record
+    sec_records = (
+        db.query(NoteSection)
+        .filter(NoteSection.note_id == note.id)
+        .order_by(NoteSection.order_index.asc())
+        .all()
+    )
+    v1_snapshot = serialize_note_snapshot(note, sec_records)
+    v1_revision = NoteRevision(
+        note_id=note.id,
+        version=1,
+        evolution_type="initial_generation",
+        section_title=None,
+        user_prompt="Initial living note generation based on personalized architecture.",
+        change_summary=f"Initial living note created with {len(sec_records)} structured sections.",
+        snapshot=v1_snapshot,
+    )
+    db.add(v1_revision)
+
     journey.status = "note_generated"
     db.commit()
     db.refresh(note)
+
+    # Newly generated note has not undergone evolutions yet
+    revisions_data = []
 
     return NoteResponse(
         id=note.id,
@@ -148,6 +171,7 @@ async def generate_structured_note(
         version=note.version,
         summary=note.summary,
         sections=generated_sections_data,
+        revisions=revisions_data,
         created_at=note.created_at,
         updated_at=note.updated_at,
     )

@@ -223,12 +223,27 @@
         <div class="note-title-row">
           <h1 class="note-main-h1" id="note-topic-heading">--</h1>
           <div class="note-meta-badges">
-            <span class="note-version-pill" id="note-version-badge">VERSION 1</span>
+            <span class="note-version-pill" id="note-version-badge" onclick="openVersionHistoryModal()" style="cursor: pointer;" title="Inspect Living Note Versions & What Changed">VERSION 1</span>
             <span class="note-readtime-pill" id="note-readtime-badge">⏱️ ~3 min read</span>
             <span class="feature-pill active" id="note-sections-count">4 Sections</span>
           </div>
         </div>
         <p class="note-summary-text" id="note-summary-text">--</p>
+      </div>
+
+      <!-- Phase 13: Historical Version Banner (Shown when viewing a historical snapshot) -->
+      <div id="historical-version-banner" class="historical-version-banner" style="display: none;">
+        <div class="banner-left">
+          <span class="banner-icon">🏷️</span>
+          <div>
+            <span class="banner-title" id="historical-banner-title">Viewing Historical Snapshot: Version 1</span>
+            <span class="banner-sub" id="historical-banner-sub">This is a read-only historical checkpoint. You can compare diffs or restore this version.</span>
+          </div>
+        </div>
+        <div class="banner-actions">
+          <button type="button" class="btn-restore-version" onclick="triggerRestoreVersion()">↺ Restore This Version</button>
+          <button type="button" class="btn-return-latest" onclick="returnToLatestVersion()">Return to Latest (v<span id="banner-latest-ver">1</span>) &rarr;</button>
+        </div>
       </div>
 
       <!-- Reader Controls Toolbar -->
@@ -243,6 +258,9 @@
         <div class="reader-toolbar-group">
           <button type="button" class="tool-btn" id="btn-focus-toggle" onclick="toggleFocusMode()">
             <span>📖 Focus</span>
+          </button>
+          <button type="button" class="tool-btn" id="btn-view-versions" onclick="openVersionHistoryModal()" title="View Version History & What Changed" style="background: rgba(245, 158, 11, 0.18); border-color: #f59e0b; color: #fde68a; font-weight: 600;">
+            <span>🏷️ Versions (<span id="version-count-pill">1</span>)</span>
           </button>
           <button type="button" class="tool-btn" id="btn-copilot-toggle" onclick="openCopilotDrawer(null, null)" title="Consult Agent 9 Socratic In-Note Copilot" style="background: rgba(99, 102, 241, 0.25); border-color: var(--accent); color: #ffffff; font-weight: 700; box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);">
             <span>🤖 Ask Copilot</span>
@@ -937,10 +955,84 @@
       </div>
     </div>
 
+    <!-- Phase 13: Note Versioning & Semantic Diff Modal -->
+    <div class="modal-overlay" id="version-history-modal" style="display: none;" onclick="closeModalOnOverlay(event)">
+      <div class="modal-card" style="max-width: 95vw; width: 1100px; max-height: 90vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+              <span class="vcard-num-badge" style="background: rgba(245, 158, 11, 0.2); color: #fde68a; border-color: #f59e0b;">🏷️ PHASE 13</span>
+              <h3 class="modal-title" style="margin: 0;">Living Note Version History &amp; What Changed</h3>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">
+              Browse historical snapshots, inspect semantic code and section diffs, or roll back to any previous version.
+            </p>
+          </div>
+          <button type="button" class="modal-close" onclick="closeVersionHistoryModal()" aria-label="Close modal" title="Close (Esc)">&times;</button>
+        </div>
+
+        <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 1.25rem;">
+          <!-- Segmented Tab Bar -->
+          <div class="vtab-bar">
+            <button type="button" class="vtab-btn active" id="btn-vtab-timeline" onclick="switchVersionModalTab('timeline')">
+              <span>⏱️ Version Timeline &amp; Snapshots</span>
+            </button>
+            <button type="button" class="vtab-btn" id="btn-vtab-diff" onclick="switchVersionModalTab('diff')">
+              <span>🔀 Semantic Diff Inspector</span>
+            </button>
+          </div>
+
+          <!-- Tab 1: Version Timeline & Snapshots -->
+          <div id="version-timeline-view">
+            <div id="version-timeline-container">
+              <!-- Dynamically populated version cards -->
+            </div>
+          </div>
+
+          <!-- Tab 2: Semantic Diff Inspector -->
+          <div id="version-diff-view" style="display: none;">
+            <!-- Version Pickers Row -->
+            <div class="diff-selectors-row">
+              <div class="diff-select-group">
+                <label for="diff-from-version">Base Version (From):</label>
+                <select id="diff-from-version" class="diff-select" onchange="handleRunDiffClick()"></select>
+              </div>
+              <span style="color: var(--text-muted); font-size: 1.1rem; font-weight: 700;">&rarr;</span>
+              <div class="diff-select-group">
+                <label for="diff-to-version">Target Version (To):</label>
+                <select id="diff-to-version" class="diff-select" onchange="handleRunDiffClick()"></select>
+              </div>
+              <button type="button" class="btn-submit" onclick="handleRunDiffClick()" style="padding: 0.45rem 1.1rem; font-size: 0.82rem; margin-left: auto;">
+                <span>Compare Versions</span>
+              </button>
+            </div>
+
+            <!-- Diff Summary Banner -->
+            <div id="diff-summary-banner" class="diff-summary-banner"></div>
+
+            <!-- Diff Stats Pills -->
+            <div id="diff-stats-bar" class="diff-stats-bar"></div>
+
+            <!-- Detailed Section & Block Diff Feed -->
+            <div id="version-diff-container" class="version-diff-container">
+              <!-- Dynamically rendered section diff cards -->
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-mono);">
+            Living note versions are non-destructive. Restoring a version creates a new version checkpoint.
+          </span>
+          <button type="button" class="tool-btn" onclick="closeVersionHistoryModal()">Done</button>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <footer class="footer">
-    Personalized Technical Note Maker &bull; Phase 6 to 12: Living Note Viewer, Evolution, Active Recall, Visual Planner, Interactive Sandbox, Socratic Copilot &amp; Knowledge Graph
+    Personalized Technical Note Maker &bull; Phase 6 to 13: Living Note Viewer, Evolution, Active Recall, Visual Planner, Interactive Sandbox, Socratic Copilot, Knowledge Graph &amp; Note Versioning
   </footer>
 
 
@@ -955,6 +1047,7 @@
   <script src="/static/js/sandbox.js"></script>
   <script src="/static/js/copilot.js"></script>
   <script src="/static/js/graph.js"></script>
+  <script src="/static/js/versioning.js"></script>
   <script src="/static/js/app.js"></script>
 </body>
 </html>

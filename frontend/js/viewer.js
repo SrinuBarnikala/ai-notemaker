@@ -153,6 +153,11 @@
 
       document.getElementById('note-sections-count').textContent = `${note.sections.length} Sections`;
 
+      const verPill = document.getElementById('version-count-pill');
+      if (verPill) {
+        verPill.textContent = note.version;
+      }
+
       const revPill = document.getElementById('rev-count-pill');
       if (revPill) {
         revPill.textContent = (note.revisions || []).length;
@@ -228,6 +233,9 @@
             </button>
             <button type="button" class="tool-btn" style="padding: 0.65rem 1.25rem; background: rgba(168, 85, 247, 0.2); border-color: #a855f7; color: #e9d5ff; font-weight: 700;" onclick="openGraphModal(false)">
               <span>🕸️ Knowledge Graph</span>
+            </button>
+            <button type="button" class="tool-btn" style="padding: 0.65rem 1.25rem; background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; color: #fde68a; font-weight: 700;" onclick="openVersionHistoryModal()">
+              <span>🏷️ Version History &amp; Diff</span>
             </button>
             <button type="button" class="btn-submit" style="width: auto; padding: 0.65rem 1.4rem;" onclick="openEvolveModal(null, 'Living Note Exploration', 'add_section')">
               <span>+ Add New Section</span>

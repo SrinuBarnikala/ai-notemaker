@@ -65,6 +65,8 @@ class NoteRevision(Base):
     evolution_type = Column(String(50), nullable=False)
     section_title = Column(String(300), nullable=True)
     user_prompt = Column(Text, nullable=False)
+    snapshot = Column(Text, nullable=True)  # JSON-serialized snapshot of Note at this version
+    change_summary = Column(Text, nullable=True)  # Human-readable summary of what changed
     created_at = Column(DateTime(timezone=True), default=get_utc_now, nullable=False)
 
     note = relationship("Note", back_populates="revisions")

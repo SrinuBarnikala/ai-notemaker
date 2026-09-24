@@ -9,6 +9,7 @@ from backend.app.models.journey import LearningJourney
 from backend.app.models.profile import KnowledgeProfile, KnowledgeConcept
 from backend.app.models.note import Note, NoteSection, NoteRevision
 from backend.app.schemas.note import NoteBlock
+from backend.app.note.versioning import serialize_note_snapshot
 from backend.app.schemas.copilot import (
     CopilotQueryRequest,
     CopilotQueryResponse,
@@ -280,12 +281,24 @@ def pin_copilot_answer(
     section.blocks = json.dumps(existing_blocks)
 
     note.version += 1
+
+    # Snapshot of sections for this new version
+    current_sections = (
+        db.query(NoteSection)
+        .filter(NoteSection.note_id == note.id)
+        .order_by(NoteSection.order_index.asc())
+        .all()
+    )
+    snapshot_json = serialize_note_snapshot(note, current_sections)
+
     revision = NoteRevision(
         note_id=note.id,
         version=note.version,
         evolution_type="copilot_pin",
         section_title=section.title,
         user_prompt=f"Copilot Pinned [{req.block_type}]: {req.title or req.content[:60]}",
+        change_summary=f"Pinned Copilot explanation into section '{section.title}'.",
+        snapshot=snapshot_json,
     )
     db.add(revision)
     db.commit()

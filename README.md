@@ -6,8 +6,8 @@
 
 ## Development Status
 
-- **Current Phase:** Phase 12 — Interactive Concept Knowledge Graph & Cross-Journey Dependency Visualizer
-- **Status:** Complete (68 tests passing)
+- **Current Phase:** Phase 13 — Note Versioning, Historical Snapshots, Semantic Diff & Rollback
+- **Status:** Complete (73 tests passing)
 - **Features:**
   - Agent 1: Topic Intake & Journey Orchestration
   - Agent 2: Adaptive Knowledge Discovery Probe
@@ -22,6 +22,7 @@
   - Agent 8 (Code Planner & Interactive Code Sandbox): Automatic note-wide code planning, language-specific on-demand section code synthesis (Python, Go, Rust, TypeScript, SQL, Bash), runtime complexity metrics (`O(N)`), test runners, and client-side in-browser WebAssembly Python execution sandbox (Pyodide) with real-time stdout terminal console output
   - Agent 9 (Socratic AI In-Note Copilot & Semantic Explainer): Contextual in-note AI mentor grounded in the learner's knowledge profile and living note context, floating text selection prompt, multi-turn Socratic technical Q&A, targeted follow-up suggestions, and one-click "Pin to Note" direct note augmentation with automatic version bumping and revision logging
   - Agent 10 (Interactive Concept Knowledge Graph & Dependency Visualizer): Dynamic 2D HTML5 Canvas force-directed physics simulation mapping technical concept topologies, prerequisite hierarchies, and semantic dependencies color-coded by mastery state (known, gap, partial, misconception), with real-time search, filter chips, interactive drag/pan/zoom, click-to-section navigation, and a cross-journey Global Technical Universe map
+  - Phase 13 (Note Versioning, Historical Snapshots & Semantic Diff): Non-destructive full-state living note version tracking (v1 &rarr; v2 &rarr; v3), historical version snapshot persistence and reader browsing with sticky historical banner, granular section-by-section and block-by-block semantic diff engine (highlighting additions, removals, and code modifications), side-by-side comparison, and one-click version rollback creating audit-safe version checkpoints.
 
 
 
@@ -34,7 +35,7 @@ ai-notemaker/
 ├── .venv/              # Dedicated local virtual environment (gitignored)
 ├── backend/            # FastAPI backend application
 │   └── app/
-│       ├── api/          # REST API endpoints (Journeys, Discovery, Profile, Architecture, Note, Copilot, Graph)
+│       ├── api/          # REST API endpoints (Journeys, Discovery, Profile, Architecture, Note, Copilot, Graph, Versioning)
 │       ├── architecture/ # Agent 4 — Personalized Note Architecture Agent
 │       ├── assessment/   # Agent 6 — Active Recall & Mastery Assessment
 │       ├── code/         # Agent 8 — Code Planner & Multi-Language Synthesis
@@ -42,8 +43,8 @@ ai-notemaker/
 │       ├── db/           # SQLite database session and engine setup
 │       ├── discovery/    # Agent 2 — LangGraph Knowledge Discovery Probe
 │       ├── graph/        # Agent 10 — Concept Knowledge Graph & Dependency Engine
-│       ├── models/       # SQLAlchemy models (Journey, Interaction, Profile, Concept, Architecture, Note)
-│       ├── note/         # Agent 5 — Content Generation Agent & Evolution Engine
+│       ├── models/       # SQLAlchemy models (Journey, Interaction, Profile, Concept, Architecture, Note, NoteRevision)
+│       ├── note/         # Agent 5 — Note Generator, Evolution Engine & Versioning/Diff Engine
 │       ├── profile/      # Agent 3 — Knowledge Profile Synthesizer
 │       ├── providers/    # LLM provider abstraction (Ollama, OpenAI, Groq, Mock)
 │       ├── schemas/      # Pydantic request/response schemas
@@ -52,7 +53,7 @@ ai-notemaker/
 │       └── main.py       # FastAPI application and lifespan
 ├── frontend/           # HTML, CSS, Vanilla JavaScript web UI
 │   ├── css/            # Modular stylesheets (main, viewer, modals, components)
-│   ├── js/             # Modular domain scripts (state, api, journey, viewer, evolution, assessment, visuals, sandbox, copilot, graph, app)
+│   ├── js/             # Modular domain scripts (state, api, journey, viewer, evolution, assessment, visuals, sandbox, copilot, graph, versioning, app)
 │   └── index.html      # Clean semantic HTML layout & entrypoint
 ├── data/               # SQLite database storage (gitignored)
 ├── tests/              # Unit, API, and provider test suite
