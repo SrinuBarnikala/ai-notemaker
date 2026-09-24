@@ -155,6 +155,14 @@ const API = {
     const res = await fetch(`/notes/${noteId}/versions/${version}/restore`, { method: 'POST' });
     if (!res.ok) throw new Error((await res.json()).detail || `Failed to restore version ${version}`);
     return res.json();
+  },
+
+  getNoteExportUrl(noteId, format = 'pdf') {
+    return `/notes/${noteId}/export?format=${format}`;
+  },
+
+  getJourneyNoteExportUrl(journeyId, format = 'pdf') {
+    return `/journeys/${journeyId}/note/export?format=${format}`;
   }
 };
 

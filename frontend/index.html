@@ -246,52 +246,90 @@
         </div>
       </div>
 
-      <!-- Reader Controls Toolbar -->
+      <!-- Reader Controls Toolbar — 4-Section Hierarchical Control Panel -->
       <div class="note-reader-controls" id="reader-toolbar">
-        <div class="reader-toolbar-group">
-          <span class="toolbar-label">Text Size:</span>
-          <button type="button" class="tool-btn" onclick="adjustFontSize(-1)" title="Smaller font">A-</button>
-          <button type="button" class="tool-btn active" id="btn-font-reset" onclick="resetFontSize()" title="Reset font">A</button>
-          <button type="button" class="tool-btn" onclick="adjustFontSize(1)" title="Larger font">A+</button>
+        <!-- Section 1: TEXT SIZE (Compact Segmented Preference Control) -->
+        <div class="toolbar-section section-text-size">
+          <span class="section-label">TEXT SIZE</span>
+          <div class="font-segmented-control" role="group" aria-label="Text Size Preference">
+            <button type="button" class="tool-btn font-step-btn" onclick="adjustFontSize(-1)" title="Smaller font">A-</button>
+            <button type="button" class="tool-btn font-step-btn active" id="btn-font-reset" onclick="resetFontSize()" title="Reset font to default">A</button>
+            <button type="button" class="tool-btn font-step-btn" onclick="adjustFontSize(1)" title="Larger font">A+</button>
+          </div>
         </div>
 
-        <div class="reader-toolbar-group">
-          <button type="button" class="tool-btn" id="btn-focus-toggle" onclick="toggleFocusMode()">
-            <span>📖 Focus</span>
-          </button>
-          <button type="button" class="tool-btn" id="btn-view-versions" onclick="openVersionHistoryModal()" title="View Version History & What Changed" style="background: rgba(245, 158, 11, 0.18); border-color: #f59e0b; color: #fde68a; font-weight: 600;">
-            <span>🏷️ Versions (<span id="version-count-pill">1</span>)</span>
-          </button>
-          <button type="button" class="tool-btn" id="btn-copilot-toggle" onclick="openCopilotDrawer(null, null)" title="Consult Agent 9 Socratic In-Note Copilot" style="background: rgba(99, 102, 241, 0.25); border-color: var(--accent); color: #ffffff; font-weight: 700; box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);">
-            <span>🤖 Ask Copilot</span>
-          </button>
-          <button type="button" class="tool-btn" id="btn-assessment-toggle" onclick="openAssessmentModal()" title="Active recall flashcards and scenario quiz" style="background: rgba(99, 102, 241, 0.2); border-color: var(--accent); color: #c7d2fe;">
-            <span>🧠 Test Mastery</span>
-          </button>
-          <button type="button" class="tool-btn" id="btn-plan-visuals" onclick="triggerPlanVisuals()" title="Synthesize & enhance architecture diagrams with Agent 7" style="background: rgba(6, 182, 212, 0.15); border-color: var(--cyan); color: #a5f3fc;">
-            <span>📊 Plan Visuals</span>
-          </button>
-          <button type="button" class="tool-btn" id="btn-plan-code" onclick="triggerPlanCode()" title="Synthesize & plan executable code implementations with Agent 8" style="background: rgba(16, 185, 129, 0.15); border-color: var(--success); color: #a7f3d0;">
-            <span>💻 Plan Code</span>
-          </button>
-          <button type="button" class="tool-btn" id="btn-graph-toggle" onclick="openGraphModal(false)" title="Inspect Concept Knowledge Graph &amp; Prerequisite Flow" style="background: rgba(168, 85, 247, 0.18); border-color: #a855f7; color: #d8b4fe;">
-            <span>🕸️ Knowledge Graph</span>
-          </button>
-          <button type="button" class="tool-btn" onclick="exportNote('markdown')" title="Export formatted GitHub Markdown (.md)">
-            <span>📥 Export .md</span>
-          </button>
-          <button type="button" class="tool-btn" id="btn-revisions-toggle" onclick="toggleRevisionsDrawer()" title="View living note evolution history">
-            <span>📜 History (<span id="rev-count-pill">0</span>)</span>
-          </button>
-          <button type="button" class="tool-btn" onclick="copyNoteLink()" title="Copy link to this note">
-            <span id="btn-link-text">🔗 Link</span>
-          </button>
-          <button type="button" class="tool-btn" onclick="window.print()" title="Print or save as PDF">
-            <span>🖨️ Print</span>
-          </button>
+        <!-- Section 2: VIEW (Compact State / Mode Control) -->
+        <div class="toolbar-section section-view">
+          <span class="section-label">VIEW</span>
+          <div class="section-buttons-row">
+            <button type="button" class="tool-btn btn-view-control" id="btn-focus-toggle" onclick="toggleFocusMode()" title="Toggle focus reading mode">
+              <span class="btn-icon">📖</span>
+              <span class="btn-label">Focus Mode</span>
+            </button>
+          </div>
         </div>
 
+        <!-- Section 3: PRIMARY ACTIONS (Strongest Visual Prominence) -->
+        <div class="toolbar-section section-primary">
+          <div class="section-header">
+            <span class="section-label">PRIMARY ACTIONS</span>
+          </div>
+          <div class="section-buttons-row">
+            <button type="button" class="tool-btn btn-primary-action btn-copilot" id="btn-copilot-toggle" onclick="openCopilotDrawer(null, null)" title="Consult Agent 9 Socratic In-Note Copilot">
+              <span class="btn-icon">🤖</span>
+              <span class="btn-label">Ask Copilot</span>
+            </button>
+            <button type="button" class="tool-btn btn-primary-action btn-assessment" id="btn-assessment-toggle" onclick="openAssessmentModal()" title="Active recall flashcards and scenario quiz">
+              <span class="btn-icon">🧠</span>
+              <span class="btn-label">Test Mastery</span>
+            </button>
+            <button type="button" class="tool-btn btn-primary-action btn-visuals" id="btn-plan-visuals" onclick="triggerPlanVisuals()" title="Synthesize &amp; enhance architecture diagrams with Agent 7">
+              <span class="btn-icon">📊</span>
+              <span class="btn-label">Plan Visuals</span>
+            </button>
+            <button type="button" class="tool-btn btn-primary-action btn-code" id="btn-plan-code" onclick="triggerPlanCode()" title="Synthesize &amp; plan executable code implementations with Agent 8">
+              <span class="btn-icon">💻</span>
+              <span class="btn-label">Plan Code</span>
+            </button>
+          </div>
+        </div>
 
+        <!-- Section 4: UTILITY & EXPORT (Secondary / Quieter Controls) -->
+        <div class="toolbar-section section-utility">
+          <div class="section-header">
+            <span class="section-label">UTILITY &amp; EXPORT</span>
+          </div>
+          <div class="section-buttons-row">
+            <button type="button" class="tool-btn btn-utility-action btn-versions" id="btn-view-versions" onclick="openVersionHistoryModal()" title="View Version History &amp; What Changed">
+              <span class="btn-icon">🏷️</span>
+              <span class="btn-label">Versions (<span id="version-count-pill">1</span>)</span>
+            </button>
+            <button type="button" class="tool-btn btn-utility-action btn-graph" id="btn-graph-toggle" onclick="openGraphModal(false)" title="Inspect Concept Knowledge Graph &amp; Prerequisite Flow">
+              <span class="btn-icon">🕸️</span>
+              <span class="btn-label">Knowledge Graph</span>
+            </button>
+            <button type="button" class="tool-btn btn-utility-action btn-export-md" id="btn-export-md" onclick="exportNote('markdown')" title="Export formatted GitHub Markdown (.md)">
+              <span class="btn-icon">📥</span>
+              <span class="btn-label">Export .md</span>
+            </button>
+            <button type="button" class="tool-btn btn-utility-action btn-export-pdf" id="btn-export-pdf" onclick="exportNote('pdf')" title="Export print-ready PDF document derived from structured note">
+              <span class="btn-icon">📄</span>
+              <span class="btn-label">Export PDF</span>
+            </button>
+            <button type="button" class="tool-btn btn-utility-action btn-history" id="btn-revisions-toggle" onclick="toggleRevisionsDrawer()" title="View living note evolution history">
+              <span class="btn-icon">📜</span>
+              <span class="btn-label">History (<span id="rev-count-pill">0</span>)</span>
+            </button>
+            <button type="button" class="tool-btn btn-utility-action btn-link" id="btn-copy-link" onclick="copyNoteLink()" title="Copy link to this note">
+              <span class="btn-icon">🔗</span>
+              <span class="btn-label" id="btn-link-text">Link</span>
+            </button>
+            <button type="button" class="tool-btn btn-utility-action btn-print" id="btn-print-note" onclick="window.print()" title="Print or save as PDF">
+              <span class="btn-icon">🖨️</span>
+              <span class="btn-label">Print</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Two-column Reader Layout: TOC on left, Body on right -->

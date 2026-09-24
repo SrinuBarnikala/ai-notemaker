@@ -6,8 +6,8 @@
 
 ## Development Status
 
-- **Current Phase:** Phase 13 — Note Versioning, Historical Snapshots, Semantic Diff & Rollback
-- **Status:** Complete (73 tests passing)
+- **Current Phase:** Phase 14 — Publication-Ready PDF Export Engine
+- **Status:** Complete (82 tests passing)
 - **Features:**
   - Agent 1: Topic Intake & Journey Orchestration
   - Agent 2: Adaptive Knowledge Discovery Probe
@@ -23,6 +23,7 @@
   - Agent 9 (Socratic AI In-Note Copilot & Semantic Explainer): Contextual in-note AI mentor grounded in the learner's knowledge profile and living note context, floating text selection prompt, multi-turn Socratic technical Q&A, targeted follow-up suggestions, and one-click "Pin to Note" direct note augmentation with automatic version bumping and revision logging
   - Agent 10 (Interactive Concept Knowledge Graph & Dependency Visualizer): Dynamic 2D HTML5 Canvas force-directed physics simulation mapping technical concept topologies, prerequisite hierarchies, and semantic dependencies color-coded by mastery state (known, gap, partial, misconception), with real-time search, filter chips, interactive drag/pan/zoom, click-to-section navigation, and a cross-journey Global Technical Universe map
   - Phase 13 (Note Versioning, Historical Snapshots & Semantic Diff): Non-destructive full-state living note version tracking (v1 &rarr; v2 &rarr; v3), historical version snapshot persistence and reader browsing with sticky historical banner, granular section-by-section and block-by-block semantic diff engine (highlighting additions, removals, and code modifications), side-by-side comparison, and one-click version rollback creating audit-safe version checkpoints.
+  - Phase 14 (Publication-Ready PDF Export Engine): High-fidelity, print-ready PDF document compiler derived dynamically from canonical structured note blocks (`paragraph`, `definition`, `warning`, `example`, `code`, `diagram`, `comparison`). Preserves the core principle that the living structured note remains the single source of truth (PDF is derived, never canonical). Includes two-pass `NumberedCanvas` running headers and publication footers (`Page X of Y`), syntax-styled code blocks with complexity badges, formatted callout boxes, responsive table rendering, and one-click direct toolbar export with real-time compilation feedback.
 
 
 
@@ -44,7 +45,7 @@ ai-notemaker/
 │       ├── discovery/    # Agent 2 — LangGraph Knowledge Discovery Probe
 │       ├── graph/        # Agent 10 — Concept Knowledge Graph & Dependency Engine
 │       ├── models/       # SQLAlchemy models (Journey, Interaction, Profile, Concept, Architecture, Note, NoteRevision)
-│       ├── note/         # Agent 5 — Note Generator, Evolution Engine & Versioning/Diff Engine
+│       ├── note/         # Agent 5 — Note Generator, Evolution Engine, Versioning & PDF Compiler
 │       ├── profile/      # Agent 3 — Knowledge Profile Synthesizer
 │       ├── providers/    # LLM provider abstraction (Ollama, OpenAI, Groq, Mock)
 │       ├── schemas/      # Pydantic request/response schemas

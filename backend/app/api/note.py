@@ -21,6 +21,7 @@ from backend.app.schemas.note import (
 )
 from backend.app.note.generator import generate_structured_note
 from backend.app.note.evolver import evolve_structured_note, export_note_to_markdown
+from backend.app.note.pdf import generate_note_pdf
 from backend.app.note.versioning import (
     list_note_versions,
     get_note_version_response,
@@ -215,11 +216,11 @@ async def evolve_note_by_id(
 )
 def export_note_by_id(
     note_id: str,
-    format: Literal["markdown", "json"] = Query("markdown", description="Export format"),
+    format: Literal["markdown", "json", "pdf"] = Query("markdown", description="Export format"),
     db: Session = Depends(get_db),
 ):
     """
-    Export the living structured note into GitHub-Flavored Markdown or raw JSON.
+    Export the living structured note into GitHub-Flavored Markdown, raw JSON, or publication-ready PDF.
     """
     note = db.query(Note).filter(Note.id == note_id).first()
     if not note:
@@ -243,7 +244,31 @@ def export_note_by_id(
                 "Content-Disposition": f'attachment; filename="{filename}.md"',
             },
         )
+    elif format == "pdf":
+        pdf_bytes = generate_note_pdf(note_resp)
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}.pdf"',
+            },
+        )
     return note_resp
+
+
+@router.get(
+    "/notes/{note_id}/export/pdf",
+    tags=["Living Note Export"],
+    summary="Export living note as a publication-ready PDF document",
+)
+def export_note_pdf_endpoint(
+    note_id: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Direct endpoint to export the living note as a print-ready PDF document.
+    """
+    return export_note_by_id(note_id=note_id, format="pdf", db=db)
 
 
 @router.get(
@@ -252,7 +277,7 @@ def export_note_by_id(
 )
 def export_note_by_journey(
     journey_id: str,
-    format: Literal["markdown", "json"] = Query("markdown", description="Export format"),
+    format: Literal["markdown", "json", "pdf"] = Query("markdown", description="Export format"),
     db: Session = Depends(get_db),
 ):
     """
@@ -265,6 +290,21 @@ def export_note_by_journey(
             detail=f"Note for journey '{journey_id}' has not been generated yet.",
         )
     return export_note_by_id(note_id=note.id, format=format, db=db)
+
+
+@router.get(
+    "/journeys/{journey_id}/note/export/pdf",
+    tags=["Living Note Export"],
+    summary="Export journey living note as a publication-ready PDF document",
+)
+def export_journey_note_pdf_endpoint(
+    journey_id: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Direct endpoint to export the journey living note as a print-ready PDF document.
+    """
+    return export_note_by_journey(journey_id=journey_id, format="pdf", db=db)
 
 
 # ==========================================

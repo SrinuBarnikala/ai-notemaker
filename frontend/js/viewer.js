@@ -20,7 +20,9 @@
       const focusBtn = document.getElementById('btn-focus-toggle');
       if (focusBtn) {
         focusBtn.classList.toggle('active', isFocus);
-        focusBtn.innerHTML = isFocus ? '<span>✕ Exit Focus</span>' : '<span>📖 Focus Mode</span>';
+        focusBtn.innerHTML = isFocus
+          ? '<span class="btn-icon">✕</span><span class="btn-label">Exit Focus</span>'
+          : '<span class="btn-icon">📖</span><span class="btn-label">Focus Mode</span>';
       }
       if (isFocus) {
         document.getElementById('note-panel').scrollIntoView({ behavior: 'smooth' });
@@ -452,6 +454,14 @@
         return;
       }
 
+      const isPdf = format === 'pdf';
+      const btn = isPdf ? document.getElementById('btn-export-pdf') : null;
+      const originalHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.innerHTML = '<span class="btn-icon">⏳</span><span class="btn-label">Compiling...</span>';
+        btn.disabled = true;
+      }
+
       const noteId = currentNote ? currentNote.id : null;
       const exportUrl = noteId ? `/notes/${noteId}/export?format=${format}` : `/journeys/${currentJourneyId}/note/export?format=${format}`;
 
@@ -461,7 +471,8 @@
 
         const blob = await res.blob();
         const disposition = res.headers.get('content-disposition') || '';
-        let filename = `${(currentTopic || 'technical_note').toLowerCase().replace(/\s+/g, '_')}_v${currentNote ? currentNote.version : 1}.md`;
+        const ext = isPdf ? 'pdf' : (format === 'json' ? 'json' : 'md');
+        let filename = `${(currentTopic || 'technical_note').toLowerCase().replace(/\s+/g, '_')}_v${currentNote ? currentNote.version : 1}.${ext}`;
         const match = disposition.match(/filename="?([^"]+)"?/);
         if (match && match[1]) filename = match[1];
 
@@ -474,6 +485,11 @@
         URL.revokeObjectURL(link.href);
       } catch (err) {
         alert('Export failed: ' + err.message);
+      } finally {
+        if (btn) {
+          btn.innerHTML = originalHtml;
+          btn.disabled = false;
+        }
       }
     }
 

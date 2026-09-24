@@ -81,63 +81,393 @@
     }
 
     /* Reader Toolbar Controls */
+    /* =========================================================================
+       Reader Toolbar Controls — 4-Section Hierarchical Control Panel
+       ========================================================================= */
     .note-reader-controls {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(7, 11, 18, 0.95);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 0.6rem 1.25rem;
-      margin-bottom: 2rem;
-      gap: 1rem;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 14px;
+      background: rgba(10, 14, 26, 0.94);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 18px 22px;
+      margin-bottom: 2.25rem;
       position: sticky;
       top: 66px;
       z-index: 25;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 14px 36px -10px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.06);
     }
 
-    .reader-toolbar-group {
+    /* Subtle Section Container */
+    .toolbar-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.015);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .toolbar-section:hover {
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .section-meta {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      justify-content: space-between;
     }
 
-    .toolbar-label {
-      font-size: 0.775rem;
-      font-family: var(--font-mono);
-      color: var(--text-muted);
-      font-weight: 600;
+    .section-label {
+      font-family: var(--font-mono, monospace);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
       text-transform: uppercase;
-      margin-right: 0.25rem;
+      color: #64748b;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    .tool-btn {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border);
+    .section-buttons-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    /* -------------------------------------------------------------------------
+       1. TEXT SIZE: Compact Segmented Preference Control
+       ------------------------------------------------------------------------- */
+    .toolbar-section.section-text-size {
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 16px;
+      padding: 8px 14px;
+      background: rgba(255, 255, 255, 0.015);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 10px;
+      width: fit-content;
+      max-width: 100%;
+    }
+
+    .font-segmented-control {
+      display: inline-flex;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 2px;
+      gap: 2px;
+      height: 30px;
+      box-sizing: border-box;
+      align-items: center;
+    }
+
+    .font-step-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-family: var(--font-mono, monospace);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      height: 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      line-height: 1;
+    }
+
+    .font-step-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+    }
+
+    .font-step-btn.active {
+      background: rgba(99, 102, 241, 0.32);
+      color: #ffffff;
+    }
+
+    /* -------------------------------------------------------------------------
+       2. VIEW: Compact State / Mode Control
+       ------------------------------------------------------------------------- */
+    .toolbar-section.section-view {
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 16px;
+      padding: 8px 14px;
+      background: rgba(255, 255, 255, 0.015);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 10px;
+      width: fit-content;
+      max-width: 100%;
+    }
+
+    .btn-view-control {
+      height: 36px;
+      padding: 0 16px;
+      background: rgba(30, 41, 59, 0.45);
+      border: 1px solid rgba(148, 163, 184, 0.2);
       color: #cbd5e1;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 0.825rem;
       font-weight: 600;
-      padding: 0.35rem 0.7rem;
       border-radius: 8px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      transition: all 0.15s ease;
+      gap: 7px;
+      transition: all 0.18s ease;
+      white-space: nowrap;
     }
-    .tool-btn:hover {
+
+    .btn-view-control:hover {
       background: rgba(99, 102, 241, 0.15);
-      border-color: var(--border-accent);
+      border-color: rgba(99, 102, 241, 0.4);
+      color: #ffffff;
+    }
+
+    .btn-view-control.active {
+      background: rgba(99, 102, 241, 0.22);
+      border: 1.5px solid #6366f1;
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(99, 102, 241, 0.25);
+    }
+
+    .btn-view-control .btn-icon {
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    /* -------------------------------------------------------------------------
+       3. PRIMARY ACTIONS: Strongest Visual Prominence
+       ------------------------------------------------------------------------- */
+    .toolbar-section.section-primary {
+      background: rgba(30, 27, 75, 0.25);
+      border: 1px solid rgba(99, 102, 241, 0.22);
+      border-radius: 12px;
+      padding: 14px 16px;
+      box-shadow: 0 4px 20px -6px rgba(0, 0, 0, 0.45);
+    }
+
+    .toolbar-section.section-primary .section-label {
+      color: #818cf8;
+      font-weight: 800;
+    }
+
+    .toolbar-section.section-primary .section-buttons-row {
+      gap: 14px;
+    }
+
+    .btn-primary-action {
+      height: 40px;
+      padding: 0 18px;
+      border-radius: 10px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-primary-action .btn-icon {
+      font-size: 1.12rem;
+      line-height: 1;
+    }
+
+    .btn-primary-action:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px -4px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Primary Buttons Color Semantics */
+    .btn-copilot {
+      background: rgba(99, 102, 241, 0.14);
+      border: 1px solid rgba(99, 102, 241, 0.38);
+      color: #e0e7ff;
+    }
+    .btn-copilot:hover {
+      background: rgba(99, 102, 241, 0.24);
+      border-color: #818cf8;
+      color: #ffffff;
+    }
+
+    .btn-assessment {
+      background: rgba(139, 92, 246, 0.14);
+      border: 1px solid rgba(139, 92, 246, 0.38);
+      color: #ede9fe;
+    }
+    .btn-assessment:hover {
+      background: rgba(139, 92, 246, 0.24);
+      border-color: #a78bfa;
+      color: #ffffff;
+    }
+
+    .btn-visuals {
+      background: rgba(6, 182, 212, 0.12);
+      border: 1px solid rgba(6, 182, 212, 0.34);
+      color: #cffafe;
+    }
+    .btn-visuals:hover {
+      background: rgba(6, 182, 212, 0.22);
+      border-color: #22d3ee;
+      color: #ffffff;
+    }
+
+    .btn-code {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.34);
+      color: #d1fae5;
+    }
+    .btn-code:hover {
+      background: rgba(16, 185, 129, 0.22);
+      border-color: #34d399;
+      color: #ffffff;
+    }
+
+    /* -------------------------------------------------------------------------
+       4. UTILITY & EXPORT: Secondary & Quieter Controls
+       ------------------------------------------------------------------------- */
+    .toolbar-section.section-utility {
+      background: rgba(255, 255, 255, 0.015);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 12px 16px;
+    }
+
+    .toolbar-section.section-utility .section-buttons-row {
+      gap: 12px;
+    }
+
+    .btn-utility-action {
+      height: 36px;
+      padding: 0 14px;
+      border-radius: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 0.815rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #cbd5e1;
+    }
+
+    .btn-utility-action .btn-icon {
+      font-size: 0.95rem;
+      line-height: 1;
+    }
+
+    .btn-utility-action:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.18);
       color: #ffffff;
       transform: translateY(-1px);
     }
-    .tool-btn.active {
-      background: rgba(99, 102, 241, 0.25);
-      border-color: var(--accent);
+
+    /* Utility Color Semantics */
+    .btn-versions {
+      background: rgba(245, 158, 11, 0.07);
+      border-color: rgba(245, 158, 11, 0.22);
+      color: #fef3c7;
+    }
+    .btn-versions:hover {
+      background: rgba(245, 158, 11, 0.16);
+      border-color: #fbbf24;
       color: #ffffff;
+    }
+
+    .btn-graph {
+      background: rgba(168, 85, 247, 0.07);
+      border-color: rgba(168, 85, 247, 0.22);
+      color: #f3e8ff;
+    }
+    .btn-graph:hover {
+      background: rgba(168, 85, 247, 0.16);
+      border-color: #c084fc;
+      color: #ffffff;
+    }
+
+    .btn-export-pdf {
+      background: rgba(239, 68, 68, 0.07);
+      border-color: rgba(239, 68, 68, 0.22);
+      color: #fecdd3;
+    }
+    .btn-export-pdf:hover {
+      background: rgba(239, 68, 68, 0.16);
+      border-color: #f87171;
+      color: #ffffff;
+    }
+
+    .btn-export-md {
+      background: rgba(59, 130, 246, 0.07);
+      border-color: rgba(59, 130, 246, 0.22);
+      color: #dbeafe;
+    }
+    .btn-export-md:hover {
+      background: rgba(59, 130, 246, 0.16);
+      border-color: #60a5fa;
+      color: #ffffff;
+    }
+
+    .btn-history {
+      background: rgba(148, 163, 184, 0.07);
+      border-color: rgba(148, 163, 184, 0.22);
+      color: #e2e8f0;
+    }
+    .btn-history:hover {
+      background: rgba(148, 163, 184, 0.16);
+      border-color: #94a3b8;
+      color: #ffffff;
+    }
+
+    .btn-link, .btn-print {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+    }
+    .btn-link:hover, .btn-print:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.22);
+      color: #ffffff;
+    }
+
+    #version-count-pill,
+    #rev-count-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono, monospace);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.1rem 0.45rem;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.12);
+      margin-left: 2px;
+      line-height: 1;
     }
 
     /* Note Two-Column Layout: TOC + Reading Column */
@@ -564,6 +894,33 @@
       }
       .note-reader-controls {
         top: 0;
+        padding: 14px 16px;
+      }
+      .section-buttons-row {
+        gap: 10px;
+      }
+      .toolbar-section.section-text-size,
+      .toolbar-section.section-view {
+        width: 100%;
+        box-sizing: border-box;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .note-reader-controls {
+        padding: 12px 14px;
+        gap: 10px;
+      }
+      .toolbar-section {
+        padding: 10px 12px;
+      }
+      .btn-primary-action {
+        flex: 1 1 calc(50% - 10px);
+        min-width: 140px;
+      }
+      .btn-utility-action {
+        flex: 1 1 calc(50% - 10px);
+        min-width: 120px;
       }
     }
 
