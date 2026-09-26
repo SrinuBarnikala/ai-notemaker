@@ -162,3 +162,47 @@ def test_copilot_frontend_elements_present(client: TestClient):
     assert "floating-ask-badge" in html
     assert "btn-copilot-toggle" in html
     assert "copilot.js" in html
+
+
+def test_copilot_cross_journey_context_isolation(client: TestClient):
+    """Verify Copilot cannot accept a section_id from another note/journey."""
+    # Create Journey A
+    data_a = create_sample_journey_and_note(client)
+    journey_a_id = data_a["journey_id"]
+    note_a = data_a["note"]
+    section_a_id = note_a["sections"][0]["id"]
+
+    # Create Journey B
+    j_res_b = client.post("/journeys", json={"topic": "B-Tree Indexing in PostgreSQL"})
+    assert j_res_b.status_code == 201
+    journey_b_id = j_res_b.json()["id"]
+    client.post(f"/journeys/{journey_b_id}/discovery/start")
+    client.post(f"/journeys/{journey_b_id}/discovery/answer", json={"answer": "I know basic indexing."})
+    client.post(f"/journeys/{journey_b_id}/knowledge-profile")
+    client.post(f"/journeys/{journey_b_id}/architecture")
+    n_res_b = client.post(f"/journeys/{journey_b_id}/generate-note")
+    assert n_res_b.status_code == 200
+    note_b = n_res_b.json()
+    section_b_id = note_b["sections"][0]["id"]
+
+    # Query Copilot for Journey B using Section A's ID -> MUST be rejected with 404
+    cross_res = client.post(
+        f"/journeys/{journey_b_id}/copilot/ask",
+        json={
+            "question": "Can you explain this section?",
+            "section_id": section_a_id,
+        },
+    )
+    assert cross_res.status_code == 404
+    assert f"Section '{section_a_id}' does not belong to note" in cross_res.json()["detail"]
+
+    # Query Copilot for Journey B using Section B's ID -> MUST succeed
+    valid_res = client.post(
+        f"/journeys/{journey_b_id}/copilot/ask",
+        json={
+            "question": "Can you explain this section?",
+            "section_id": section_b_id,
+        },
+    )
+    assert valid_res.status_code == 200
+    assert valid_res.json()["section_id"] == section_b_id

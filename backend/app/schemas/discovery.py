@@ -28,6 +28,7 @@ class DiscoveryQuestionResponse(BaseModel):
     is_finished: bool
     quick_assessment: Optional[str] = None
     total_questions_answered: int = 0
+    max_questions: int = 4
 
 
 class DiscoveryInteractionItem(BaseModel):

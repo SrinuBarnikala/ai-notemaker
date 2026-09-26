@@ -55,3 +55,78 @@ def test_provider_factory_invalid():
     settings.llm_provider = "unsupported_provider"
     with pytest.raises(ValueError, match="Unsupported LLM provider"):
         get_llm_provider(settings)
+
+
+@pytest.mark.asyncio
+async def test_ollama_model_available():
+    import httpx
+    from unittest.mock import AsyncMock, patch, MagicMock
+
+    provider = OllamaProvider(base_url="http://localhost:11434", model_name="qwen2.5:7b")
+
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = {
+        "models": [{"name": "qwen2.5:7b"}, {"name": "mistral:latest"}]
+    }
+
+    mock_client = AsyncMock()
+    mock_client.get.return_value = mock_resp
+    mock_client.__aenter__.return_value = mock_client
+    mock_client.__aexit__.return_value = None
+
+    with patch("httpx.AsyncClient", return_value=mock_client):
+        res = await provider.check_model_availability()
+        assert res["server_reachable"] is True
+        assert res["model_available"] is True
+        assert "available" in res["detail"]
+
+
+@pytest.mark.asyncio
+async def test_ollama_model_missing():
+    import httpx
+    from unittest.mock import AsyncMock, patch, MagicMock
+
+    provider = OllamaProvider(base_url="http://localhost:11434", model_name="qwen2.5:7b")
+
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = {
+        "models": [{"name": "llama3:8b"}]
+    }
+
+    mock_client = AsyncMock()
+    mock_client.get.return_value = mock_resp
+    mock_client.__aenter__.return_value = mock_client
+    mock_client.__aexit__.return_value = None
+
+    with patch("httpx.AsyncClient", return_value=mock_client):
+        res = await provider.check_model_availability()
+        assert res["server_reachable"] is True
+        assert res["model_available"] is False
+        assert "not pulled" in res["detail"]
+        assert "ollama pull qwen2.5:7b" in res["detail"]
+
+
+@pytest.mark.asyncio
+async def test_ollama_generate_404_clean_fallback():
+    import httpx
+    from unittest.mock import AsyncMock, patch, MagicMock
+
+    provider = OllamaProvider(base_url="http://localhost:11434", model_name="qwen2.5:7b")
+
+    mock_post_resp = MagicMock()
+    mock_post_resp.status_code = 404
+    mock_post_resp.raise_for_status.side_effect = httpx.HTTPStatusError(
+        "404 Not Found", request=MagicMock(), response=mock_post_resp
+    )
+
+    mock_client = AsyncMock()
+    mock_client.post.return_value = mock_post_resp
+    mock_client.__aenter__.return_value = mock_client
+    mock_client.__aexit__.return_value = None
+
+    with patch("httpx.AsyncClient", return_value=mock_client):
+        with pytest.raises(RuntimeError) as exc_info:
+            await provider.generate("test prompt")
+        assert "not pulled" in str(exc_info.value)

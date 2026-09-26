@@ -1,9 +1,51 @@
 /* copilot.js — Agent 9 Socratic AI In-Note Copilot, Contextual Explainer & Direct Note Pinning */
 
+function resetCopilotState() {
+  activeCopilotSectionId = null;
+  activeCopilotSectionTitle = null;
+  activeCopilotSelectedText = null;
+  copilotHistory = [];
+
+  const input = document.getElementById('copilot-input');
+  if (input) input.value = '';
+
+  const quoteWrap = document.getElementById('copilot-selected-quote');
+  const quoteText = document.getElementById('copilot-quote-text');
+  if (quoteWrap) quoteWrap.style.display = 'none';
+  if (quoteText) quoteText.textContent = '';
+
+  const msgContainer = document.getElementById('copilot-messages');
+  if (msgContainer) msgContainer.innerHTML = '';
+
+  const contextPill = document.getElementById('copilot-context-pill');
+  if (contextPill) {
+    contextPill.textContent = '📍 Note Context';
+    contextPill.title = '';
+  }
+
+  const drawer = document.getElementById('copilot-drawer');
+  const backdrop = document.getElementById('copilot-backdrop');
+  if (drawer) drawer.classList.remove('open');
+  if (backdrop) backdrop.style.display = 'none';
+
+  const floatBadge = document.getElementById('floating-ask-badge');
+  if (floatBadge) floatBadge.style.display = 'none';
+}
+window.resetCopilotState = resetCopilotState;
+
 function openCopilotDrawer(sectionId = null, sectionTitle = null, prefillQuestion = "", selectedText = null) {
   if (!currentJourneyId) {
     alert("Please create or open a learning journey first to consult Agent 9 Copilot.");
     return;
+  }
+
+  // Validate that sectionId belongs to currentNote if specified
+  if (sectionId && currentNote && Array.isArray(currentNote.sections)) {
+    const exists = currentNote.sections.some(s => s.id === sectionId);
+    if (!exists) {
+      sectionId = null;
+      sectionTitle = null;
+    }
   }
 
   activeCopilotSectionId = sectionId;

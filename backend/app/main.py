@@ -54,6 +54,14 @@ async def health_check(settings: Settings = Depends(get_settings)):
     provider = get_llm_provider(settings)
     llm_ok = await provider.health_check()
 
+    model_available = True
+    model_warning = None
+    if hasattr(provider, "check_model_availability"):
+        avail = await provider.check_model_availability()
+        if avail.get("server_reachable") and not avail.get("model_available"):
+            model_available = False
+            model_warning = avail.get("detail")
+
     return {
         "status": "healthy" if db_ok else "degraded",
         "version": settings.app_version,
@@ -62,6 +70,8 @@ async def health_check(settings: Settings = Depends(get_settings)):
         "llm_provider": provider.provider_name,
         "llm_model": provider.model_name,
         "llm_healthy": llm_ok,
+        "model_available": model_available,
+        "model_warning": model_warning,
     }
 
 

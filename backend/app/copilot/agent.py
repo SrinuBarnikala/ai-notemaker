@@ -116,7 +116,12 @@ async def ask_copilot(
             .filter(NoteSection.id == req.section_id, NoteSection.note_id == note.id)
             .first()
         )
-    if not target_section and note.sections:
+        if not target_section:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Section '{req.section_id}' does not belong to note '{note.id}' for journey '{journey_id}'.",
+            )
+    elif note.sections:
         # Default to first section for contextual baseline
         target_section = note.sections[0]
 

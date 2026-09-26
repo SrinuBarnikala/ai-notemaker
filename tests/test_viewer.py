@@ -79,3 +79,50 @@ def test_note_viewer_retrieval_by_note_id(client):
     direct_res = client.get(f"/notes/{note_id}")
     assert direct_res.status_code == 200
     assert direct_res.json()["id"] == note_id
+
+
+def test_modal_escape_handling_and_components(client):
+    """Verify that all modals/drawers exist in index.html and app.js handles Escape dismiss."""
+    root_res = client.get("/")
+    assert root_res.status_code == 200
+    html = root_res.text
+
+    # Modal elements in DOM
+    expected_modal_ids = [
+        "copilot-drawer",
+        "spotlight-search-modal",
+        "version-history-modal",
+        "knowledge-memory-modal",
+        "concept-provenance-modal",
+        "assessment-modal",
+        "evolve-modal",
+        "diag-fullscreen-modal",
+        "section-visual-modal",
+        "section-code-modal",
+    ]
+    for m_id in expected_modal_ids:
+        assert m_id in html, f"Expected modal #{m_id} to be present in index.html"
+
+    # Verify app.js contains all Escape handlers
+    from pathlib import Path
+    app_js_path = Path("frontend/js/app.js")
+    assert app_js_path.exists()
+    app_js_content = app_js_path.read_text(encoding="utf-8")
+
+    assert "Escape" in app_js_content
+    close_handlers = [
+        "closeCopilotDrawer",
+        "closeSearchModal",
+        "closeVersionHistoryModal",
+        "closeMemoryModal",
+        "closeConceptProvenanceModal",
+        "closeAssessmentModal",
+        "closeEvolveModal",
+        "closeDiagramModal",
+        "closeSectionVisualModal",
+        "closeSectionCodeModal",
+        "closeGraphModal",
+        "closeConceptInspector",
+    ]
+    for handler in close_handlers:
+        assert handler in app_js_content, f"Expected handler {handler} in app.js Escape listener"

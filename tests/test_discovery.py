@@ -132,3 +132,30 @@ def test_discovery_empty_answer_rejected(client):
 def test_discovery_unknown_journey(client):
     res = client.post("/journeys/unknown-id-123/discovery/start")
     assert res.status_code == 404
+
+
+def test_discovery_progress_indicator_and_max_questions(client):
+    """Verify Discovery returns max_questions=4 and frontend displays Question X of 4."""
+    j_res = client.post("/journeys", json={"topic": "Zero Knowledge Proofs"})
+    assert j_res.status_code == 201
+    journey_id = j_res.json()["id"]
+
+    start_res = client.post(f"/journeys/{journey_id}/discovery/start")
+    assert start_res.status_code == 200
+    start_data = start_res.json()
+    assert start_data["max_questions"] == 4
+    assert start_data["question_index"] == 1
+
+    ans_res = client.post(
+        f"/journeys/{journey_id}/discovery/answer",
+        json={"answer": "I know arithmetic circuits, but PLONK polynomial commitments are unfamiliar."},
+    )
+    assert ans_res.status_code == 200
+    ans_data = ans_res.json()
+    assert ans_data["max_questions"] == 4
+
+    # Verify frontend index.html renders Question 1 of 4 and disc-step-label
+    root_res = client.get("/")
+    assert root_res.status_code == 200
+    assert "Question 1 of 4" in root_res.text
+    assert 'id="disc-step-label"' in root_res.text

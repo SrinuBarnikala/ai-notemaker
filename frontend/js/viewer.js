@@ -138,6 +138,9 @@
        ========================================================================== */
 
     function renderNote(note) {
+      if (currentNote && currentNote.id !== note.id) {
+        if (typeof resetCopilotState === 'function') resetCopilotState();
+      }
       currentNote = note;
       const notePanel = document.getElementById('note-panel');
       notePanel.style.display = 'block';

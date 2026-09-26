@@ -39,6 +39,7 @@
         const journey = await res.json();
         currentJourneyId = journey.id;
         currentTopic = journey.topic;
+        if (typeof resetCopilotState === 'function') resetCopilotState();
 
         await startDiscovery(journey.id, journey.topic);
         loadRecentJourneys();
@@ -54,6 +55,7 @@
     async function startDiscovery(journeyId, topic) {
       currentJourneyId = journeyId;
       currentTopic = topic;
+      if (typeof resetCopilotState === 'function') resetCopilotState();
 
       const discPanel = document.getElementById('discovery-panel');
       const profPanel = document.getElementById('profile-panel');
@@ -68,6 +70,8 @@
       document.getElementById('disc-topic-label').textContent = topic;
       document.getElementById('disc-question-text').textContent = 'Consulting Knowledge Discovery Agent...';
       document.getElementById('disc-concept').textContent = '🎯 Probing baseline...';
+      document.getElementById('disc-step-label').textContent = 'Question 1 of 4';
+      document.getElementById('disc-progress').style.width = '25%';
       document.getElementById('active-question-section').style.display = 'block';
 
       try {
@@ -95,10 +99,11 @@
         return;
       }
 
-      document.getElementById('disc-step-label').textContent = `Question ${data.question_index} of ~4`;
+      const maxQ = data.max_questions || 4;
+      document.getElementById('disc-step-label').textContent = `Question ${data.question_index} of ${maxQ}`;
       document.getElementById('disc-question-text').textContent = data.question_text;
       document.getElementById('disc-concept').textContent = `🎯 ${data.concept_target}`;
-      document.getElementById('disc-progress').style.width = `${Math.min(data.question_index * 25, 95)}%`;
+      document.getElementById('disc-progress').style.width = `${Math.min((data.question_index / maxQ) * 100, 100)}%`;
       document.getElementById('disc-answer-input').value = '';
       document.getElementById('disc-answer-input').focus();
     }
@@ -336,6 +341,7 @@
     async function resumeJourney(journeyId, topic, status) {
       currentJourneyId = journeyId;
       currentTopic = topic;
+      if (typeof resetCopilotState === 'function') resetCopilotState();
 
       if (status === 'note_generated') {
         try {
@@ -379,6 +385,21 @@
       // Default: continue discovery
       startDiscovery(journeyId, topic);
     }
+
+    async function loadJourneyById(journeyId) {
+      if (typeof resetCopilotState === 'function') resetCopilotState();
+      try {
+        const res = await fetch(`/journeys/${journeyId}`);
+        if (!res.ok) return;
+        const j = await res.json();
+        currentJourneyId = j.id;
+        currentTopic = j.topic;
+        await resumeJourney(j.id, j.topic, j.status);
+      } catch (err) {
+        console.error("Failed to load journey by id:", err);
+      }
+    }
+    window.loadJourneyById = loadJourneyById;
 
     /* ==========================================================================
        PHASE 9: VISUAL PLANNER & INTERACTIVE ARCHITECTURE ENGINE (AGENT 7)
