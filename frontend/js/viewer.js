@@ -247,14 +247,15 @@
             </button>
             <button type="button" class="tool-btn" style="padding: 0.65rem 1.25rem; background: rgba(99, 102, 241, 0.2); border-color: var(--accent); color: #ffffff;" onclick="openAssessmentModal()">
               <span>🧠 Test Mastery &amp; Flashcards</span>
-            </button>
             <button type="button" class="tool-btn" style="padding: 0.65rem 1.25rem; background: rgba(6, 182, 212, 0.18); border-color: var(--cyan); color: #a5f3fc;" onclick="triggerPlanVisuals()">
               <span>📊 Plan Visual Architecture</span>
+            </button>
+            <button type="button" class="tool-btn" style="padding: 0.65rem 1.25rem; background: rgba(56, 189, 248, 0.2); border-color: #38bdf8; color: #bae6fd; font-weight: 700;" onclick="openMemoryModal('history')">
+              <span>🧠 Knowledge Memory</span>
             </button>
           </div>
         </div>
       `;
-
 
       bodyContainer.innerHTML = sectionsHtml + globalEvolveCard;
 
@@ -263,7 +264,13 @@
 
       // Initialize ScrollSpy
       setTimeout(setupScrollSpy, 150);
+
+      // Phase 15: Contextual In-Note Knowledge Memory Cross-References
+      if (typeof loadNoteMemoryCrossReferences === 'function') {
+        setTimeout(() => loadNoteMemoryCrossReferences(note.id), 200);
+      }
     }
+
 
 
 

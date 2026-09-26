@@ -9,6 +9,7 @@ from backend.app.api.visuals import router as visuals_router
 from backend.app.api.code import router as code_router
 from backend.app.api.copilot import router as copilot_router
 from backend.app.api.graph import router as graph_router
+from backend.app.api.memory import router as memory_router
 
 api_router = APIRouter()
 api_router.include_router(journeys_router, prefix="/journeys", tags=["Journeys"])
@@ -21,4 +22,6 @@ api_router.include_router(visuals_router)
 api_router.include_router(code_router)
 api_router.include_router(copilot_router)
 api_router.include_router(graph_router)
+api_router.include_router(memory_router)
+
 

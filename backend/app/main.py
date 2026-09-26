@@ -68,11 +68,27 @@ async def health_check(settings: Settings = Depends(get_settings)):
 # Frontend static files
 frontend_dir = Path("./frontend")
 if frontend_dir.exists():
+    @app.middleware("http")
+    async def add_cache_control_headers(request, call_next):
+        response = await call_next(request)
+        if request.url.path.startswith("/static/") or request.url.path == "/":
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        return response
+
     app.mount("/static", StaticFiles(directory=str(frontend_dir)), name="static")
 
     @app.get("/", tags=["Frontend"])
     async def serve_index():
         index_file = frontend_dir / "index.html"
         if index_file.exists():
-            return FileResponse(str(index_file))
+            return FileResponse(
+                str(index_file),
+                headers={
+                    "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+                    "Pragma": "no-cache",
+                    "Expires": "0",
+                },
+            )
         return {"message": "Personalized Technical Note Maker API running."}
