@@ -64,5 +64,33 @@ def ensure_schema_migrations():
                     conn.execute(text("ALTER TABLE note_revisions ADD COLUMN snapshot TEXT"))
                 if "change_summary" not in cols:
                     conn.execute(text("ALTER TABLE note_revisions ADD COLUMN change_summary TEXT"))
+
+            # Check note_architectures columns
+            res = conn.execute(text("PRAGMA table_info(note_architectures)")).fetchall()
+            cols = [row[1] for row in res]
+            if cols:
+                if "generation_status" not in cols:
+                    conn.execute(text("ALTER TABLE note_architectures ADD COLUMN generation_status VARCHAR(50) DEFAULT 'llm_success'"))
+                if "generation_details" not in cols:
+                    conn.execute(text("ALTER TABLE note_architectures ADD COLUMN generation_details TEXT"))
+
+            # Check notes columns
+            res = conn.execute(text("PRAGMA table_info(notes)")).fetchall()
+            cols = [row[1] for row in res]
+            if cols:
+                if "generation_status" not in cols:
+                    conn.execute(text("ALTER TABLE notes ADD COLUMN generation_status VARCHAR(50) DEFAULT 'llm_success'"))
+                if "generation_details" not in cols:
+                    conn.execute(text("ALTER TABLE notes ADD COLUMN generation_details TEXT"))
+
+            # Check note_sections columns
+            res = conn.execute(text("PRAGMA table_info(note_sections)")).fetchall()
+            cols = [row[1] for row in res]
+            if cols:
+                if "generation_status" not in cols:
+                    conn.execute(text("ALTER TABLE note_sections ADD COLUMN generation_status VARCHAR(50) DEFAULT 'llm_success'"))
+                if "generation_details" not in cols:
+                    conn.execute(text("ALTER TABLE note_sections ADD COLUMN generation_details TEXT"))
     except Exception:
         pass
+

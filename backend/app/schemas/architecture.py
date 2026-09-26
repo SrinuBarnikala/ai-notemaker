@@ -1,6 +1,7 @@
 from datetime import datetime
-from typing import List, Optional, Literal
+from typing import List, Optional, Literal, Dict, Any, Union
 from pydantic import BaseModel, ConfigDict
+
 
 
 class SectionBlueprint(BaseModel):
@@ -28,7 +29,11 @@ class NoteArchitectureResponse(BaseModel):
     learning_goal: str
     summary_rationale: str
     sections: List[SectionBlueprint]
+    generation_status: Optional[str] = "llm_success"
+    generation_details: Optional[Union[str, Dict[str, Any]]] = None
     created_at: datetime
+
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+

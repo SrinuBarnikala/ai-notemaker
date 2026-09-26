@@ -1,5 +1,6 @@
 import logging
-from typing import List, Dict, Any
+import re
+from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
 
 from backend.app.discovery.parser import extract_json_object
@@ -11,6 +12,42 @@ logger = logging.getLogger(__name__)
 class ArchitectureParsed(BaseModel):
     summary_rationale: str = Field(..., min_length=10)
     sections: List[SectionBlueprint] = Field(..., min_length=3)
+    used_fallback: bool = False
+    failure_reason: Optional[str] = None
+
+
+def clean_gap_to_title(gap: str) -> str:
+    """Transforms a raw knowledge gap phrase into a natural, authoritative technical title."""
+    clean = gap.strip()
+    prefixes_to_strip = [
+        "concrete understanding of ",
+        "factors influencing ",
+        "practical application of ",
+        "design and implementation of ",
+        "design of ",
+        "implementation of ",
+        "understanding of ",
+        "foundations of ",
+        "foundational mechanics of ",
+        "mechanics of ",
+        "knowledge of ",
+    ]
+    lower = clean.lower()
+    for prefix in prefixes_to_strip:
+        if lower.startswith(prefix):
+            clean = clean[len(prefix):].strip()
+            break
+
+    words = clean.split()
+    minor_words = {"and", "or", "in", "of", "for", "to", "the", "a", "an", "on", "with", "as", "such"}
+    capitalized = " ".join(
+        w.capitalize() if w.lower() not in minor_words else w.lower()
+        for w in words
+    )
+
+    if capitalized:
+        capitalized = capitalized[0].upper() + capitalized[1:]
+    return capitalized or gap.strip()
 
 
 def parse_note_architecture(
@@ -47,10 +84,15 @@ def parse_note_architecture(
                     if v_type.lower() in ["none", "null", ""]:
                         v_type = None
 
+                title = str(s.get("title", f"Section {idx}")).strip()
+                # Clean any unintentional raw prefixes
+                if title.lower().startswith("core mechanics: concrete understanding"):
+                    title = clean_gap_to_title(title.replace("Core Mechanics:", ""))
+
                 sections.append(
                     SectionBlueprint(
                         order_index=idx,
-                        title=str(s.get("title", f"Section {idx}")).strip(),
+                        title=title,
                         section_type=str(s.get("section_type", "deep_dive")).strip(),
                         depth=depth,  # type: ignore
                         target_concepts=target_concepts,
@@ -67,12 +109,17 @@ def parse_note_architecture(
                 return ArchitectureParsed(
                     summary_rationale=summary_rationale,
                     sections=sections,
+                    used_fallback=False,
+                    failure_reason=None,
                 )
         except Exception as e:
             logger.warning("Pydantic validation failed for Note Architecture: %s", e)
+            failure_reason = f"Schema validation failed: {e}"
+    else:
+        failure_reason = "Model output was empty or invalid JSON"
 
     # Deterministic fallback architecture constructed directly from learner profile
-    logger.info("Using deterministic fallback generation for note architecture on %s", topic)
+    logger.info("Using deterministic fallback generation for note architecture on %s (reason: %s)", topic, failure_reason)
     sections = []
     curr_idx = 1
 
@@ -81,11 +128,11 @@ def parse_note_architecture(
     sections.append(
         SectionBlueprint(
             order_index=curr_idx,
-            title=f"{topic} in One Sentence & Your Starting Mental Model",
+            title=f"{topic}: Foundations & Starting Mental Model",
             section_type="mental_model",
             depth="brief",
             target_concepts=strong_concepts or [topic],
-            rationale="Respects existing strong foundations while framing the scope of the note.",
+            rationale="Anchors on existing baseline foundations while establishing the precise architectural scope.",
             needs_code=False,
             needs_visual=True,
             visual_type="flowchart",
@@ -98,7 +145,7 @@ def parse_note_architecture(
         sections.append(
             SectionBlueprint(
                 order_index=curr_idx,
-                title="Mental Model Realignment & Common Misconceptions",
+                title=f"Mental Model Realignment: Avoiding Pitfalls in {topic}",
                 section_type="pitfall_warning",
                 depth="standard",
                 target_concepts=[topic],
@@ -110,17 +157,25 @@ def parse_note_architecture(
         )
         curr_idx += 1
 
-    # 3. Targeted Deep Dives for Gaps and Weak/Moderate concepts
-    target_gaps = gaps or ["Internal Mechanics", "Edge Cases & Trade-offs"]
-    for gap_title in target_gaps[:3]:
+    # 3. Targeted Deep Dives for Gaps (synthesizing natural technical titles)
+    target_gaps = gaps or ["Internal Mechanics", "Operational Trade-offs"]
+    for i, raw_gap in enumerate(target_gaps[:3]):
+        cleaned_gap = clean_gap_to_title(raw_gap)
+        if i == 0:
+            sec_title = f"{cleaned_gap}: Internal Mechanics & Architecture"
+        elif i == 1:
+            sec_title = f"{cleaned_gap}: Strategies & Constraint Dynamics"
+        else:
+            sec_title = f"{cleaned_gap}: Optimization & Algorithms"
+
         sections.append(
             SectionBlueprint(
                 order_index=curr_idx,
-                title=f"Core Mechanics: {gap_title}",
+                title=sec_title,
                 section_type="deep_dive",
                 depth="deep",
-                target_concepts=[gap_title],
-                rationale=f"Addresses learner's primary knowledge gap in {gap_title} with granular depth.",
+                target_concepts=[raw_gap],
+                rationale=f"Addresses learner's primary knowledge gap in {cleaned_gap} with rigorous technical depth.",
                 needs_code=False,
                 needs_visual=True,
                 visual_type="architecture_diagram",
@@ -132,11 +187,11 @@ def parse_note_architecture(
     sections.append(
         SectionBlueprint(
             order_index=curr_idx,
-            title=f"Practical Implementation & Production Patterns for {topic}",
+            title=f"Production Implementation & Practical Patterns for {topic}",
             section_type="code_walkthrough",
             depth="deep",
             target_concepts=[topic] + target_gaps[:2],
-            rationale="Grounds the theoretical understanding into executable code and real-world patterns.",
+            rationale="Grounds theoretical mechanics into executable code, real-world patterns, and edge-case handling.",
             needs_code=True,
             needs_visual=False,
             visual_type=None,
@@ -144,25 +199,28 @@ def parse_note_architecture(
     )
     curr_idx += 1
 
-    # 5. Advanced Next Steps
+    # 5. Advanced Next Steps / Production Trade-offs
     sections.append(
         SectionBlueprint(
             order_index=curr_idx,
-            title="Advanced Concepts to Master Next",
+            title=f"Operational Trade-offs, Edge Cases & Next Frontiers in {topic}",
             section_type="bridge",
             depth="brief",
             target_concepts=[f"Next Frontier in {topic}"],
-            rationale="Provides continuous learning trajectory once the immediate gaps are bridged.",
+            rationale="Provides continuous learning trajectory, scaling trade-offs, and production considerations.",
             needs_code=False,
             needs_visual=False,
             visual_type=None,
         )
     )
 
+    clean_gaps_summary = ", ".join([clean_gap_to_title(g) for g in target_gaps[:2]])
     return ArchitectureParsed(
         summary_rationale=(
-            f"This personalized architecture specifically isolates your identified gaps in {', '.join(target_gaps[:2])} "
-            f"while skipping redundant elementary explanations and prioritizing hands-on execution."
+            f"This personalized architecture systematically resolves your identified knowledge gaps in "
+            f"{clean_gaps_summary} while bypassing redundant elementary reviews and emphasizing production patterns."
         ),
         sections=sections,
+        used_fallback=True,
+        failure_reason=failure_reason,
     )

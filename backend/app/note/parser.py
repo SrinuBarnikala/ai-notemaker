@@ -1,10 +1,19 @@
 import json
 import logging
 import re
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from backend.app.schemas.note import NoteBlock
+from backend.app.visuals.sanitizer import sanitize_mermaid_spec, generate_fallback_mermaid
 
 logger = logging.getLogger(__name__)
+
+
+class ParsedBlocksList(list):
+    """List of NoteBlock objects with generation observability metadata."""
+    def __init__(self, iterable=(), used_fallback: bool = False, failure_reason: Optional[str] = None):
+        super().__init__(iterable)
+        self.used_fallback = used_fallback
+        self.failure_reason = failure_reason
 
 
 def extract_json_array_or_object(text: str) -> Any:
@@ -13,17 +22,7 @@ def extract_json_array_or_object(text: str) -> Any:
     if match:
         clean = match.group(1).strip()
 
-    # Check for array
-    start_arr = clean.find("[")
-    end_arr = clean.rfind("]")
-    if start_arr != -1 and end_arr != -1 and end_arr > start_arr:
-        candidate = clean[start_arr : end_arr + 1]
-        try:
-            return json.loads(candidate)
-        except json.JSONDecodeError:
-            pass
-
-    # Check for object with "blocks" key
+    # Check for object with "blocks" key first
     start_obj = clean.find("{")
     end_obj = clean.rfind("}")
     if start_obj != -1 and end_obj != -1 and end_obj > start_obj:
@@ -36,8 +35,21 @@ def extract_json_array_or_object(text: str) -> Any:
         except json.JSONDecodeError:
             pass
 
+    # Check for direct array
+    start_arr = clean.find("[")
+    end_arr = clean.rfind("]")
+    if start_arr != -1 and end_arr != -1 and end_arr > start_arr:
+        candidate = clean[start_arr : end_arr + 1]
+        try:
+            return json.loads(candidate)
+        except json.JSONDecodeError:
+            pass
+
     try:
-        return json.loads(clean)
+        parsed = json.loads(clean)
+        if isinstance(parsed, dict) and "blocks" in parsed:
+            return parsed["blocks"]
+        return parsed
     except json.JSONDecodeError:
         return None
 
@@ -52,42 +64,74 @@ def parse_section_blocks(
     needs_code: bool,
     needs_visual: bool,
     visual_type: str = None,
-) -> List[NoteBlock]:
+    topic: str = "Systems Engineering",
+) -> ParsedBlocksList:
     """
-    Parses LLM output into a list of validated NoteBlock objects.
-    Falls back to high-fidelity structured blocks if LLM output is malformed.
+    Parses and validates LLM output into structured NoteBlock objects.
+    Falls back to topic-neutral structured blocks if LLM output fails validation.
     """
     data = extract_json_array_or_object(raw_text)
-    if data and isinstance(data, list):
-        parsed_blocks = []
-        valid_types = {"paragraph", "definition", "example", "code", "warning", "comparison", "diagram"}
-        for item in data:
-            if isinstance(item, dict):
+    failure_reason = None
+
+    if data:
+        raw_items = data if isinstance(data, list) else (data.get("blocks") if isinstance(data, dict) else None)
+        if isinstance(raw_items, list) and len(raw_items) > 0:
+            parsed_blocks = []
+            valid_types = {"paragraph", "definition", "example", "code", "warning", "comparison", "diagram"}
+
+            for item in raw_items:
+                if not isinstance(item, dict):
+                    continue
                 b_type = str(item.get("type", "paragraph")).lower().strip()
                 if b_type not in valid_types:
                     b_type = "paragraph"
+
+                content = item.get("content")
+                term = item.get("term")
+                code_snippet = item.get("code")
+                diag_spec = item.get("diagram_spec")
+
+                # Sanitize Mermaid if diagram block
+                if b_type == "diagram" and diag_spec:
+                    diag_spec = sanitize_mermaid_spec(diag_spec, fallback_title=section_title)
+
+                # Ensure minimum valid content
+                if b_type == "paragraph" and not content:
+                    continue
+                if b_type == "definition" and not (content or term):
+                    continue
+                if b_type == "code" and not code_snippet:
+                    continue
+
                 try:
                     parsed_blocks.append(
                         NoteBlock(
                             type=b_type,  # type: ignore
-                            content=item.get("content"),
-                            term=item.get("term"),
-                            language=item.get("language"),
-                            code=item.get("code"),
+                            content=content,
+                            term=term,
+                            language=item.get("language") or ("python" if b_type == "code" else None),
+                            code=code_snippet,
                             title=item.get("title"),
                             caption=item.get("caption"),
-                            diagram_spec=item.get("diagram_spec"),
+                            diagram_spec=diag_spec,
+                            diagram_type=item.get("diagram_type") or (visual_type if b_type == "diagram" else None),
                             items=item.get("items"),
                         )
                     )
                 except Exception as e:
                     logger.warning("Block validation failed: %s", e)
 
-        if parsed_blocks:
-            return parsed_blocks
+            if parsed_blocks:
+                return ParsedBlocksList(parsed_blocks, used_fallback=False, failure_reason=None)
+            else:
+                failure_reason = "No valid blocks satisfied schema constraints"
+        else:
+            failure_reason = "Extracted JSON did not contain a non-empty array of blocks"
+    else:
+        failure_reason = "Output was empty or not parseable as JSON"
 
-    # Deterministic high-quality fallback structured blocks
-    logger.info("Using deterministic fallback blocks for section: %s", section_title)
+    # Deterministic topic-neutral fallback blocks
+    logger.info("Using deterministic fallback blocks for section '%s' (reason: %s)", section_title, failure_reason)
     blocks = []
     primary_concept = target_concepts[0] if target_concepts else section_title
 
@@ -96,9 +140,9 @@ def parse_section_blocks(
         NoteBlock(
             type="paragraph",
             content=(
-                f"**{section_title}** forms a foundational component of this topic. "
-                f"{rationale} By examining its internal mechanics, we transition from intuitive "
-                f"assumptions to concrete systems design."
+                f"**{section_title}** establishes key architectural mechanisms within {topic}. "
+                f"{rationale} Understanding its operational boundaries and state transitions is essential "
+                f"for resilient systems design."
             ),
         )
     )
@@ -110,74 +154,75 @@ def parse_section_blocks(
                 type="definition",
                 term=primary_concept,
                 content=(
-                    f"The core mechanism responsible for executing {primary_concept.lower()} "
-                    f"within the end-to-end architecture, establishing invariants and managing data transformations."
+                    f"The core technical principles, operational parameters, and behavioral guarantees defining "
+                    f"{primary_concept} within the end-to-end architecture."
                 ),
             )
         )
 
-    # 3. Add Warning block for pitfall warning or misconception
+    # 3. Add Warning & Comparison block for pitfall warning
     if section_type == "pitfall_warning":
         blocks.append(
             NoteBlock(
                 type="warning",
-                title="Common Conceptual Pitfall",
+                title=f"Critical Constraint Management in {primary_concept}",
                 content=(
-                    f"A frequent misconception is conflating raw vector similarity with true relevance reranking. "
-                    f"Vector search uses approximate nearest neighbors over fixed embeddings, whereas rerankers "
-                    f"perform joint query-document cross-attention."
+                    f"A frequent pitfall is assuming default resource allocations scale linearly without establishing "
+                    f"explicit boundaries, backpressure limits, and fallback invariants."
                 ),
             )
         )
         blocks.append(
             NoteBlock(
                 type="comparison",
-                title="Vector Search vs Reranking Comparison",
-                content="Key behavioral and operational differences:",
+                title=f"{primary_concept}: Baseline vs Production Patterns",
+                content="Key operational trade-offs and behavioral differences:",
                 items=[
-                    {"dimension": "Speed", "Vector Search": "Sub-millisecond (HNSW)", "Reranking": "10-50ms (Cross-Encoder)"},
-                    {"dimension": "Context", "Vector Search": "Independent embeddings", "Reranking": "Full token interaction"},
-                    {"dimension": "Recall vs Precision", "Vector Search": "High recall filter", "Reranking": "High precision ranking"},
+                    {"dimension": "Constraint Management", "Naive Baseline": "Unbounded / unvalidated", "Engineered Pattern": "Explicit thresholds and backpressure"},
+                    {"dimension": "State Lifecycle", "Naive Baseline": "Volatile, implicit state", "Engineered Pattern": "Deterministic synchronization and checkpoints"},
+                    {"dimension": "Failure Handling", "Naive Baseline": "Unhandled degradation", "Engineered Pattern": "Circuit-breaking and telemetry"},
                 ],
             )
         )
 
     # 4. Add Visual Diagram if requested
     if needs_visual:
-        from backend.app.visuals.sanitizer import generate_fallback_mermaid
-        v_type = visual_type or "architecture"
-        diag_title = f"Architectural Flow: {primary_concept}"
+        v_type = visual_type or "architecture_diagram"
+        diag_title = f"{primary_concept} Architecture & Data Flow"
         blocks.append(
             NoteBlock(
                 type="diagram",
                 title=diag_title,
-                caption=f"Visual representation of data flow and component boundaries for {primary_concept}.",
+                caption=f"Visual representation of component boundaries and data transitions for {primary_concept}.",
                 diagram_spec=generate_fallback_mermaid(v_type, primary_concept),
                 diagram_type=v_type,
-                visual_description=f"Automated architectural visualization for {primary_concept}.",
+                visual_description=f"System diagram illustrating data transformations for {primary_concept}.",
             )
         )
 
     # 5. Add Code block if requested or if walkthrough
     if needs_code or section_type == "code_walkthrough":
+        clean_name = "".join(w.capitalize() for w in re.sub(r"[^a-zA-Z0-9 ]", "", primary_concept).split()) or "Core"
         blocks.append(
             NoteBlock(
                 type="code",
                 language="python",
-                title=f"Production Implementation: {primary_concept}",
+                title=f"Production Pattern: {primary_concept}",
                 code=(
-                    f"from typing import List, Dict, Any\n"
-                    f"\n"
-                    f"def execute_{primary_concept.lower().replace(' ', '_').replace('-', '_')}(query: str, items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:\n"
+                    f"from typing import Dict, Any\n\n"
+                    f"class {clean_name}Controller:\n"
                     f"    \"\"\"\n"
-                    f"    Executes production logic for {primary_concept}.\n"
+                    f"    Manages operational lifecycle and state invariants for {primary_concept}.\n"
                     f"    \"\"\"\n"
-                    f"    results = []\n"
-                    f"    for item in items:\n"
-                    f"        score = compute_score(query, item['content'])\n"
-                    f"        if score > 0.7:\n"
-                    f"            results.append({{**item, 'relevance': score}})\n"
-                    f"    return sorted(results, key=lambda x: x['relevance'], reverse=True)\n"
+                    f"    def __init__(self, capacity_limit: int = 1000):\n"
+                    f"        self.capacity_limit = capacity_limit\n"
+                    f"        self._active_state: Dict[str, Any] = {{}}\n\n"
+                    f"    def process_context(self, payload: Dict[str, Any]) -> Dict[str, Any]:\n"
+                    f"        if not payload:\n"
+                    f"            raise ValueError('Context payload cannot be empty')\n"
+                    f"        # Verify operational bounds and execute state transformation\n"
+                    f"        processed = {{'status': 'applied', 'concept': '{primary_concept}', 'data': payload}}\n"
+                    f"        return processed\n"
                 ),
             )
         )
@@ -187,13 +232,12 @@ def parse_section_blocks(
         blocks.append(
             NoteBlock(
                 type="example",
-                title="Real-World Architectural Consideration",
+                title="Production Engineering Consideration",
                 content=(
-                    f"When operating {primary_concept} at scale, network latency and GPU batch sizing dominate. "
-                    f"Always apply two-stage filtering: retrieve top-100 candidates via indexed vector search, "
-                    f"then rerank top-20 before prompting the generator model."
+                    f"When operating {primary_concept} at scale, monitor resource utilization and latency profiles. "
+                    f"Establish proactive circuit breakers and bounded limits to prevent cascading failures under heavy load."
                 ),
             )
         )
 
-    return blocks
+    return ParsedBlocksList(blocks, used_fallback=True, failure_reason=failure_reason)

@@ -27,6 +27,8 @@ class Note(Base):
     topic = Column(String(500), nullable=False)
     version = Column(Integer, default=1, nullable=False)
     summary = Column(Text, nullable=False)
+    generation_status = Column(String(50), default="llm_success", nullable=False)
+    generation_details = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), default=get_utc_now, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=get_utc_now, onupdate=get_utc_now, nullable=False)
 
@@ -94,8 +96,11 @@ class NoteSection(Base):
     section_type = Column(String(50), nullable=False)
     depth = Column(String(50), nullable=False)
     blocks = Column(Text, nullable=False, default="[]")  # JSON string array of structured NoteBlock objects
+    generation_status = Column(String(50), default="llm_success", nullable=False)
+    generation_details = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), default=get_utc_now, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
 
     note = relationship("Note", back_populates="sections")
 

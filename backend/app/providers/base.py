@@ -27,11 +27,13 @@ class LLMProvider(ABC):
         system_prompt: Optional[str] = None,
         temperature: float = 0.7,
         max_tokens: Optional[int] = None,
+        response_format: Optional[dict] = None,
     ) -> str:
         """
         Generate text response from the LLM provider.
         """
         pass
+
 
     @abstractmethod
     async def health_check(self) -> bool:

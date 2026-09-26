@@ -1,6 +1,7 @@
 from datetime import datetime
-from typing import List, Optional, Dict, Any, Literal
+from typing import List, Optional, Dict, Any, Literal, Union
 from pydantic import BaseModel, ConfigDict
+
 
 
 class NoteBlock(BaseModel):
@@ -30,8 +31,12 @@ class NoteSectionData(BaseModel):
     section_type: str
     depth: str
     blocks: List[NoteBlock]
+    generation_status: Optional[str] = "llm_success"
+    generation_details: Optional[Union[str, Dict[str, Any]]] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
 
 
 class NoteRevisionData(BaseModel):
@@ -126,10 +131,14 @@ class NoteResponse(BaseModel):
     summary: str
     sections: List[NoteSectionData]
     revisions: List[NoteRevisionData] = []
+    generation_status: Optional[str] = "llm_success"
+    generation_details: Optional[Union[str, Dict[str, Any]]] = None
     created_at: datetime
     updated_at: datetime
 
+
     model_config = ConfigDict(from_attributes=True)
+
 
 
 class GenerateNoteRequest(BaseModel):

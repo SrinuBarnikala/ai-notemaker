@@ -158,35 +158,38 @@ def generate_fallback_mermaid(visual_type: str = "flowchart", title: str = "Tech
     F1 --> A1
     F2 --> A2"""
 
-    if visual_type == "architecture":
+    if visual_type in ("architecture", "architecture_diagram"):
         return f"""flowchart TD
-    subgraph Ingestion["1. Ingress Layer"]
-        ClientApp["Client Application"] --> LoadBalancer["Load Balancer / Proxy"]
+    subgraph Ingress["1. Ingress & Interface"]
+        ClientApp["Client / Agent Context"] --> Dispatcher["Dispatcher & Gateway"]
     end
 
-    subgraph Processing["2. {clean_title} Core"]
-        LoadBalancer --> Service["Processing Service"]
-        Service --> Cache[("In-Memory Cache")]
+    subgraph ProcessingCore["2. {clean_title} Core"]
+        Dispatcher --> Controller["Controller Logic"]
+        Controller --> Execution["{clean_title} Engine"]
     end
 
-    subgraph Persistence["3. Persistence & Vector Layer"]
-        Service --> PrimaryDB[("Primary Database")]
-        Service --> EventQueue["Event Queue / Log"]
+    subgraph Persistence["3. Storage & State Persistence"]
+        Execution <--> StateStore[("State Store / Cache")]
     end
 
     classDef primary fill:#1e1b4b,stroke:#6366f1,stroke-width:2px,color:#f8fafc;
     classDef secondary fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#f8fafc;
-    class ClientApp,Service primary;
-    class PrimaryDB,EventQueue secondary;"""
+    class ClientApp,Dispatcher,Controller,Execution primary;
+    class StateStore secondary;"""
 
     # Default: flowchart
-    return f"""flowchart LR
-    Input["Input Query / State"] --> Transform["{clean_title}"]
-    Transform --> Validator{{"Invariants Valid?"}}
-    Validator -- Yes --> Output["Optimized Output State"]
-    Validator -- No --> Fallback["Fallback / Recovery Path"]
+    return f"""flowchart TD
+    InputNode["Initial State / Context Input"] --> PrepNode["Prepare & Validate {clean_title}"]
+    PrepNode --> ExecNode["Execute {clean_title}"]
+    ExecNode --> EvalNode{{"Constraints Satisfied?"}}
+    EvalNode -- Yes --> ResultNode["Optimized Output State"]
+    EvalNode -- No --> FallbackNode["Compensate & Handle Edge Case"]
 
     classDef accent fill:#312e81,stroke:#818cf8,stroke-width:2px,color:#f8fafc;
     classDef success fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc;
-    class Transform accent;
-    class Output success;"""
+    classDef warn fill:#78350f,stroke:#f59e0b,stroke-width:2px,color:#f8fafc;
+    class PrepNode,ExecNode accent;
+    class ResultNode success;
+    class FallbackNode warn;"""
+

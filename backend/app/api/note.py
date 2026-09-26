@@ -52,6 +52,8 @@ def build_note_response(note: Note, db: Session) -> NoteResponse:
                 section_type=s.section_type,
                 depth=s.depth,
                 blocks=blocks,
+                generation_status=getattr(s, "generation_status", "llm_success") or "llm_success",
+                generation_details=json.loads(s.generation_details) if getattr(s, "generation_details", None) else None,
             )
         )
 
@@ -85,9 +87,12 @@ def build_note_response(note: Note, db: Session) -> NoteResponse:
         summary=note.summary,
         sections=section_data_list,
         revisions=revision_data_list,
+        generation_status=getattr(note, "generation_status", "llm_success") or "llm_success",
+        generation_details=getattr(note, "generation_details", None),
         created_at=note.created_at,
         updated_at=note.updated_at,
     )
+
 
 
 @router.post(

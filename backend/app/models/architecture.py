@@ -28,8 +28,11 @@ class NoteArchitecture(Base):
     topic = Column(String(500), nullable=False)
     learning_goal = Column(Text, nullable=False, default="Master core mechanics and practical architecture")
     summary_rationale = Column(Text, nullable=False)
+    generation_status = Column(String(50), default="llm_success", nullable=False)
+    generation_details = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), default=get_utc_now, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
 
     journey = relationship("LearningJourney", back_populates="note_architecture")
     sections = relationship(

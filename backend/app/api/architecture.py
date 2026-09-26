@@ -97,6 +97,9 @@ def get_note_architecture(
         learning_goal=arch.learning_goal,
         summary_rationale=arch.summary_rationale,
         sections=section_blueprints,
+        generation_status=getattr(arch, "generation_status", "llm_success") or "llm_success",
+        generation_details=getattr(arch, "generation_details", None),
         created_at=arch.created_at,
         updated_at=arch.updated_at,
     )
+

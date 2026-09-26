@@ -21,10 +21,7 @@ from backend.app.main import app
 from backend.app.db.session import SessionLocal
 from backend.app.models.profile import KnowledgeProfile
 
-client = TestClient(app)
-
-
-def test_complete_end_to_end_journey_and_personalization():
+def test_complete_end_to_end_journey_and_personalization(client):
     # 1. Topic Intake
     intake_res = client.post("/journeys", json={"topic": "Distributed Consensus & Paxos"})
     assert intake_res.status_code == 201

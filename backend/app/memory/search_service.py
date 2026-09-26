@@ -183,11 +183,12 @@ def search_knowledge_base(
                                     )
                                 })
                     elif b_type in ["paragraph", "definition", "warning", "example", "comparison"]:
-                        text_to_check = b_content or block.get("term", "") + " " + block.get("definition", "")
-                        if any_term_pattern.search(text_to_check):
+                        text_to_check = b_content or f"{block.get('term') or ''} {block.get('definition') or ''}".strip()
+                        if text_to_check and any_term_pattern.search(text_to_check):
                             sec_match = True
                             if not matched_snippet:
                                 matched_snippet = highlight_snippet(text_to_check, q_clean)
+
                 
                 if sec_match and result_type in ["all", "section"]:
                     score = calculate_relevance(q_clean, sec.title, matched_snippet)

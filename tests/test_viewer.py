@@ -3,9 +3,6 @@ from starlette.testclient import TestClient
 from backend.app.main import app
 
 
-@pytest.fixture
-def client():
-    return TestClient(app)
 
 
 def test_viewer_html_contains_reader_components(client):

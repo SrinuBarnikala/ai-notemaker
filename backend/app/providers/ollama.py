@@ -30,6 +30,7 @@ class OllamaProvider(LLMProvider):
         system_prompt: Optional[str] = None,
         temperature: float = 0.7,
         max_tokens: Optional[int] = None,
+        response_format: Optional[dict] = None,
     ) -> str:
         url = f"{self._base_url}/api/generate"
         payload = {
@@ -44,6 +45,9 @@ class OllamaProvider(LLMProvider):
             payload["system"] = system_prompt
         if max_tokens:
             payload["options"]["num_predict"] = max_tokens
+        if response_format:
+            payload["format"] = "json"
+
 
         try:
             async with httpx.AsyncClient(timeout=self._timeout) as client:

@@ -31,10 +31,13 @@ class MockLLMProvider(LLMProvider):
         system_prompt: Optional[str] = None,
         temperature: float = 0.7,
         max_tokens: Optional[int] = None,
+        response_format: Optional[dict] = None,
     ) -> str:
         self.last_prompt = prompt
         self.last_system_prompt = system_prompt
+        self.last_response_format = response_format
         return self._response_text
+
 
     async def health_check(self) -> bool:
         return self.is_healthy

@@ -1,11 +1,12 @@
 import json
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
 from backend.app.config import Settings
 from backend.app.models.journey import LearningJourney
+from backend.app.models.discovery import DiscoveryInteraction
 from backend.app.models.profile import KnowledgeProfile, KnowledgeConcept
 from backend.app.models.architecture import NoteArchitecture, NoteArchitectureSection
 from backend.app.schemas.architecture import NoteArchitectureResponse, SectionBlueprint
@@ -21,21 +22,21 @@ logger = logging.getLogger(__name__)
 
 def format_concepts_for_prompt(concepts: List[KnowledgeConcept]) -> str:
     if not concepts:
-        return "No granular concepts mapped."
+        return "No specific concepts classified."
     lines = []
     for c in concepts:
-        lines.append(f"- {c.name} [Level: {c.level}, Category: {c.category}] Notes: {c.notes or 'N/A'}")
+        lines.append(f"- {c.name} (level: {c.level}, category: {c.category}): {c.notes or 'No notes'}")
     return "\n".join(lines)
 
 
 async def generate_note_architecture(
     journey_id: str,
-    learning_goal: str,
     db: Session,
     settings: Settings,
+    learning_goal: Optional[str] = "Master core mechanics, resolve gaps, and implement in production",
 ) -> NoteArchitectureResponse:
     """
-    Synthesizes and persists a personalized note architecture based on the learner's Knowledge Profile.
+    Synthesizes a personalized NoteArchitecture for a learning journey based on its KnowledgeProfile.
     """
     journey = db.query(LearningJourney).filter(LearningJourney.id == journey_id).first()
     if not journey:
@@ -61,6 +62,21 @@ async def generate_note_architecture(
         .all()
     )
 
+    interactions = (
+        db.query(DiscoveryInteraction)
+        .filter(DiscoveryInteraction.journey_id == journey_id)
+        .order_by(DiscoveryInteraction.question_index.asc())
+        .all()
+    )
+    discovery_lines = []
+    for item in interactions:
+        if item.learner_answer:
+            target = item.concept_target or "General"
+            discovery_lines.append(f"- Concept: {target} | Learner stated: '{item.learner_answer}'")
+            if item.quick_assessment:
+                discovery_lines.append(f"  Assessed: {item.quick_assessment}")
+    discovery_summary = "\n".join(discovery_lines) or "No prior discovery responses recorded."
+
     misconceptions = json.loads(profile.misconceptions or "[]")
     gaps = json.loads(profile.gaps or "[]")
 
@@ -73,6 +89,7 @@ async def generate_note_architecture(
         learning_goal=learning_goal,
         overall_confidence=profile.overall_confidence,
         summary=profile.summary,
+        discovery_summary=discovery_summary,
         concepts_formatted=concepts_formatted,
         misconceptions_formatted=misconceptions_formatted,
         gaps_formatted=gaps_formatted,
@@ -84,15 +101,18 @@ async def generate_note_architecture(
     ]
 
     provider = get_llm_provider(settings)
+    failure_reason = None
     try:
         raw_output = await provider.generate(
             prompt=prompt,
             system_prompt=ARCHITECTURE_SYSTEM_PROMPT,
             temperature=0.3,
+            response_format={"type": "json_object"},
         )
     except Exception as err:
         logger.error("LLM call failed in note architecture generation: %s", err)
         raw_output = ""
+        failure_reason = f"Provider exception: {err}"
 
     parsed = parse_note_architecture(
         raw_text=raw_output,
@@ -102,6 +122,14 @@ async def generate_note_architecture(
         gaps=gaps,
         misconceptions=misconceptions,
     )
+
+    generation_status = "llm_fallback" if parsed.used_fallback else "llm_success"
+    generation_details = {
+        "provider": provider.provider_name,
+        "model": provider.model_name,
+        "fallback_used": parsed.used_fallback,
+        "failure_reason": parsed.failure_reason or failure_reason,
+    }
 
     # Persist or update existing architecture
     arch = (
@@ -116,12 +144,16 @@ async def generate_note_architecture(
             topic=journey.topic,
             learning_goal=learning_goal,
             summary_rationale=parsed.summary_rationale,
+            generation_status=generation_status,
+            generation_details=json.dumps(generation_details),
         )
         db.add(arch)
         db.flush()
     else:
         arch.learning_goal = learning_goal
         arch.summary_rationale = parsed.summary_rationale
+        arch.generation_status = generation_status
+        arch.generation_details = json.dumps(generation_details)
         # Clear existing sections
         db.query(NoteArchitectureSection).filter(NoteArchitectureSection.architecture_id == arch.id).delete()
         db.flush()
@@ -152,6 +184,8 @@ async def generate_note_architecture(
         learning_goal=arch.learning_goal,
         summary_rationale=arch.summary_rationale,
         sections=parsed.sections,
+        generation_status=arch.generation_status,
+        generation_details=arch.generation_details,
         created_at=arch.created_at,
         updated_at=arch.updated_at,
     )
