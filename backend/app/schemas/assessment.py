@@ -47,6 +47,8 @@ class QuestionResult(BaseModel):
     correct_index: int
     is_correct: bool
     explanation: str
+    selected_text: Optional[str] = None
+    correct_text: Optional[str] = None
 
 
 class QuizSubmissionResult(BaseModel):

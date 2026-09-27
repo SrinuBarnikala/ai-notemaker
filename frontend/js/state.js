@@ -12,6 +12,7 @@ let activeEvolveType = 'add_code';
 let currentAssessment = null;
 let activeCardIndex = 0;
 let userQuizAnswers = {};
+let lastQuizSubmissionResult = null;
 let assessmentFontScale = 1.0;
 let activeQuizQuestionIndex = 0;
 let quizViewMode = 'focus';

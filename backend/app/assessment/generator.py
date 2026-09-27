@@ -109,7 +109,7 @@ def parse_assessment_json(raw_text: str, topic: str, concepts: List[str]) -> Dic
                     "Disable database durability and run purely in volatile worker memory",
                 ],
                 correct_index=0,
-                explanation="Append-only structures with batching eliminate lock contention while preserving durability invariants.",
+                explanation="Option A is correct: Lock-free append-only ring buffers with batched commits decouple write producers from disk flush boundaries, eliminating lock contention while strictly preserving durability invariants. In contrast, Option B causes catastrophic worker starvation under load, Option C destroys throughput through head-of-line blocking, and Option D violates basic data persistence guarantees.",
             ),
             QuizQuestion(
                 id="q-2",
@@ -122,7 +122,7 @@ def parse_assessment_json(raw_text: str, topic: str, concepts: List[str]) -> Dic
                     "Inability to run in cloud container environments",
                 ],
                 correct_index=0,
-                explanation="Sub-millisecond reads require pre-computed in-memory indices and caches, which directly trade RAM for speed.",
+                explanation="Option A is correct: Sub-millisecond reads fundamentally require keeping working sets and pre-computed index structures in RAM, directly trading increased memory footprint for speed. In contrast, Option B is false because linearizable or snapshot consistency can still be maintained with proper cache validation protocols, and Options C & D are invalid arbitrary operational constraints.",
             ),
             QuizQuestion(
                 id="q-3",
@@ -135,7 +135,7 @@ def parse_assessment_json(raw_text: str, topic: str, concepts: List[str]) -> Dic
                     "Route all traffic exclusively to random unverified nodes",
                 ],
                 correct_index=0,
-                explanation="Quorum majority requirements ensure that only the partition with more than half the nodes can commit changes.",
+                explanation="Option A is correct: Quorum majorities (N/2 + 1) guarantee that at most one partition can commit state mutations, preventing conflicting split-brain divergences. In contrast, Option B guarantees catastrophic state corruption through silent data conflicts, Option C destroys availability through unneeded crash loops, and Option D breaches routing and security invariants.",
             ),
         ]
 
@@ -269,6 +269,9 @@ def evaluate_quiz_submission(
             score += 1
             correct_concepts.append(q.concept)
 
+        selected_text = q.options[chosen] if 0 <= chosen < len(q.options) else None
+        correct_text = q.options[q.correct_index] if 0 <= q.correct_index < len(q.options) else None
+
         breakdown.append(
             QuestionResult(
                 question_id=q.id,
@@ -277,6 +280,8 @@ def evaluate_quiz_submission(
                 correct_index=q.correct_index,
                 is_correct=is_correct,
                 explanation=q.explanation,
+                selected_text=selected_text,
+                correct_text=correct_text,
             )
         )
 

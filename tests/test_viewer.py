@@ -123,3 +123,18 @@ def test_modal_escape_handling_and_components(client):
     ]
     for handler in close_handlers:
         assert handler in app_js_content, f"Expected handler {handler} in app.js Escape listener"
+
+
+def test_toc_scrollspy_and_bidirectional_sync(client):
+    """Verify that viewer.js contains robust bidirectional scrollspy and active TOC item sync."""
+    from pathlib import Path
+    viewer_js = Path("frontend/js/viewer.js").read_text(encoding="utf-8")
+
+    assert "updateScrollSpyActiveSection" in viewer_js
+    assert "setActiveTocItem" in viewer_js
+    assert "setupScrollSpy" in viewer_js
+    assert "isProgrammaticScroll" in viewer_js
+    assert "requestAnimationFrame" in viewer_js
+    assert "smoothScrollTo" in viewer_js
+    assert "note-section-container" in viewer_js
+    assert "note-viewer-toc" in viewer_js

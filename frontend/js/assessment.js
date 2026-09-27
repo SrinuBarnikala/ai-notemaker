@@ -17,6 +17,13 @@
       } else {
         renderFlashcardsUI();
         renderQuizUI();
+        if (lastQuizSubmissionResult) {
+          renderQuizScoreBanners(lastQuizSubmissionResult);
+          const submitBtn = document.getElementById('btn-submit-quiz');
+          if (submitBtn) submitBtn.style.display = 'none';
+          const retakeBtn = document.getElementById('btn-retake-quiz');
+          if (retakeBtn) retakeBtn.style.display = 'inline-flex';
+        }
       }
     }
 
@@ -70,6 +77,25 @@
         currentAssessment = await res.json();
         activeCardIndex = 0;
         userQuizAnswers = {};
+        lastQuizSubmissionResult = null;
+        activeQuizQuestionIndex = 0;
+
+        // Reset quiz banner & submit button state
+        const topScoreBox = document.getElementById('quiz-score-container');
+        if (topScoreBox) { topScoreBox.style.display = 'none'; topScoreBox.innerHTML = ''; }
+        const bottomScoreBox = document.getElementById('quiz-bottom-score-container');
+        if (bottomScoreBox) { bottomScoreBox.style.display = 'none'; bottomScoreBox.innerHTML = ''; }
+        const submitBtn = document.getElementById('btn-submit-quiz');
+        if (submitBtn) {
+          submitBtn.style.display = 'block';
+          submitBtn.disabled = false;
+          const btnText = document.getElementById('btn-quiz-text');
+          if (btnText) { btnText.style.display = 'inline'; btnText.textContent = 'Submit Quiz & Update Mastery Profile'; }
+          const btnSpinner = document.getElementById('btn-quiz-spinner');
+          if (btnSpinner) btnSpinner.style.display = 'none';
+        }
+        const retakeBtn = document.getElementById('btn-retake-quiz');
+        if (retakeBtn) retakeBtn.style.display = 'none';
 
         renderFlashcardsUI();
         renderQuizUI();
@@ -257,16 +283,75 @@
       const pct = total > 0 ? Math.round((answered / total) * 100) : 0;
 
       const label = document.getElementById('quiz-progress-label');
-      if (label) label.textContent = `${answered}/${total} Answered (${pct}%)`;
-
       const fill = document.getElementById('quiz-progress-fill');
-      if (fill) fill.style.width = `${pct}%`;
+
+      if (lastQuizSubmissionResult) {
+        if (label) {
+          label.textContent = `Score: ${lastQuizSubmissionResult.score}/${lastQuizSubmissionResult.total} Correct (${lastQuizSubmissionResult.percentage}%)`;
+        }
+        if (fill) {
+          fill.style.width = `${lastQuizSubmissionResult.percentage}%`;
+          if (lastQuizSubmissionResult.percentage >= 70) {
+            fill.style.background = 'linear-gradient(90deg, #10b981, #059669)';
+          } else {
+            fill.style.background = 'linear-gradient(90deg, #f59e0b, #ef4444)';
+          }
+        }
+      } else {
+        if (label) label.textContent = `${answered}/${total} Answered (${pct}%)`;
+        if (fill) {
+          fill.style.width = `${pct}%`;
+          fill.style.background = 'linear-gradient(90deg, #6366f1, #10b981)';
+        }
+      }
+    }
+
+    function renderQuizScoreBanners(result) {
+      if (!result) return;
+      const masteredHtml = (result.mastered_concepts && result.mastered_concepts.length > 0) ? `
+        <div style="margin-top: 0.6rem; font-size: 0.8rem; color: #e0e7ff; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+          <strong style="color: #818cf8;">🚀 Promoted to Mastered:</strong>
+          ${result.mastered_concepts.map(c => `<span class="card-concept-badge" style="color: #34d399; border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.15);">${escapeHtml(c)}</span>`).join('')}
+        </div>
+      ` : '';
+
+      const scoreHtml = `
+        <div class="quiz-score-banner">
+          <div>
+            <div style="font-size: 0.75rem; font-family: var(--font-mono); color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">AGENT 6 &bull; MASTERY EVALUATION</div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-top: 0.25rem;">${escapeHtml(result.message)}</div>
+            <div style="font-size: 0.85rem; color: #a7f3d0; margin-top: 0.4rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <span>🧠 Mental Model Confidence:</span>
+              <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-weight: 700; padding: 0.15rem 0.6rem; border-radius: 9999px; font-size: 0.75rem;">${escapeHtml(result.updated_confidence.toUpperCase())}</span>
+            </div>
+            ${masteredHtml}
+          </div>
+          <div style="text-align: right; min-width: 130px;">
+            <div class="score-badge-num">${result.percentage}%</div>
+            <div style="font-size: 0.85rem; font-family: var(--font-mono); font-weight: 700; color: #cbd5e1;">${result.score} of ${result.total} Correct</div>
+            <div style="font-size: 0.725rem; color: ${result.percentage >= 70 ? '#34d399' : '#f59e0b'}; margin-top: 0.25rem; font-weight: 600;">${result.percentage >= 70 ? '🎯 Technical Mastery Standard Met' : '📖 Knowledge Gaps Retained for Review'}</div>
+          </div>
+        </div>
+      `;
+
+      const topScoreBox = document.getElementById('quiz-score-container');
+      if (topScoreBox) {
+        topScoreBox.style.display = 'block';
+        topScoreBox.innerHTML = scoreHtml;
+      }
+
+      const bottomScoreBox = document.getElementById('quiz-bottom-score-container');
+      if (bottomScoreBox) {
+        bottomScoreBox.style.display = 'block';
+        bottomScoreBox.innerHTML = scoreHtml;
+      }
     }
 
     function renderQuizUI() {
       if (!currentAssessment || !currentAssessment.quiz_questions) return;
       const container = document.getElementById('quiz-questions-list');
       const questions = currentAssessment.quiz_questions;
+      const isSubmitted = !!lastQuizSubmissionResult;
 
       if (activeQuizQuestionIndex >= questions.length) {
         activeQuizQuestionIndex = Math.max(0, questions.length - 1);
@@ -276,45 +361,185 @@
       const pillsContainer = document.getElementById('quiz-stepper-pills');
       if (pillsContainer && questions.length > 0) {
         pillsContainer.innerHTML = questions.map((q, idx) => {
-          const isAnswered = userQuizAnswers[q.id] !== undefined;
           const isActive = (quizViewMode === 'focus' && idx === activeQuizQuestionIndex);
-          return `
-            <button type="button" class="qstep-pill ${isActive ? 'active' : ''} ${isAnswered ? 'answered' : ''}" onclick="jumpToQuizQuestion(${idx})" title="Jump to Question ${idx + 1}">
-              <span>Q${idx + 1}</span>
-              ${isAnswered ? '<span style="font-size: 0.7rem; color: #34d399;">✓</span>' : ''}
-            </button>
-          `;
+          const isAnswered = userQuizAnswers[q.id] !== undefined;
+
+          if (isSubmitted) {
+            const resultItem = (lastQuizSubmissionResult.breakdown && lastQuizSubmissionResult.breakdown.find(b => b.question_id === q.id));
+            const isCorrect = resultItem ? resultItem.is_correct : (userQuizAnswers[q.id] === q.correct_index);
+            const wasAnswered = resultItem ? (resultItem.selected_index !== undefined && resultItem.selected_index >= 0) : isAnswered;
+
+            const pillClass = isCorrect ? 'pill-correct' : (wasAnswered ? 'pill-incorrect' : 'pill-unanswered');
+            const iconHtml = isCorrect 
+              ? '<span class="qstep-status-icon status-correct">✓</span>' 
+              : (wasAnswered ? '<span class="qstep-status-icon status-incorrect">✗</span>' : '<span class="qstep-status-icon status-unanswered">⚠️</span>');
+
+            return `
+              <button type="button" class="qstep-pill ${isActive ? 'active' : ''} ${pillClass}" onclick="jumpToQuizQuestion(${idx})" title="Question ${idx + 1}: ${isCorrect ? 'Correct' : (wasAnswered ? 'Incorrect' : 'Unanswered')}">
+                <span>Q${idx + 1}</span>
+                ${iconHtml}
+              </button>
+            `;
+          } else {
+            return `
+              <button type="button" class="qstep-pill ${isActive ? 'active' : ''} ${isAnswered ? 'answered' : ''}" onclick="jumpToQuizQuestion(${idx})" title="Jump to Question ${idx + 1}">
+                <span>Q${idx + 1}</span>
+                ${isAnswered ? '<span style="font-size: 0.7rem; color: #34d399;">✓</span>' : ''}
+              </button>
+            `;
+          }
         }).join('');
       }
 
+      const letters = ['A', 'B', 'C', 'D', 'E'];
+
       // Render questions (in focus mode, only active question card is visible)
       container.innerHTML = questions.map((q, qIdx) => {
-        const letters = ['A', 'B', 'C', 'D', 'E'];
-        const isAnswered = userQuizAnswers[q.id] !== undefined;
         const isVisible = (quizViewMode === 'all' || qIdx === activeQuizQuestionIndex);
-        return `
-          <div class="quiz-question-card ${isAnswered ? 'answered' : ''}" id="quiz-card-${q.id}" style="display: ${isVisible ? 'block' : 'none'};">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
-              <span style="font-family: var(--font-mono); font-size: 0.75rem; color: #a5b4fc; font-weight: 700; letter-spacing: 0.05em;">QUESTION ${qIdx + 1} OF ${questions.length} &bull; ${escapeHtml(q.concept)}</span>
-              <span class="card-diff-badge diff-medium" style="font-size: 0.675rem;">SCENARIO</span>
+        const isAnswered = userQuizAnswers[q.id] !== undefined;
+        const selectedIdx = userQuizAnswers[q.id];
+
+        if (isSubmitted) {
+          const resultItem = (lastQuizSubmissionResult.breakdown && lastQuizSubmissionResult.breakdown.find(b => b.question_id === q.id)) || {
+            question_id: q.id,
+            concept: q.concept,
+            selected_index: (selectedIdx !== undefined ? selectedIdx : -1),
+            correct_index: q.correct_index,
+            is_correct: (selectedIdx === q.correct_index),
+            explanation: q.explanation
+          };
+
+          const isCorrect = resultItem.is_correct;
+          const wasAnswered = (resultItem.selected_index !== undefined && resultItem.selected_index >= 0);
+          const cardResultClass = isCorrect ? 'result-card-correct' : (wasAnswered ? 'result-card-incorrect' : 'result-card-unanswered');
+
+          const badgeHtml = isCorrect 
+            ? `<span class="quiz-result-badge badge-correct">✅ Correct (+1)</span>`
+            : (wasAnswered 
+                ? `<span class="quiz-result-badge badge-incorrect">❌ Incorrect (0/1)</span>`
+                : `<span class="quiz-result-badge badge-unanswered">⚠️ Unanswered (0/1)</span>`);
+
+          return `
+            <div class="quiz-question-card submitted ${cardResultClass}" id="quiz-card-${q.id}" style="display: ${isVisible ? 'block' : 'none'};">
+              <div class="quiz-card-header">
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                  <span class="quiz-qnum-tag">QUESTION ${qIdx + 1} OF ${questions.length}</span>
+                  <span class="quiz-concept-tag">&bull; ${escapeHtml(q.concept)}</span>
+                </div>
+                <div>
+                  ${badgeHtml}
+                </div>
+              </div>
+
+              <div class="quiz-question-title">${escapeHtml(q.question)}</div>
+
+              <div class="quiz-options-list">
+                ${q.options.map((opt, oIdx) => {
+                  const isUserChoice = (resultItem.selected_index === oIdx);
+                  const isCorrectOption = (resultItem.correct_index === oIdx);
+
+                  let optClasses = ['quiz-opt-btn', 'submitted-opt'];
+                  let tagHtml = '';
+
+                  if (isCorrectOption) {
+                    optClasses.push('correct');
+                    if (isUserChoice) {
+                      tagHtml = `<span class="opt-result-tag tag-correct-choice">✓ Your Answer (Correct)</span>`;
+                    } else {
+                      tagHtml = `<span class="opt-result-tag tag-correct-answer">✓ Correct Answer</span>`;
+                    }
+                  } else if (isUserChoice) {
+                    optClasses.push('incorrect');
+                    tagHtml = `<span class="opt-result-tag tag-incorrect-choice">✗ Your Choice</span>`;
+                  } else {
+                    optClasses.push('dimmed');
+                  }
+
+                  return `
+                    <button type="button" class="${optClasses.join(' ')}" id="opt-${q.id}-${oIdx}" disabled>
+                      <span class="opt-radio-circle"><span class="opt-radio-dot"></span></span>
+                      <span class="opt-letter">${letters[oIdx] || oIdx}</span>
+                      <span class="opt-text">${escapeHtml(opt)}</span>
+                      ${tagHtml}
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+
+              <!-- Rich Explanation Box -->
+              <div class="quiz-explanation-box ${isCorrect ? 'correct-expl' : 'incorrect-expl'}" id="expl-${q.id}" style="display: block;">
+                <div class="expl-header">
+                  <div style="display: flex; align-items: center; gap: 0.45rem;">
+                    <span class="expl-icon">${isCorrect ? '💡' : '🔍'}</span>
+                    <span class="expl-title">${isCorrect ? 'Mastery Analysis & Internal Mechanics' : 'Diagnostic Breakdown & Correct Solution'}</span>
+                  </div>
+                  <span class="expl-score-tag ${isCorrect ? 'tag-score-pass' : 'tag-score-fail'}">
+                    ${isCorrect ? 'Earned: 1 / 1 pt' : 'Earned: 0 / 1 pt'}
+                  </span>
+                </div>
+
+                <div class="expl-choice-comparison">
+                  ${isCorrect ? `
+                    <div class="expl-choice-row choice-correct">
+                      <span class="expl-choice-label">Your Selection:</span>
+                      <span class="expl-choice-val"><strong>Option ${letters[resultItem.selected_index] || ''}:</strong> ${escapeHtml(q.options[resultItem.selected_index] || '')}</span>
+                    </div>
+                  ` : (wasAnswered ? `
+                    <div class="expl-choice-row choice-user-incorrect">
+                      <span class="expl-choice-label">Your Selection:</span>
+                      <span class="expl-choice-val"><strong>Option ${letters[resultItem.selected_index] || ''}:</strong> ${escapeHtml(q.options[resultItem.selected_index] || '')}</span>
+                    </div>
+                    <div class="expl-choice-row choice-actual-correct">
+                      <span class="expl-choice-label">Correct Solution:</span>
+                      <span class="expl-choice-val"><strong>Option ${letters[resultItem.correct_index] || ''}:</strong> ${escapeHtml(q.options[resultItem.correct_index] || '')}</span>
+                    </div>
+                  ` : `
+                    <div class="expl-choice-row choice-unanswered">
+                      <span class="expl-choice-label">Your Status:</span>
+                      <span class="expl-choice-val">Unanswered</span>
+                    </div>
+                    <div class="expl-choice-row choice-actual-correct">
+                      <span class="expl-choice-label">Correct Solution:</span>
+                      <span class="expl-choice-val"><strong>Option ${letters[resultItem.correct_index] || ''}:</strong> ${escapeHtml(q.options[resultItem.correct_index] || '')}</span>
+                    </div>
+                  `)}
+                </div>
+
+                <div class="expl-body-text">
+                  <div class="expl-body-heading">
+                    <span>📖 Technical Analysis &amp; Mechanics:</span>
+                  </div>
+                  <div class="expl-text-content">${escapeHtml(resultItem.explanation || q.explanation || 'Detailed scenario analysis verified.')}</div>
+                </div>
+              </div>
             </div>
-            <div class="quiz-question-title">${escapeHtml(q.question)}</div>
-            <div class="quiz-options-list">
-              ${q.options.map((opt, oIdx) => {
-                const isSelected = userQuizAnswers[q.id] === oIdx;
-                return `
-                  <button type="button" class="quiz-opt-btn ${isSelected ? 'selected' : ''}" id="opt-${q.id}-${oIdx}" onclick="selectQuizOption('${q.id}', ${oIdx})">
-                    <span class="opt-radio-circle"><span class="opt-radio-dot"></span></span>
-                    <span class="opt-letter">${letters[oIdx] || oIdx}</span>
-                    <span class="opt-text">${escapeHtml(opt)}</span>
-                    <span class="opt-selected-tag" style="display: ${isSelected ? 'inline-flex' : 'none'};">✓ Selected</span>
-                  </button>
-                `;
-              }).join('')}
+          `;
+        } else {
+          // Pre-submission interactive mode
+          return `
+            <div class="quiz-question-card ${isAnswered ? 'answered' : ''}" id="quiz-card-${q.id}" style="display: ${isVisible ? 'block' : 'none'};">
+              <div class="quiz-card-header">
+                <span style="font-family: var(--font-mono); font-size: 0.75rem; color: #a5b4fc; font-weight: 700; letter-spacing: 0.05em;">QUESTION ${qIdx + 1} OF ${questions.length} &bull; ${escapeHtml(q.concept)}</span>
+                <span class="card-diff-badge diff-medium" style="font-size: 0.675rem;">SCENARIO</span>
+              </div>
+              <div class="quiz-question-title">${escapeHtml(q.question)}</div>
+              <div class="quiz-options-list">
+                ${q.options.map((opt, oIdx) => {
+                  const isSelected = (selectedIdx === oIdx);
+                  return `
+                    <button type="button" class="quiz-opt-btn ${isSelected ? 'selected' : ''}" id="opt-${q.id}-${oIdx}" onclick="selectQuizOption('${q.id}', ${oIdx})">
+                      <span class="opt-radio-circle"><span class="opt-radio-dot"></span></span>
+                      <span class="opt-letter">${letters[oIdx] || oIdx}</span>
+                      <span class="opt-text">${escapeHtml(opt)}</span>
+                      <span class="opt-selected-tag" style="display: ${isSelected ? 'inline-flex' : 'none'};">✓ Selected</span>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+              <div class="quiz-explanation-box" id="expl-${q.id}" style="display: none;"></div>
             </div>
-            <div class="quiz-explanation-box" id="expl-${q.id}" style="display: none;"></div>
-          </div>
-        `;
+          `;
+        }
       }).join('');
 
       // Update focus navigation controls
@@ -339,6 +564,8 @@
     }
 
     function selectQuizOption(qId, optIdx) {
+      if (lastQuizSubmissionResult) return; // Prevent mutation after submission
+
       userQuizAnswers[qId] = optIdx;
       const q = currentAssessment.quiz_questions.find(item => item.id === qId);
       if (!q) return;
@@ -420,84 +647,12 @@
           throw new Error(errData.detail || 'Failed to evaluate quiz submission');
         }
         const result = await res.json();
+        lastQuizSubmissionResult = result;
 
-        // Render Score Banner HTML
-        const masteredHtml = (result.mastered_concepts && result.mastered_concepts.length > 0) ? `
-          <div style="margin-top: 0.6rem; font-size: 0.8rem; color: #e0e7ff; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
-            <strong style="color: #818cf8;">🚀 Promoted to Mastered:</strong>
-            ${result.mastered_concepts.map(c => `<span class="card-concept-badge" style="color: #34d399; border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.15);">${escapeHtml(c)}</span>`).join('')}
-          </div>
-        ` : '';
+        // Render Score Banners
+        renderQuizScoreBanners(result);
 
-        const scoreHtml = `
-          <div class="quiz-score-banner">
-            <div>
-              <div style="font-size: 0.75rem; font-family: var(--font-mono); color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">AGENT 6 &bull; MASTERY EVALUATION</div>
-              <div style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-top: 0.25rem;">${escapeHtml(result.message)}</div>
-              <div style="font-size: 0.85rem; color: #a7f3d0; margin-top: 0.4rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                <span>🧠 Mental Model Confidence:</span>
-                <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-weight: 700; padding: 0.15rem 0.6rem; border-radius: 9999px; font-size: 0.75rem;">${escapeHtml(result.updated_confidence.toUpperCase())}</span>
-              </div>
-              ${masteredHtml}
-            </div>
-            <div style="text-align: right; min-width: 130px;">
-              <div class="score-badge-num">${result.percentage}%</div>
-              <div style="font-size: 0.85rem; font-family: var(--font-mono); font-weight: 700; color: #cbd5e1;">${result.score} of ${result.total} Correct</div>
-              <div style="font-size: 0.725rem; color: ${result.percentage >= 70 ? '#34d399' : '#f59e0b'}; margin-top: 0.25rem; font-weight: 600;">${result.percentage >= 70 ? '🎯 Technical Mastery Standard Met' : '📖 Knowledge Gaps Retained for Review'}</div>
-            </div>
-          </div>
-        `;
-
-        // Render into BOTH top and bottom containers
-        const topScoreBox = document.getElementById('quiz-score-container');
-        if (topScoreBox) {
-          topScoreBox.style.display = 'block';
-          topScoreBox.innerHTML = scoreHtml;
-        }
-
-        const bottomScoreBox = document.getElementById('quiz-bottom-score-container');
-        if (bottomScoreBox) {
-          bottomScoreBox.style.display = 'block';
-          bottomScoreBox.innerHTML = scoreHtml;
-        }
-
-        // Highlight correct/incorrect options & show rich explanations
-        result.breakdown.forEach(item => {
-          const q = questions.find(question => question.id === item.question_id);
-          if (!q) return;
-
-          const card = document.getElementById(`quiz-card-${item.question_id}`);
-          if (card) {
-            card.style.borderColor = item.is_correct ? 'rgba(16, 185, 129, 0.5)' : 'rgba(239, 68, 68, 0.5)';
-          }
-
-          q.options.forEach((_, oIdx) => {
-            const optBtn = document.getElementById(`opt-${item.question_id}-${oIdx}`);
-            if (optBtn) {
-              optBtn.disabled = true;
-              optBtn.classList.remove('selected');
-              if (oIdx === item.correct_index) {
-                optBtn.classList.add('correct');
-              } else if (oIdx === item.selected_index && !item.is_correct) {
-                optBtn.classList.add('incorrect');
-              }
-            }
-          });
-
-          const explBox = document.getElementById(`expl-${item.question_id}`);
-          if (explBox) {
-            explBox.style.display = 'block';
-            explBox.className = `quiz-explanation-box ${item.is_correct ? 'correct-expl' : 'incorrect-expl'}`;
-            explBox.innerHTML = `
-              <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 700; color: ${item.is_correct ? '#34d399' : '#f87171'}; margin-bottom: 0.35rem;">
-                <span>${item.is_correct ? '✅ Correct Answer (+1)' : '❌ Incorrect Selection (0/1)'}</span>
-              </div>
-              <div style="font-size: 0.85rem; line-height: 1.5; color: #e2e8f0;">${escapeHtml(item.explanation)}</div>
-            `;
-          }
-        });
-
-        // Switch view to 'all' so learner can review all explanations together
+        // Switch view to 'all' so learner can review all questions and explanations together
         setQuizViewMode('all');
 
         // Hide submit button and show retake quiz button
@@ -515,7 +670,7 @@
         if (currentJourneyId) {
           fetch(`/journeys/${currentJourneyId}/knowledge-profile`)
             .then(r => r.ok ? r.json() : null)
-            .then(p => { if (p) renderProfile(p); })
+            .then(p => { if (p && typeof renderProfile === 'function') renderProfile(p); })
             .catch(() => {});
         }
       } catch (err) {
@@ -527,8 +682,10 @@
     }
 
     function retakeQuiz() {
+      lastQuizSubmissionResult = null;
       userQuizAnswers = {};
       activeQuizQuestionIndex = 0;
+
       const topScoreBox = document.getElementById('quiz-score-container');
       if (topScoreBox) {
         topScoreBox.style.display = 'none';
@@ -559,6 +716,7 @@
       const modalBody = document.getElementById('assessment-modal-body');
       if (modalBody) modalBody.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
 
     /* ==========================================================================
        JOURNEY RESUMPTION & HISTORY

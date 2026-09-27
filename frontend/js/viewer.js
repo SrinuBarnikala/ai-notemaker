@@ -6,12 +6,14 @@
       document.querySelectorAll('.tool-btn').forEach(b => {
         if (b.id === 'btn-font-reset') b.classList.toggle('active', Math.abs(currentFontSizeRem - 1.05) < 0.02);
       });
+      setTimeout(updateScrollSpyActiveSection, 50);
     }
 
     function resetFontSize() {
       currentFontSizeRem = 1.05;
       document.getElementById('note-content-body').style.fontSize = `1.05rem`;
       document.getElementById('btn-font-reset').classList.add('active');
+      setTimeout(updateScrollSpyActiveSection, 50);
     }
 
     function toggleFocusMode() {
@@ -27,6 +29,10 @@
       if (isFocus) {
         document.getElementById('note-panel').scrollIntoView({ behavior: 'smooth' });
       }
+      setTimeout(() => {
+        updateReadingProgress();
+        updateScrollSpyActiveSection();
+      }, 100);
     }
 
     function copyNoteLink() {
@@ -54,14 +60,19 @@
       });
     }
 
-    /* Reading Progress & Scrollspy */
-    window.addEventListener('scroll', () => {
+    /* Reading Progress & Robust Bidirectional Scrollspy */
+    let isScrollTicking = false;
+    let isProgrammaticScroll = false;
+    let programmaticScrollTimer = null;
+
+    function updateReadingProgress() {
       const notePanel = document.getElementById('note-panel');
       const progressBar = document.getElementById('reading-progress-bar');
       const progressText = document.getElementById('toc-progress-text');
 
       if (!notePanel || notePanel.style.display === 'none') {
-        progressBar.style.width = '0%';
+        if (progressBar) progressBar.style.width = '0%';
+        if (progressText) progressText.textContent = '0%';
         return;
       }
 
@@ -69,32 +80,128 @@
       const totalHeight = notePanel.offsetHeight - window.innerHeight;
       if (totalHeight > 0) {
         const currentProgress = Math.min(100, Math.max(0, ((-rect.top) / totalHeight) * 100));
-        progressBar.style.width = `${currentProgress}%`;
+        if (progressBar) progressBar.style.width = `${currentProgress}%`;
         if (progressText) progressText.textContent = `${Math.round(currentProgress)}%`;
       }
-    });
+    }
+
+    function setActiveTocItem(sectionId) {
+      if (!sectionId) return;
+      const tocLinks = document.querySelectorAll('.toc-item');
+      let activeLink = null;
+
+      tocLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href === `#${sectionId}`) {
+          if (!link.classList.contains('active')) {
+            link.classList.add('active');
+          }
+          activeLink = link;
+        } else {
+          link.classList.remove('active');
+        }
+      });
+
+      // Keep active TOC item visible within the sticky TOC sidebar if it overflows
+      if (activeLink) {
+        const sidebar = document.getElementById('note-viewer-toc');
+        if (sidebar && sidebar.scrollHeight > sidebar.clientHeight) {
+          const linkRect = activeLink.getBoundingClientRect();
+          const sidebarRect = sidebar.getBoundingClientRect();
+          if (linkRect.top < sidebarRect.top + 20 || linkRect.bottom > sidebarRect.bottom - 20) {
+            activeLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          }
+        }
+      }
+    }
+
+    function updateScrollSpyActiveSection() {
+      if (isProgrammaticScroll) return;
+
+      const notePanel = document.getElementById('note-panel');
+      if (!notePanel || notePanel.style.display === 'none') return;
+
+      const sections = Array.from(document.querySelectorAll('.note-section-container'));
+      if (!sections.length) return;
+
+      const header = document.querySelector('header');
+      const headerHeight = (header && window.getComputedStyle(header).display !== 'none') ? header.offsetHeight : 0;
+      // Target reading line: positioned just under the sticky header / focus mode top padding
+      const targetOffset = headerHeight + 70;
+
+      // Check if user has scrolled to the bottom of the page
+      const scrollBottom = window.innerHeight + window.scrollY;
+      const documentHeight = Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight,
+        document.body.offsetHeight,
+        document.documentElement.offsetHeight
+      );
+      const isAtBottom = scrollBottom >= documentHeight - 60;
+
+      let currentSectionId = sections[0].id;
+
+      if (isAtBottom) {
+        currentSectionId = sections[sections.length - 1].id;
+      } else {
+        // Find the last section whose top has reached or passed the target reading line
+        for (let i = 0; i < sections.length; i++) {
+          const rect = sections[i].getBoundingClientRect();
+          if (rect.top <= targetOffset) {
+            currentSectionId = sections[i].id;
+          } else {
+            break;
+          }
+        }
+      }
+
+      setActiveTocItem(currentSectionId);
+    }
+
+    // High performance RAF scroll listener
+    window.addEventListener('scroll', () => {
+      if (!isScrollTicking) {
+        window.requestAnimationFrame(() => {
+          updateReadingProgress();
+          updateScrollSpyActiveSection();
+          isScrollTicking = false;
+        });
+        isScrollTicking = true;
+      }
+    }, { passive: true });
+
+    window.addEventListener('resize', () => {
+      updateReadingProgress();
+      updateScrollSpyActiveSection();
+    }, { passive: true });
+
+    // Cancel programmatic scroll override if user manually interacts
+    window.addEventListener('wheel', () => { isProgrammaticScroll = false; }, { passive: true });
+    window.addEventListener('touchstart', () => { isProgrammaticScroll = false; }, { passive: true });
 
     function setupScrollSpy() {
-      if (observer) observer.disconnect();
+      if (observer) {
+        try { observer.disconnect(); } catch (e) {}
+      }
+
+      // Immediately sync TOC active state with current scroll position
+      updateReadingProgress();
+      updateScrollSpyActiveSection();
+
+      // Also set up an IntersectionObserver with threshold: 0 for instant boundary detection
       const sections = document.querySelectorAll('.note-section-container');
-      const tocLinks = document.querySelectorAll('.toc-item');
-
-      observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const id = entry.target.id;
-            tocLinks.forEach(link => {
-              if (link.getAttribute('href') === `#${id}`) {
-                link.classList.add('active');
-              } else {
-                link.classList.remove('active');
-              }
-            });
+      if ('IntersectionObserver' in window && sections.length > 0) {
+        observer = new IntersectionObserver(() => {
+          if (!isProgrammaticScroll) {
+            updateScrollSpyActiveSection();
           }
+        }, {
+          rootMargin: '-50px 0px -40% 0px',
+          threshold: 0
         });
-      }, { rootMargin: '-100px 0px -60% 0px', threshold: 0.1 });
 
-      sections.forEach(sec => observer.observe(sec));
+        sections.forEach(sec => observer.observe(sec));
+      }
     }
 
     /* Submission & Step Handling */
@@ -279,12 +386,27 @@
 
 
     function smoothScrollTo(event, elementId) {
-      event.preventDefault();
+      if (event) event.preventDefault();
       const el = document.getElementById(elementId);
       if (el) {
+        // Immediately highlight clicked TOC item for instant user feedback
+        setActiveTocItem(elementId);
+
+        // Temporarily pause scroll listener overrides during smooth animation
+        isProgrammaticScroll = true;
+        if (programmaticScrollTimer) clearTimeout(programmaticScrollTimer);
+
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        programmaticScrollTimer = setTimeout(() => {
+          isProgrammaticScroll = false;
+          updateScrollSpyActiveSection();
+        }, 700);
+
         // Update URL hash without jump
-        history.replaceState(null, null, `#${elementId}`);
+        try {
+          history.replaceState(null, null, `#${elementId}`);
+        } catch (e) {}
       }
     }
 

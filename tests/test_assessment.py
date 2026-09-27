@@ -89,6 +89,61 @@ def test_quiz_submission_and_profile_progression(client):
     assert prof_data["overall_confidence"] == "advanced"
 
 
+def test_quiz_partial_submission_breakdown_and_explanations(client):
+    journey_id, note = helper_setup_note_for_assessment(client, "Distributed State Machine Replication")
+
+    gen_res = client.post(f"/journeys/{journey_id}/assessment/generate")
+    assert gen_res.status_code == 200
+    quiz_questions = gen_res.json()["quiz_questions"]
+    assert len(quiz_questions) >= 3
+
+    # Answer: 1 correct, 1 wrong, 1 left unanswered
+    q0 = quiz_questions[0]
+    q1 = quiz_questions[1]
+    wrong_opt = (q1["correct_index"] + 1) % len(q1["options"])
+
+    answers = {
+        q0["id"]: q0["correct_index"],
+        q1["id"]: wrong_opt,
+    }
+
+    sub_res = client.post(
+        f"/journeys/{journey_id}/assessment/submit",
+        json={"answers": answers},
+    )
+    assert sub_res.status_code == 200
+    res = sub_res.json()
+
+    assert res["score"] == 1
+    assert res["total"] == len(quiz_questions)
+
+    b0 = next(b for b in res["breakdown"] if b["question_id"] == q0["id"])
+    assert b0["is_correct"] is True
+    assert b0["selected_index"] == q0["correct_index"]
+    assert b0["selected_text"] == q0["options"][q0["correct_index"]]
+    assert b0["correct_text"] == q0["options"][q0["correct_index"]]
+    assert len(b0["explanation"]) > 10
+
+    b1 = next(b for b in res["breakdown"] if b["question_id"] == q1["id"])
+    assert b1["is_correct"] is False
+    assert b1["selected_index"] == wrong_opt
+    assert b1["correct_index"] == q1["correct_index"]
+    assert b1["selected_text"] == q1["options"][wrong_opt]
+    assert b1["correct_text"] == q1["options"][q1["correct_index"]]
+    assert len(b1["explanation"]) > 10
+
+    # Verify frontend assets contain the updated submission and explanation handling
+    from pathlib import Path
+    assess_js = Path("frontend/js/assessment.js").read_text(encoding="utf-8")
+    assert "lastQuizSubmissionResult" in assess_js
+    assert "pill-correct" in assess_js
+    assert "pill-incorrect" in assess_js
+    assert "tag-correct-choice" in assess_js
+    assert "tag-incorrect-choice" in assess_js
+    assert "expl-choice-comparison" in assess_js
+    assert "retakeQuiz" in assess_js
+
+
 def test_assessment_errors(client):
     # Unknown journey
     res = client.post("/journeys/unknown-uuid-0000/assessment/generate")

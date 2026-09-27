@@ -13,7 +13,7 @@ Directives:
    - "question": Concrete scenario, code diagnosis, or systems architecture dilemma.
    - "options": Exactly 4 distinct, plausible options.
    - "correct_index": 0-indexed integer (0, 1, 2, or 3) indicating the single correct option.
-   - "explanation": In-depth analysis explaining why the correct choice works and why distractors fail.
+   - "explanation": Comprehensive technical explanation detailing: (1) Why the correct option is optimal and directly solves the scenario, and (2) Why each alternative distractor option is incorrect, flawed, or represents a common misconception.
 4. Output strict JSON matching the schema with keys "flashcards" and "quiz_questions".
 """
 
@@ -50,7 +50,7 @@ Return ONLY valid JSON in this exact structure:
         "Option D description"
       ],
       "correct_index": 0,
-      "explanation": "Detailed explanation of why Option A is correct and why other options are flawed."
+      "explanation": "Option A is correct because [reasoning and internal mechanics]. In contrast, Option B fails because [reason], Option C is flawed because [reason], and Option D violates [invariant]."
     }}
   ]
 }}
