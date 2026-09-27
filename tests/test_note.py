@@ -46,6 +46,35 @@ def test_parse_section_blocks_valid_json():
     assert blocks[3].type == "warning"
 
 
+def test_parse_section_blocks_markdown_table_conversion():
+    raw_json = """
+    [
+      {
+        "type": "comparison",
+        "title": "Protocol Latency & Consistency Trade-offs",
+        "content": "| Protocol | Latency | Guarantees |\\n|---|---|---|\\n| Paxos | 2 RTTs | Linearizable |\\n| Raft | 2 RTTs | Linearizable |\\n| 2PC | 3 RTTs | Atomic Commit |"
+      }
+    ]
+    """
+    blocks = parse_section_blocks(
+        raw_text=raw_json,
+        section_title="Consensus Mechanics",
+        section_type="deep_dive",
+        depth="standard",
+        target_concepts=["Consensus"],
+        rationale="Comparison of consensus mechanisms.",
+        needs_code=False,
+        needs_visual=False,
+    )
+    assert len(blocks) == 1
+    assert blocks[0].type == "comparison"
+    assert blocks[0].items is not None
+    assert len(blocks[0].items) == 3
+    assert blocks[0].items[0]["Protocol"] == "Paxos"
+    assert blocks[0].items[0]["Latency"] == "2 RTTs"
+    assert blocks[0].items[2]["Guarantees"] == "Atomic Commit"
+
+
 def test_parse_section_blocks_fallback():
     corrupt = "Not a json array."
     blocks = parse_section_blocks(

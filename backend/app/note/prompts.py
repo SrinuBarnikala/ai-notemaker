@@ -16,9 +16,11 @@ Core Directives:
    - If needs_code is true, write idiomatic, runnable, non-placeholder code that directly implements the mechanisms of the target concepts.
    - If needs_visual is true, write a valid Mermaid.js diagram specifically illustrating the target concept's component relationships, data flow, or state transitions.
    - Match the requested depth: "brief" (1-2 crisp, punchy blocks), "standard" (2-3 informative blocks), "deep" (4-6 comprehensive, architectural blocks).
+   - Mathematical Expressions: Use clean LaTeX enclosed in `$...$` for inline math (e.g. `$O(N)$`, `$\\sigma(z) = \\frac{1}{1 + e^{-z}}$`) or `$$...$$` for display math equations.
 4. Output Format:
    - You MUST return a JSON object with a "blocks" array.
    - Valid block types: "paragraph", "definition", "code", "warning", "comparison", "diagram", "example".
+   - For "comparison" blocks, provide structured row objects in the "items" array, e.g. `[{"Dimension": "...", "Approach A": "...", "Approach B": "..."}]`.
 """
 
 SECTION_GENERATION_PROMPT_TEMPLATE = """Document Topic: "{topic}"

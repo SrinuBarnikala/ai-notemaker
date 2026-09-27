@@ -22,22 +22,37 @@ def extract_json_array_or_object(text: str) -> Any:
     if match:
         clean = match.group(1).strip()
 
-    # Check for object with "blocks" key first
+    start_arr = clean.find("[")
+    end_arr = clean.rfind("]")
     start_obj = clean.find("{")
     end_obj = clean.rfind("}")
+
+    # If array starts before object, prioritize parsing outer array
+    if start_arr != -1 and end_arr != -1 and end_arr > start_arr:
+        if start_obj == -1 or start_arr < start_obj:
+            candidate = clean[start_arr : end_arr + 1]
+            try:
+                parsed = json.loads(candidate)
+                if isinstance(parsed, list):
+                    return parsed
+            except json.JSONDecodeError:
+                pass
+
+    # Check for object with "blocks" key or single block
     if start_obj != -1 and end_obj != -1 and end_obj > start_obj:
         candidate = clean[start_obj : end_obj + 1]
         try:
             parsed = json.loads(candidate)
-            if isinstance(parsed, dict) and "blocks" in parsed:
-                return parsed["blocks"]
+            if isinstance(parsed, dict):
+                if "blocks" in parsed:
+                    return parsed["blocks"]
+                if "type" in parsed:
+                    return [parsed]
             return parsed
         except json.JSONDecodeError:
             pass
 
     # Check for direct array
-    start_arr = clean.find("[")
-    end_arr = clean.rfind("]")
     if start_arr != -1 and end_arr != -1 and end_arr > start_arr:
         candidate = clean[start_arr : end_arr + 1]
         try:
@@ -47,11 +62,69 @@ def extract_json_array_or_object(text: str) -> Any:
 
     try:
         parsed = json.loads(clean)
-        if isinstance(parsed, dict) and "blocks" in parsed:
-            return parsed["blocks"]
+        if isinstance(parsed, dict):
+            if "blocks" in parsed:
+                return parsed["blocks"]
+            if "type" in parsed:
+                return [parsed]
         return parsed
     except json.JSONDecodeError:
         return None
+
+
+def parse_markdown_table_to_items(text: str) -> Optional[List[Dict[str, Any]]]:
+    """
+    Parses a Markdown pipe table into a list of dictionaries.
+    e.g.
+    | Metric | Approach A | Approach B |
+    | --- | --- | --- |
+    | Latency | 5ms | 200ms |
+    """
+    if not text or "|" not in text:
+        return None
+
+    clean_text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
+    lines = [line.strip() for line in clean_text.strip().splitlines() if line.strip()]
+    table_lines = [line for line in lines if line.startswith("|") or line.endswith("|") or "|" in line]
+    if len(table_lines) < 2:
+        return None
+
+    # Find the separator row (e.g. |---|---| or |:---:|---:|)
+    sep_idx = -1
+    for idx, line in enumerate(table_lines):
+        clean = line.replace("|", "").replace(":", "").replace("-", "").replace(" ", "").strip()
+        if clean == "" and "-" in line:
+            sep_idx = idx
+            break
+
+    if sep_idx < 1 or sep_idx >= len(table_lines):
+        return None
+
+    def split_row(row_str: str) -> List[str]:
+        clean = row_str.strip()
+        if clean.startswith("|"):
+            clean = clean[1:]
+        if clean.endswith("|"):
+            clean = clean[:-1]
+        return [c.strip() for c in clean.split("|")]
+
+    headers = split_row(table_lines[sep_idx - 1])
+    if not headers or all(not h for h in headers):
+        return None
+
+    items = []
+    for line in table_lines[sep_idx + 1:]:
+        cells = split_row(line)
+        if not any(cells):
+            continue
+        row_dict = {}
+        for i, header in enumerate(headers):
+            val = cells[i] if i < len(cells) else ""
+            row_dict[header] = val
+        if row_dict:
+            items.append(row_dict)
+
+    return items if items else None
 
 
 def parse_section_blocks(
@@ -103,6 +176,13 @@ def parse_section_blocks(
                 if b_type == "code" and not code_snippet:
                     continue
 
+                items = item.get("items")
+                if b_type == "comparison":
+                    if (not items or len(items) == 0) and content:
+                        parsed_items = parse_markdown_table_to_items(content)
+                        if parsed_items:
+                            items = parsed_items
+
                 try:
                     parsed_blocks.append(
                         NoteBlock(
@@ -115,7 +195,7 @@ def parse_section_blocks(
                             caption=item.get("caption"),
                             diagram_spec=diag_spec,
                             diagram_type=item.get("diagram_type") or (visual_type if b_type == "diagram" else None),
-                            items=item.get("items"),
+                            items=items,
                         )
                     )
                 except Exception as e:

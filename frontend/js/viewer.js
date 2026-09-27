@@ -372,6 +372,9 @@
       // Render interactive Mermaid diagrams
       setTimeout(renderAllMermaidDiagrams, 80);
 
+      // Render LaTeX Mathematical Expressions with KaTeX
+      setTimeout(renderAllMathFormulas, 90);
+
       // Initialize ScrollSpy
       setTimeout(setupScrollSpy, 150);
 
@@ -410,15 +413,42 @@
       }
     }
 
+    function renderAllMathFormulas() {
+      const container = document.getElementById('note-content-body');
+      if (!container) return;
+
+      if (typeof renderMathInElement === 'function') {
+        try {
+          renderMathInElement(container, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '\\[', right: '\\]', display: true },
+              { left: '$', right: '$', display: false },
+              { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false,
+            errorColor: '#f87171'
+          });
+        } catch (err) {
+          console.warn('KaTeX auto-render failed, applying fallback:', err);
+          if (typeof applyMathFallbackFormatting === 'function') {
+            applyMathFallbackFormatting(container);
+          }
+        }
+      } else if (typeof applyMathFallbackFormatting === 'function') {
+        applyMathFallbackFormatting(container);
+      }
+    }
+
     function renderNoteBlock(b, sectionId = null) {
       if (b.type === 'paragraph') {
-        return `<div class="block-paragraph">${formatInlineMarkdown(b.content || '')}</div>`;
+        return `<div class="block-paragraph">${renderMarkdownText(b.content || '')}</div>`;
       }
       if (b.type === 'definition') {
         return `
           <div class="block-definition">
             <div class="def-term"><span>📖</span><span>${escapeHtml(b.term || 'Definition')}</span></div>
-            <div class="def-content">${formatInlineMarkdown(b.content || '')}</div>
+            <div class="def-content">${renderMarkdownText(b.content || '')}</div>
           </div>
         `;
       }
@@ -426,7 +456,7 @@
         return `
           <div class="block-warning">
             <div class="warning-title"><span>⚠️</span><span>${escapeHtml(b.title || 'Important Note / Misconception')}</span></div>
-            <div class="warning-content">${formatInlineMarkdown(b.content || '')}</div>
+            <div class="warning-content">${renderMarkdownText(b.content || '')}</div>
           </div>
         `;
       }
@@ -434,7 +464,7 @@
         return `
           <div class="block-example">
             <div class="example-title"><span>💡</span><span>${escapeHtml(b.title || 'Example Walkthrough')}</span></div>
-            <div class="example-content">${formatInlineMarkdown(b.content || '')}</div>
+            <div class="example-content">${renderMarkdownText(b.content || '')}</div>
           </div>
         `;
       }
@@ -552,30 +582,34 @@
         `;
       }
       if (b.type === 'comparison') {
-        let rows = '';
+        let tableHtml = '';
         if (b.items && b.items.length) {
           const keys = Object.keys(b.items[0]);
-          const headers = keys.map(k => `<th>${escapeHtml(k)}</th>`).join('');
-          rows = `
-            <table class="comparison-table">
-              <thead><tr>${headers}</tr></thead>
-              <tbody>
-                ${b.items.map(it => `
-                  <tr>${keys.map(k => `<td>${escapeHtml(String(it[k] || ''))}</td>`).join('')}</tr>
-                `).join('')}
-              </tbody>
-            </table>
+          const headers = keys.map(k => `<th>${formatInlineMarkdown(k)}</th>`).join('');
+          tableHtml = `
+            <div class="comparison-table-wrapper">
+              <table class="comparison-table">
+                <thead><tr>${headers}</tr></thead>
+                <tbody>
+                  ${b.items.map(it => `
+                    <tr>${keys.map(k => `<td>${formatInlineMarkdown(String(it[k] !== undefined ? it[k] : ''))}</td>`).join('')}</tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
           `;
         }
+
+        const contentHtml = b.content ? renderMarkdownText(b.content) : '';
+
         return `
           <div class="block-comparison">
             <div class="comparison-title">${escapeHtml(b.title || 'Conceptual Comparison')}</div>
-            ${b.content ? `<div style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 0.75rem;">${formatInlineMarkdown(b.content)}</div>` : ''}
-            ${rows}
+            ${tableHtml ? `${contentHtml ? `<div style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 0.75rem;">${contentHtml}</div>` : ''}${tableHtml}` : `${contentHtml}`}
           </div>
         `;
       }
-      return `<div class="block-paragraph">${formatInlineMarkdown(b.content || '')}</div>`;
+      return `<div class="block-paragraph">${renderMarkdownText(b.content || '')}</div>`;
     }
 
 
