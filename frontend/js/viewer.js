@@ -337,28 +337,29 @@
             <div class="evolve-card-title">🌱 Expand &amp; Verify Your Technical Mastery</div>
             <p class="evolve-card-sub">Technical mastery is an ongoing dialogue. Ask Agent 9 Socratic Copilot for instant clarification, test recall with 3D flashcards, inspect Mermaid diagrams, or execute runnable sandbox code.</p>
           </div>
-          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-            <button type="button" class="tool-btn" style="padding: 0.65rem 1.3rem; background: rgba(99, 102, 241, 0.25); border-color: var(--accent); color: #ffffff; font-weight: 700; box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);" onclick="openCopilotDrawer(null, null)">
+          <div class="evolve-card-grid">
+            <button type="button" class="tool-btn evolve-action-btn" style="background: rgba(99, 102, 241, 0.25); border-color: var(--accent); color: #ffffff; box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);" onclick="openCopilotDrawer(null, null)">
               <span>🤖 Consult Copilot</span>
             </button>
-            <button type="button" class="tool-btn" style="padding: 0.65rem 1.25rem; background: rgba(168, 85, 247, 0.2); border-color: #a855f7; color: #e9d5ff; font-weight: 700;" onclick="openGraphModal(false)">
+            <button type="button" class="tool-btn evolve-action-btn" style="background: rgba(168, 85, 247, 0.2); border-color: #a855f7; color: #e9d5ff;" onclick="openGraphModal(false)">
               <span>🕸️ Knowledge Graph</span>
             </button>
-            <button type="button" class="tool-btn" style="padding: 0.65rem 1.25rem; background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; color: #fde68a; font-weight: 700;" onclick="openVersionHistoryModal()">
+            <button type="button" class="tool-btn evolve-action-btn" style="background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; color: #fde68a;" onclick="openVersionHistoryModal()">
               <span>🏷️ Version History &amp; Diff</span>
             </button>
-            <button type="button" class="btn-submit" style="width: auto; padding: 0.65rem 1.4rem;" onclick="openEvolveModal(null, 'Living Note Exploration', 'add_section')">
+            <button type="button" class="btn-submit evolve-action-btn" onclick="openEvolveModal(null, 'Living Note Exploration', 'add_section')">
               <span>+ Add New Section</span>
             </button>
-            <button type="button" class="tool-btn" style="padding: 0.65rem 1.25rem; background: rgba(16, 185, 129, 0.18); border-color: var(--success); color: #a7f3d0;" onclick="triggerPlanCode()">
+            <button type="button" class="tool-btn evolve-action-btn" style="background: rgba(16, 185, 129, 0.18); border-color: var(--success); color: #a7f3d0;" onclick="triggerPlanCode()">
               <span>💻 Plan Interactive Code</span>
             </button>
-            <button type="button" class="tool-btn" style="padding: 0.65rem 1.25rem; background: rgba(99, 102, 241, 0.2); border-color: var(--accent); color: #ffffff;" onclick="openAssessmentModal()">
+            <button type="button" class="tool-btn evolve-action-btn" style="background: rgba(99, 102, 241, 0.2); border-color: var(--accent); color: #ffffff;" onclick="openAssessmentModal()">
               <span>🧠 Test Mastery &amp; Flashcards</span>
-            <button type="button" class="tool-btn" style="padding: 0.65rem 1.25rem; background: rgba(6, 182, 212, 0.18); border-color: var(--cyan); color: #a5f3fc;" onclick="triggerPlanVisuals()">
+            </button>
+            <button type="button" class="tool-btn evolve-action-btn" style="background: rgba(6, 182, 212, 0.18); border-color: var(--cyan); color: #a5f3fc;" onclick="triggerPlanVisuals()">
               <span>📊 Plan Visual Architecture</span>
             </button>
-            <button type="button" class="tool-btn" style="padding: 0.65rem 1.25rem; background: rgba(56, 189, 248, 0.2); border-color: #38bdf8; color: #bae6fd; font-weight: 700;" onclick="openMemoryModal('history')">
+            <button type="button" class="tool-btn evolve-action-btn" style="background: rgba(56, 189, 248, 0.2); border-color: #38bdf8; color: #bae6fd;" onclick="openMemoryModal('history')">
               <span>🧠 Knowledge Memory</span>
             </button>
           </div>

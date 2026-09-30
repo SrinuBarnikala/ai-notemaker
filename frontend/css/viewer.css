@@ -908,14 +908,14 @@
       border: 1px solid rgba(99, 102, 241, 0.35);
       border-radius: 14px;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1.5rem;
-      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1.25rem;
+      container-type: inline-size;
+      container-name: evolveCard;
     }
     .evolve-card-left {
-      flex: 1;
-      min-width: 260px;
+      width: 100%;
     }
     .evolve-card-title {
       font-size: 1.1rem;
@@ -927,6 +927,81 @@
       font-size: 0.875rem;
       color: var(--text-secondary);
       line-height: 1.5;
+    }
+
+    /* Option Buttons Uniform Grid Layout */
+    .evolve-card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      width: 100%;
+    }
+
+    @container evolveCard (min-width: 860px) {
+      .evolve-card-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @container evolveCard (max-width: 480px) {
+      .evolve-card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .evolve-card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .evolve-card-grid .evolve-action-btn {
+      width: 100% !important;
+      height: 44px !important;
+      min-height: 44px !important;
+      max-height: 44px !important;
+      padding: 0 1.1rem !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      font-size: 0.85rem !important;
+      font-weight: 700 !important;
+      border-radius: 10px !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease !important;
+      white-space: nowrap !important;
+      line-height: 1 !important;
+      text-decoration: none !important;
+      border-width: 1px !important;
+      border-style: solid !important;
+      text-align: center !important;
+    }
+
+    .evolve-card-grid .evolve-action-btn.btn-submit {
+      border-color: rgba(99, 102, 241, 0.4) !important;
+    }
+
+    .evolve-card-grid .evolve-action-btn:hover {
+      transform: translateY(-1px) !important;
+      filter: brightness(1.15) !important;
+    }
+
+    .evolve-card-grid .evolve-action-btn:active {
+      transform: translateY(0) !important;
+    }
+
+    .evolve-card-grid .evolve-action-btn > span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 0.85rem;
+      font-weight: 700;
     }
 
 
