@@ -123,9 +123,7 @@ async function triggerSearch() {
 
   try {
     const url = `/search?q=${encodeURIComponent(currentSearchQuery)}&type=${currentSearchType}&limit=35`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Search request failed');
-    const data = await res.json();
+    const data = await API.request(url, undefined, 'Search request failed');
     renderSearchResults(data);
   } catch (err) {
     container.innerHTML = `
@@ -285,9 +283,7 @@ async function loadMemoryOverview() {
   if (!container) return;
 
   try {
-    const res = await fetch('/memory/overview');
-    if (!res.ok) throw new Error('Failed to load overview');
-    const data = await res.json();
+    const data = await API.request('/memory/overview', undefined, 'Failed to load overview');
 
     container.innerHTML = `
       <div class="mstat-card">
@@ -327,9 +323,7 @@ async function loadLearningHistory() {
   `;
 
   try {
-    const res = await fetch('/memory/history');
-    if (!res.ok) throw new Error('Failed to load history');
-    const items = await res.json();
+    const items = await API.request('/memory/history', undefined, 'Failed to load history');
 
     if (!items || items.length === 0) {
       container.innerHTML = `
@@ -410,9 +404,7 @@ async function loadConceptMemories() {
   `;
 
   try {
-    const res = await fetch('/memory/concepts');
-    if (!res.ok) throw new Error('Failed to load concept memories');
-    currentConceptMemories = await res.json();
+    currentConceptMemories = await API.request('/memory/concepts', undefined, 'Failed to load concept memories');
     renderFilteredConceptGrid('');
   } catch (err) {
     container.innerHTML = `
@@ -494,9 +486,7 @@ async function loadRelatedTopics() {
   `;
 
   try {
-    const res = await fetch(`/memory/related/${currentJourneyId}`);
-    if (!res.ok) throw new Error('Failed to load related topics');
-    const data = await res.json();
+    const data = await API.request(`/memory/related/${currentJourneyId}`, undefined, 'Failed to load related topics');
 
     const bridgingHtml = (data.bridging_concepts || []).length > 0 ? `
       <div class="mbridge-banner">
@@ -577,9 +567,7 @@ async function openConceptProvenanceModal(conceptName) {
   relatedEl.innerHTML = '';
 
   try {
-    const res = await fetch(`/memory/concepts/${encodeURIComponent(conceptName)}`);
-    if (!res.ok) throw new Error('Concept memory not found');
-    const data = await res.json();
+    const data = await API.request(`/memory/concepts/${encodeURIComponent(conceptName)}`, undefined, 'Concept memory not found');
 
     storyEl.textContent = data.provenance_story;
 
@@ -627,9 +615,8 @@ function closeConceptProvenanceModal() {
 async function loadNoteMemoryCrossReferences(noteId) {
   if (!noteId) return;
   try {
-    const res = await fetch(`/memory/notes/${noteId}/cross-references`);
-    if (!res.ok) return;
-    const data = await res.json();
+    const data = await API.requestOrNull(`/memory/notes/${noteId}/cross-references`);
+    if (!data) return;
     if (data.cross_references && data.cross_references.length > 0) {
       applyInNoteMemoryBadges(data.cross_references);
     }

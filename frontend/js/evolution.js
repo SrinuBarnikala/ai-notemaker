@@ -41,13 +41,6 @@
       activeEvolveSectionId = null;
     }
 
-    function closeModalOnOverlay(event) {
-      if (event.target.classList.contains('modal-overlay')) {
-        event.target.style.display = 'none';
-        activeEvolveSectionId = null;
-      }
-    }
-
     function selectEvolveType(targetBtn, type) {
       activeEvolveType = type;
       const pills = document.querySelectorAll('#evolve-type-selector .type-pill');
@@ -101,18 +94,12 @@
       const endpoint = noteId ? `/notes/${noteId}/evolve` : `/journeys/${currentJourneyId}/note/evolve`;
 
       try {
-        const res = await fetch(endpoint, {
+        const updatedNote = await API.request(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
-        });
+        }, 'Failed to evolve living note');
 
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.detail || 'Failed to evolve living note');
-        }
-
-        const updatedNote = await res.json();
         closeEvolveModal();
         renderNote(updatedNote);
 

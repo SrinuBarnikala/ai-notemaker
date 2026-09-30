@@ -64,17 +64,16 @@
       if (!journeyId) return;
 
       try {
-        let res = null;
+        let assessmentData = null;
         if (!forceGenerate) {
-          res = await fetch(`/journeys/${journeyId}/assessment`);
+          assessmentData = await API.requestOrNull(`/journeys/${journeyId}/assessment`);
         }
-        if (!res || !res.ok) {
+        if (!assessmentData) {
           // Generate new assessment
-          res = await fetch(`/journeys/${journeyId}/assessment/generate`, { method: 'POST' });
+          assessmentData = await API.request(`/journeys/${journeyId}/assessment/generate`, { method: 'POST' }, 'Failed to load assessment materials');
         }
 
-        if (!res.ok) throw new Error('Failed to load assessment materials');
-        currentAssessment = await res.json();
+        currentAssessment = assessmentData;
         activeCardIndex = 0;
         userQuizAnswers = {};
         lastQuizSubmissionResult = null;
@@ -636,17 +635,11 @@
       }
 
       try {
-        const res = await fetch(`/journeys/${journeyId}/assessment/submit`, {
+        const result = await API.request(`/journeys/${journeyId}/assessment/submit`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ answers: userQuizAnswers })
-        });
-
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.detail || 'Failed to evaluate quiz submission');
-        }
-        const result = await res.json();
+        }, 'Failed to evaluate quiz submission');
         lastQuizSubmissionResult = result;
 
         // Render Score Banners
@@ -668,8 +661,7 @@
 
         // If profile exists, reload it to reflect newly mastered concepts
         if (currentJourneyId) {
-          fetch(`/journeys/${currentJourneyId}/knowledge-profile`)
-            .then(r => r.ok ? r.json() : null)
+          API.requestOrNull(`/journeys/${currentJourneyId}/knowledge-profile`)
             .then(p => { if (p && typeof renderProfile === 'function') renderProfile(p); })
             .catch(() => {});
         }

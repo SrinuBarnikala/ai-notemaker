@@ -1,8 +1,7 @@
-import json
 import logging
-import re
 from typing import Optional, Dict, Any
 from pydantic import BaseModel, Field
+from backend.app.core.json_utils import strip_code_fence, find_bracket_span, try_parse_json
 
 logger = logging.getLogger(__name__)
 
@@ -26,28 +25,17 @@ def extract_json_object(text: str) -> Optional[Dict[str, Any]]:
     Extracts and parses a JSON object from raw LLM text, safely handling
     markdown backticks, preamble, and postscript comments.
     """
-    clean = text.strip()
-
-    # Remove markdown code blocks if present
-    match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", clean)
-    if match:
-        clean = match.group(1).strip()
+    clean = strip_code_fence(text)
 
     # Find boundaries of the outermost JSON object
-    start = clean.find("{")
-    end = clean.rfind("}")
-    if start != -1 and end != -1 and end > start:
-        candidate = clean[start : end + 1]
-        try:
-            return json.loads(candidate)
-        except json.JSONDecodeError:
-            pass
+    span = find_bracket_span(clean, "{", "}")
+    if span:
+        parsed = try_parse_json(clean[span[0] : span[1] + 1])
+        if parsed is not None:
+            return parsed
 
     # Direct parse attempt
-    try:
-        return json.loads(clean)
-    except json.JSONDecodeError:
-        return None
+    return try_parse_json(clean)
 
 
 def parse_initial_question(raw_text: str, topic: str) -> InitialQuestionParsed:

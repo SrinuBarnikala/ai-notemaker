@@ -163,19 +163,13 @@ sys.stderr = sys_stderr_backup
       }
 
       try {
-        const res = await fetch(`/journeys/${currentJourneyId}/code/plan`, {
+        const plan = await API.request(`/journeys/${currentJourneyId}/code/plan`, {
           method: 'POST',
-        });
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.detail || 'Code planning failed');
-        }
-        const plan = await res.json();
+        }, 'Code planning failed');
 
         // Fetch and re-render updated note
-        const noteRes = await fetch(`/journeys/${currentJourneyId}/note`);
-        if (noteRes.ok) {
-          const updatedNote = await noteRes.json();
+        const updatedNote = await API.requestOrNull(`/journeys/${currentJourneyId}/note`);
+        if (updatedNote) {
           renderNote(updatedNote);
         }
 
@@ -235,7 +229,7 @@ sys.stderr = sys_stderr_backup
       statusEl.style.display = 'none';
 
       try {
-        const res = await fetch(`/journeys/${currentJourneyId}/sections/${targetSectionForCode}/code`, {
+        await API.request(`/journeys/${currentJourneyId}/sections/${targetSectionForCode}/code`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -243,17 +237,11 @@ sys.stderr = sys_stderr_backup
             custom_prompt: promptVal || undefined,
             include_tests: includeTests,
           }),
-        });
-
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.detail || 'Failed to synthesize code');
-        }
+        }, 'Failed to synthesize code');
 
         // Refresh note
-        const noteRes = await fetch(`/journeys/${currentJourneyId}/note`);
-        if (noteRes.ok) {
-          const updatedNote = await noteRes.json();
+        const updatedNote = await API.requestOrNull(`/journeys/${currentJourneyId}/note`);
+        if (updatedNote) {
           renderNote(updatedNote);
         }
         closeSectionCodeModal();

@@ -161,9 +161,7 @@ async function loadGraphData() {
     if (isGlobalMode && rawGlobalGraphData) {
       payload = rawGlobalGraphData;
     } else {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Failed to load concept graph.');
-      payload = await res.json();
+      payload = await API.request(url, undefined, 'Failed to load concept graph.');
     }
 
     if (isGlobalMode) {

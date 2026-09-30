@@ -265,24 +265,18 @@
       statusEl.style.display = 'none';
 
       try {
-        const res = await fetch(`/journeys/${currentJourneyId}/sections/${targetSectionForVisual}/visual`, {
+        await API.request(`/journeys/${currentJourneyId}/sections/${targetSectionForVisual}/visual`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             visual_type: selectedVisualType,
             custom_prompt: promptVal || undefined,
           }),
-        });
-
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.detail || 'Failed to generate visual');
-        }
+        }, 'Failed to generate visual');
 
         // Refresh note
-        const noteRes = await fetch(`/journeys/${currentJourneyId}/note`);
-        if (noteRes.ok) {
-          const updatedNote = await noteRes.json();
+        const updatedNote = await API.requestOrNull(`/journeys/${currentJourneyId}/note`);
+        if (updatedNote) {
           renderNote(updatedNote);
         }
         closeSectionVisualModal();
@@ -311,19 +305,13 @@
       }
 
       try {
-        const res = await fetch(`/journeys/${currentJourneyId}/visuals/plan`, {
+        const plan = await API.request(`/journeys/${currentJourneyId}/visuals/plan`, {
           method: 'POST',
-        });
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.detail || 'Visual planning failed');
-        }
-        const plan = await res.json();
+        }, 'Visual planning failed');
 
         // Fetch and re-render updated note
-        const noteRes = await fetch(`/journeys/${currentJourneyId}/note`);
-        if (noteRes.ok) {
-          const updatedNote = await noteRes.json();
+        const updatedNote = await API.requestOrNull(`/journeys/${currentJourneyId}/note`);
+        if (updatedNote) {
           renderNote(updatedNote);
         }
 

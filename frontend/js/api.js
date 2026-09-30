@@ -1,6 +1,40 @@
 /* api.js — Centralized REST API Service for AI Note Maker */
 
+/**
+ * Generic fetch wrapper: throws an Error (preferring the backend's `detail`
+ * message, falling back to fallbackErrorMessage) on a non-OK response,
+ * otherwise resolves with the parsed JSON body.
+ */
+async function apiRequest(url, options, fallbackErrorMessage) {
+  const res = await fetch(url, options);
+  if (!res.ok) {
+    let detail;
+    try {
+      const data = await res.json();
+      detail = data && data.detail;
+    } catch (_) {
+      // non-JSON error body — fall back to the provided message
+    }
+    throw new Error(detail || fallbackErrorMessage);
+  }
+  return res.json();
+}
+
+/**
+ * Generic fetch wrapper for best-effort/background loads: resolves with the
+ * parsed JSON body on success, or null on a non-OK response (never throws
+ * for HTTP errors, matching the historical `if (!res.ok) return;` call sites).
+ */
+async function apiRequestOrNull(url, options) {
+  const res = await fetch(url, options);
+  if (!res.ok) return null;
+  return res.json();
+}
+
 const API = {
+  request: apiRequest,
+  requestOrNull: apiRequestOrNull,
+
   async createJourney(topic) {
     const res = await fetch('/journeys', {
       method: 'POST',

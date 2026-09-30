@@ -1,10 +1,16 @@
 /* app.js — Main Application Bootstrap & Keyboard Navigation */
 
+function closeModalOnOverlay(event) {
+  if (event.target.classList.contains('modal-overlay')) {
+    event.target.style.display = 'none';
+    activeEvolveSectionId = null;
+  }
+}
+
 async function checkLlmStatus() {
   try {
-    const res = await fetch('/health');
-    if (!res.ok) return;
-    const data = await res.json();
+    const data = await API.requestOrNull('/health');
+    if (!data) return;
     const badge = document.getElementById('llm-status-badge');
     if (!badge) return;
 
@@ -46,9 +52,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   if (jid) {
     try {
-      const res = await fetch(`/journeys/${jid}/note`);
-      if (res.ok) {
-        const note = await res.json();
+      const note = await API.requestOrNull(`/journeys/${jid}/note`);
+      if (note) {
         currentJourneyId = jid;
         if (typeof resetCopilotState === 'function') resetCopilotState();
         renderNote(note);
@@ -58,9 +63,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
   } else if (nid) {
     try {
-      const res = await fetch(`/notes/${nid}`);
-      if (res.ok) {
-        const note = await res.json();
+      const note = await API.requestOrNull(`/notes/${nid}`);
+      if (note) {
         currentJourneyId = note.journey_id;
         if (typeof resetCopilotState === 'function') resetCopilotState();
         renderNote(note);

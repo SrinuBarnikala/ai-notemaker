@@ -1,9 +1,9 @@
-import json
 import logging
 import re
 from typing import List, Dict, Any, Optional
 from backend.app.schemas.note import NoteBlock
 from backend.app.visuals.sanitizer import sanitize_mermaid_spec, generate_fallback_mermaid
+from backend.app.core.json_utils import strip_code_fence, find_bracket_span, try_parse_json
 
 logger = logging.getLogger(__name__)
 
@@ -17,59 +17,41 @@ class ParsedBlocksList(list):
 
 
 def extract_json_array_or_object(text: str) -> Any:
-    clean = text.strip()
-    match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", clean)
-    if match:
-        clean = match.group(1).strip()
+    clean = strip_code_fence(text)
 
-    start_arr = clean.find("[")
-    end_arr = clean.rfind("]")
-    start_obj = clean.find("{")
-    end_obj = clean.rfind("}")
+    arr_span = find_bracket_span(clean, "[", "]")
+    obj_span = find_bracket_span(clean, "{", "}")
 
     # If array starts before object, prioritize parsing outer array
-    if start_arr != -1 and end_arr != -1 and end_arr > start_arr:
-        if start_obj == -1 or start_arr < start_obj:
-            candidate = clean[start_arr : end_arr + 1]
-            try:
-                parsed = json.loads(candidate)
-                if isinstance(parsed, list):
-                    return parsed
-            except json.JSONDecodeError:
-                pass
+    if arr_span and (obj_span is None or arr_span[0] < obj_span[0]):
+        parsed = try_parse_json(clean[arr_span[0] : arr_span[1] + 1])
+        if isinstance(parsed, list):
+            return parsed
 
     # Check for object with "blocks" key or single block
-    if start_obj != -1 and end_obj != -1 and end_obj > start_obj:
-        candidate = clean[start_obj : end_obj + 1]
-        try:
-            parsed = json.loads(candidate)
+    if obj_span:
+        parsed = try_parse_json(clean[obj_span[0] : obj_span[1] + 1])
+        if parsed is not None:
             if isinstance(parsed, dict):
                 if "blocks" in parsed:
                     return parsed["blocks"]
                 if "type" in parsed:
                     return [parsed]
             return parsed
-        except json.JSONDecodeError:
-            pass
 
     # Check for direct array
-    if start_arr != -1 and end_arr != -1 and end_arr > start_arr:
-        candidate = clean[start_arr : end_arr + 1]
-        try:
-            return json.loads(candidate)
-        except json.JSONDecodeError:
-            pass
+    if arr_span:
+        parsed = try_parse_json(clean[arr_span[0] : arr_span[1] + 1])
+        if parsed is not None:
+            return parsed
 
-    try:
-        parsed = json.loads(clean)
-        if isinstance(parsed, dict):
-            if "blocks" in parsed:
-                return parsed["blocks"]
-            if "type" in parsed:
-                return [parsed]
-        return parsed
-    except json.JSONDecodeError:
-        return None
+    parsed = try_parse_json(clean)
+    if isinstance(parsed, dict):
+        if "blocks" in parsed:
+            return parsed["blocks"]
+        if "type" in parsed:
+            return [parsed]
+    return parsed
 
 
 def parse_markdown_table_to_items(text: str) -> Optional[List[Dict[str, Any]]]:

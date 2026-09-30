@@ -30,13 +30,11 @@
       btnSpinner.style.display = 'inline';
 
       try {
-        const res = await fetch('/journeys', {
+        const journey = await API.request('/journeys', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ topic })
-        });
-        if (!res.ok) throw new Error('Failed to create journey');
-        const journey = await res.json();
+        }, 'Failed to create journey');
         currentJourneyId = journey.id;
         currentTopic = journey.topic;
         if (typeof resetCopilotState === 'function') resetCopilotState();
@@ -75,9 +73,7 @@
       document.getElementById('active-question-section').style.display = 'block';
 
       try {
-        const res = await fetch(`/journeys/${journeyId}/discovery/start`, { method: 'POST' });
-        if (!res.ok) throw new Error('Failed to start discovery');
-        const data = await res.json();
+        const data = await API.request(`/journeys/${journeyId}/discovery/start`, { method: 'POST' }, 'Failed to start discovery');
         renderQuestion(data);
         loadDiscoveryHistory(journeyId);
 
@@ -125,13 +121,11 @@
       btnSpinner.style.display = 'inline';
 
       try {
-        const res = await fetch(`/journeys/${currentJourneyId}/discovery/answer`, {
+        const data = await API.request(`/journeys/${currentJourneyId}/discovery/answer`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ answer })
-        });
-        if (!res.ok) throw new Error('Failed to submit answer');
-        const data = await res.json();
+        }, 'Failed to submit answer');
         renderQuestion(data);
         loadDiscoveryHistory(currentJourneyId);
       } catch (err) {
@@ -145,9 +139,8 @@
 
     async function loadDiscoveryHistory(journeyId) {
       try {
-        const res = await fetch(`/journeys/${journeyId}/discovery`);
-        if (!res.ok) return;
-        const data = await res.json();
+        const data = await API.requestOrNull(`/journeys/${journeyId}/discovery`);
+        if (!data) return;
         const feed = document.getElementById('qa-feed');
 
         const answered = data.interactions.filter(i => i.learner_answer);
@@ -176,9 +169,7 @@
       document.getElementById('prof-summary').textContent = '🤖 Agent 2 analyzing discovery data to build mental model...';
 
       try {
-        const res = await fetch(`/journeys/${journeyId}/knowledge-profile`, { method: 'POST' });
-        if (!res.ok) throw new Error('Failed to synthesize profile');
-        const profile = await res.json();
+        const profile = await API.request(`/journeys/${journeyId}/knowledge-profile`, { method: 'POST' }, 'Failed to synthesize profile');
         renderProfile(profile);
       } catch (err) {
         document.getElementById('prof-summary').textContent = 'Failed to generate profile: ' + err.message;
@@ -256,13 +247,11 @@
       bList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Designing sections...</div>';
 
       try {
-        const res = await fetch(`/journeys/${targetId}/architecture`, {
+        const arch = await API.request(`/journeys/${targetId}/architecture`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ learning_goal: 'Master core mechanics, resolve gaps, and implement in production' })
-        });
-        if (!res.ok) throw new Error('Failed to generate architecture');
-        const arch = await res.json();
+        }, 'Failed to generate architecture');
         renderArchitecture(arch);
       } catch (err) {
         document.getElementById('arch-rationale').textContent = 'Failed to generate architecture: ' + err.message;
@@ -305,10 +294,8 @@
     async function loadRecentJourneys() {
       const listEl = document.getElementById('history-list');
       try {
-        const res = await fetch('/journeys?limit=6');
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!data.journeys || data.journeys.length === 0) {
+        const data = await API.requestOrNull('/journeys?limit=6');
+        if (!data || !data.journeys || data.journeys.length === 0) {
           listEl.innerHTML = '<div style="color: var(--text-muted); font-size: 0.875rem; text-align: center; padding: 1rem;">No journeys yet.</div>';
           return;
         }
@@ -345,9 +332,8 @@
 
       if (status === 'note_generated') {
         try {
-          const res = await fetch(`/journeys/${journeyId}/note`);
-          if (res.ok) {
-            const note = await res.json();
+          const note = await API.requestOrNull(`/journeys/${journeyId}/note`);
+          if (note) {
             renderNote(note);
             return;
           }
@@ -356,9 +342,8 @@
 
       if (status === 'architecture_ready') {
         try {
-          const res = await fetch(`/journeys/${journeyId}/architecture`);
-          if (res.ok) {
-            const arch = await res.json();
+          const arch = await API.requestOrNull(`/journeys/${journeyId}/architecture`);
+          if (arch) {
             const archPanel = document.getElementById('architecture-panel');
             archPanel.style.display = 'block';
             archPanel.scrollIntoView({ behavior: 'smooth' });
@@ -370,9 +355,8 @@
 
       if (status === 'profile_ready') {
         try {
-          const res = await fetch(`/journeys/${journeyId}/knowledge-profile`);
-          if (res.ok) {
-            const prof = await res.json();
+          const prof = await API.requestOrNull(`/journeys/${journeyId}/knowledge-profile`);
+          if (prof) {
             const profPanel = document.getElementById('profile-panel');
             profPanel.style.display = 'block';
             profPanel.scrollIntoView({ behavior: 'smooth' });
@@ -389,9 +373,8 @@
     async function loadJourneyById(journeyId) {
       if (typeof resetCopilotState === 'function') resetCopilotState();
       try {
-        const res = await fetch(`/journeys/${journeyId}`);
-        if (!res.ok) return;
-        const j = await res.json();
+        const j = await API.requestOrNull(`/journeys/${journeyId}`);
+        if (!j) return;
         currentJourneyId = j.id;
         currentTopic = j.topic;
         await resumeJourney(j.id, j.topic, j.status);

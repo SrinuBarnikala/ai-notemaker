@@ -1,42 +1,30 @@
 import re
-import json
 import logging
 from typing import Optional, Dict, Any
+from backend.app.core.json_utils import strip_code_fence, find_bracket_span, try_parse_json
 
 logger = logging.getLogger(__name__)
 
 
 def extract_json(raw_text: str) -> Optional[Any]:
     """Safely extracts JSON object or array from LLM response text."""
-    clean = raw_text.strip()
-    match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", clean)
-    if match:
-        clean = match.group(1).strip()
+    clean = strip_code_fence(raw_text)
 
     # Try array
-    s_arr = clean.find("[")
-    e_arr = clean.rfind("]")
-    if s_arr != -1 and e_arr != -1 and e_arr > s_arr:
-        candidate = clean[s_arr : e_arr + 1]
-        try:
-            return json.loads(candidate)
-        except json.JSONDecodeError:
-            pass
+    span = find_bracket_span(clean, "[", "]")
+    if span:
+        parsed = try_parse_json(clean[span[0] : span[1] + 1])
+        if parsed is not None:
+            return parsed
 
     # Try object
-    s_obj = clean.find("{")
-    e_obj = clean.rfind("}")
-    if s_obj != -1 and e_obj != -1 and e_obj > s_obj:
-        candidate = clean[s_obj : e_obj + 1]
-        try:
-            return json.loads(candidate)
-        except json.JSONDecodeError:
-            pass
+    span = find_bracket_span(clean, "{", "}")
+    if span:
+        parsed = try_parse_json(clean[span[0] : span[1] + 1])
+        if parsed is not None:
+            return parsed
 
-    try:
-        return json.loads(clean)
-    except json.JSONDecodeError:
-        return None
+    return try_parse_json(clean)
 
 
 def sanitize_code_block(raw_code: str, language: str = "python") -> str:

@@ -213,18 +213,11 @@ async function sendCopilotMessage() {
       history: copilotHistory.slice(-6)
     };
 
-    const res = await fetch(`/journeys/${currentJourneyId}/copilot/ask`, {
+    const data = await API.request(`/journeys/${currentJourneyId}/copilot/ask`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.detail || "Failed to consult Copilot.");
-    }
-
-    const data = await res.json();
+    }, "Failed to consult Copilot.");
 
     // Remove loading indicator
     const loader = document.getElementById(loadingId);
@@ -382,18 +375,11 @@ async function pinCopilotAnswerToSection(btnId, sectionId, sectionTitle, pinCand
       language: pinCandidate.language || null
     };
 
-    const res = await fetch(`/journeys/${currentJourneyId}/copilot/pin`, {
+    const resData = await API.request(`/journeys/${currentJourneyId}/copilot/pin`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.detail || "Failed to pin block.");
-    }
-
-    const resData = await res.json();
+    }, "Failed to pin block.");
 
     btn.classList.add('pinned');
     btn.innerHTML = `<span>✓ Pinned (v${resData.note_version})!</span>`;

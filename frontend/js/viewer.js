@@ -223,13 +223,11 @@
       btnSpinner.style.display = 'inline';
 
       try {
-        const res = await fetch(`/journeys/${targetId}/generate-note`, {
+        const note = await API.request(`/journeys/${targetId}/generate-note`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ style_preference: 'rigorous_technical' })
-        });
-        if (!res.ok) throw new Error('Failed to generate structured note');
-        const note = await res.json();
+        }, 'Failed to generate structured note');
         renderNote(note);
       } catch (err) {
         alert('Error generating note: ' + err.message);
