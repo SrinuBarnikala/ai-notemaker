@@ -28,12 +28,17 @@ from backend.app.note.parser import extract_json_array_or_object
 logger = logging.getLogger(__name__)
 
 
-def parse_assessment_json(raw_text: str, topic: str, concepts: List[str]) -> Dict[str, Any]:
+def parse_assessment_json(
+    raw_text: str,
+    topic: str,
+    concepts: List[str],
+    llm_error: Optional[str] = None,
+) -> Dict[str, Any]:
     """
     Parses LLM generation output into flashcards and quiz questions,
-    with a deterministic high-fidelity fallback.
+    with a deterministic, topic-grounded fallback if generation or parsing fails.
     """
-    data = extract_json_array_or_object(raw_text)
+    data = extract_json_array_or_object(raw_text) if raw_text else None
     flashcards: List[FlashcardItem] = []
     quiz_questions: List[QuizQuestion] = []
 
@@ -67,79 +72,104 @@ def parse_assessment_json(raw_text: str, topic: str, concepts: List[str]) -> Dic
                         )
                     )
 
-    # Deterministic fallback if model generated corrupt/mocked output
+    # Determine why we're about to fall back, for observability.
+    failure_reason: Optional[str] = None
+    if not flashcards or not quiz_questions:
+        if llm_error:
+            failure_reason = f"LLM generation call failed: {llm_error}"
+        elif data is None:
+            failure_reason = "LLM output was empty or not parseable as JSON"
+        elif not flashcards and not quiz_questions:
+            failure_reason = "LLM output did not contain any valid flashcards or quiz questions"
+        elif not flashcards:
+            failure_reason = "LLM output did not contain any valid flashcards"
+        else:
+            failure_reason = "LLM output did not contain any valid quiz questions"
+
+    # Deterministic, topic-grounded fallback if the model output was missing/corrupt.
+    # Intentionally avoids inventing domain-specific "facts" (e.g. distributed-systems
+    # jargon) that would be wrong for whatever the actual topic is - it stays generic
+    # about *how to study the topic* rather than pretending to teach unrelated content.
+    used_fallback = False
     if not flashcards:
+        used_fallback = True
         primary = concepts[0] if concepts else topic
-        secondary = concepts[1] if len(concepts) > 1 else f"{topic} Internals"
+        secondary = concepts[1] if len(concepts) > 1 else f"{topic} fundamentals"
         flashcards = [
             FlashcardItem(
                 id="fc-1",
                 concept=primary,
-                front=f"What is the fundamental design invariant of {primary}?",
-                back=f"{primary} guarantees correctness and throughput by decoupling ingestion state from indexing boundaries.",
+                front=f"What is the core idea behind {primary} in the context of {topic}?",
+                back=f"{primary} is a specific concept within {topic}; understanding its structure and role is key to reasoning about {topic} correctly.",
                 difficulty="medium",
             ),
             FlashcardItem(
                 id="fc-2",
                 concept=secondary,
-                front=f"How does {secondary} resolve failure recovery without data corruption?",
-                back=f"Through deterministic state replays, write-ahead logs, and monotonic epoch checkpoints.",
-                difficulty="hard",
+                front=f"What distinguishes {secondary} from other closely related ideas in {topic}?",
+                back=f"{secondary} has boundaries and behavior that are easy to conflate with adjacent concepts in {topic} without deliberate comparison.",
+                difficulty="medium",
             ),
             FlashcardItem(
                 id="fc-3",
                 concept=topic,
-                front=f"What primary performance bottleneck arises when scaling {topic} horizontally?",
-                back="Distributed network roundtrips, lock contention on coordination barriers, and serialization overhead.",
-                difficulty="medium",
+                front=f"What is a common misconception learners have when first approaching {topic}?",
+                back=f"Learners often oversimplify {topic}, missing the specific mechanics or trade-offs that only become clear with deeper study.",
+                difficulty="hard",
             ),
         ]
 
     if not quiz_questions:
+        used_fallback = True
         primary = concepts[0] if concepts else topic
         quiz_questions = [
             QuizQuestion(
                 id="q-1",
                 concept=primary,
-                question=f"Under high write throughput, what is the most reliable strategy to prevent lock contention in {primary}?",
+                question=f"Which statement best reflects how {primary} actually behaves within {topic}?",
                 options=[
-                    "Implement lock-free append-only ring buffers with batch flush commits",
-                    "Place exclusive table locks across the primary coordination worker",
-                    "Serialize every write request over a single synchronous network thread",
-                    "Disable database durability and run purely in volatile worker memory",
+                    f"{primary} follows specific, well-defined mechanics that can be reasoned about precisely",
+                    f"{primary} behaves randomly with no consistent rules",
+                    f"{primary} has no relationship to the rest of {topic}",
+                    f"{primary} cannot be understood without unrelated background",
                 ],
                 correct_index=0,
-                explanation="Option A is correct: Lock-free append-only ring buffers with batched commits decouple write producers from disk flush boundaries, eliminating lock contention while strictly preserving durability invariants. In contrast, Option B causes catastrophic worker starvation under load, Option C destroys throughput through head-of-line blocking, and Option D violates basic data persistence guarantees.",
+                explanation=f"Option A is correct: {primary}, like any well-defined technical concept in {topic}, follows specific mechanics that can be studied and reasoned about. Options B, C, and D describe traits that would make {primary} impossible to teach or apply, which contradicts it being a core part of {topic}.",
             ),
             QuizQuestion(
                 id="q-2",
-                concept=topic,
-                question=f"Which architectural trade-off is unavoidable when optimizing {topic} for sub-millisecond read latency?",
+                concept=primary,
+                question=f"When distinguishing {primary} from related ideas in {topic}, what is the most reliable approach?",
                 options=[
-                    "Higher memory consumption due to dense caching and auxiliary precomputed index structures",
-                    "Total loss of consistency guarantees across all read queries",
-                    "Forced single-node deployment limitations",
-                    "Inability to run in cloud container environments",
+                    f"Compare their defining characteristics and how each is actually used within {topic}",
+                    "Assume they are interchangeable since they sound similar",
+                    "Ignore the differences since terminology doesn't matter in practice",
+                    "Rely only on the order they were introduced in the material",
                 ],
                 correct_index=0,
-                explanation="Option A is correct: Sub-millisecond reads fundamentally require keeping working sets and pre-computed index structures in RAM, directly trading increased memory footprint for speed. In contrast, Option B is false because linearizable or snapshot consistency can still be maintained with proper cache validation protocols, and Options C & D are invalid arbitrary operational constraints.",
+                explanation=f"Option A is correct: distinguishing concepts within {topic} requires comparing their actual defining characteristics and usage, not surface-level similarity. Options B, C, and D skip the comparison entirely and would lead to genuine misunderstandings about {topic}.",
             ),
             QuizQuestion(
                 id="q-3",
-                concept="Operational Resilience",
-                question="When a split-brain or transient network partition occurs, how should the cluster preserve consistency?",
+                concept=topic,
+                question=f"What is the best way to solidify understanding of {topic} after an initial pass through the material?",
                 options=[
-                    "Enforce quorum majorities (N/2 + 1) before accepting mutating state updates",
-                    "Allow both partitions to accept writes independently and merge blindly later",
-                    "Immediately terminate all node processes without snapshotting state",
-                    "Route all traffic exclusively to random unverified nodes",
+                    f"Apply {topic}'s concepts to a concrete example or problem and check that the reasoning holds",
+                    "Memorize definitions without testing them against examples",
+                    "Assume understanding is complete after a single read-through",
+                    "Avoid revisiting any concept once it has been introduced",
                 ],
                 correct_index=0,
-                explanation="Option A is correct: Quorum majorities (N/2 + 1) guarantee that at most one partition can commit state mutations, preventing conflicting split-brain divergences. In contrast, Option B guarantees catastrophic state corruption through silent data conflicts, Option C destroys availability through unneeded crash loops, and Option D breaches routing and security invariants.",
+                explanation="Option A is correct: applying concepts to a concrete example and checking whether the reasoning holds is what converts passive exposure into durable understanding for any technical topic, including this one. Options B, C, and D all skip active practice, which is the step most likely to reveal gaps.",
             ),
         ]
 
-    return {"flashcards": flashcards, "quiz_questions": quiz_questions}
+    return {
+        "flashcards": flashcards,
+        "quiz_questions": quiz_questions,
+        "used_fallback": used_fallback,
+        "failure_reason": failure_reason,
+    }
 
 
 async def generate_assessment_for_journey(
@@ -191,6 +221,7 @@ async def generate_assessment_for_journey(
         gaps_and_misconceptions=gaps_and_misconceptions,
     )
 
+    llm_error: Optional[str] = None
     try:
         raw_output = await provider.generate(
             prompt=prompt,
@@ -200,10 +231,16 @@ async def generate_assessment_for_journey(
     except Exception as err:
         logger.error("Assessment generation failed: %s", err)
         raw_output = ""
+        llm_error = str(err)
 
-    parsed = parse_assessment_json(raw_output, journey.topic, concepts_list)
+    parsed = parse_assessment_json(raw_output, journey.topic, concepts_list, llm_error=llm_error)
     flashcards = parsed["flashcards"]
     quiz_questions = parsed["quiz_questions"]
+    if parsed.get("used_fallback"):
+        logger.warning(
+            "Assessment for journey '%s' used deterministic fallback content (reason: %s)",
+            journey_id, parsed.get("failure_reason"),
+        )
 
     assessment = db.query(Assessment).filter(Assessment.journey_id == journey_id).first()
     if not assessment:
