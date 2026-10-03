@@ -1,10 +1,14 @@
 /* state.js — Shared Application State & Core Utilities */
 
+let currentUser = null;
+let isAuthenticated = false;
+
 let currentJourneyId = null;
 let currentTopic = "";
 let currentFontSizeRem = 1.05;
 let currentNote = null;
 let observer = null;
+
 
 let activeEvolveSectionId = null;
 let activeEvolveType = 'add_code';

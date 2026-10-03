@@ -28,6 +28,13 @@ class Settings(BaseSettings):
     openai_api_key: Optional[str] = None
     openai_base_url: str = "https://api.openai.com/v1"
 
+    # Authentication & Session Security
+    jwt_secret_key: str = "dev-secret-key-personalized-technical-notemaker-replace-in-prod"
+    jwt_algorithm: str = "HS256"
+    jwt_access_token_expire_minutes: int = 60 * 24 * 7  # 7 days
+    auth_cookie_name: str = "auth_token"
+    auth_cookie_samesite: Literal["lax", "strict", "none"] = "lax"
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -1,4 +1,44 @@
-/* api.js — Centralized REST API Service for AI Note Maker */
+/* api.js — Centralized REST API Service for AI Note Maker & Auth Session */
+
+let inMemoryToken = null;
+
+function getAuthToken() {
+  return inMemoryToken || sessionStorage.getItem('notemaker_auth_token');
+}
+
+function setAuthToken(token) {
+  inMemoryToken = token;
+  if (token) {
+    sessionStorage.setItem('notemaker_auth_token', token);
+  } else {
+    sessionStorage.removeItem('notemaker_auth_token');
+  }
+}
+
+function clearAuthSession() {
+  inMemoryToken = null;
+  sessionStorage.removeItem('notemaker_auth_token');
+  currentUser = null;
+  isAuthenticated = false;
+}
+
+/**
+ * Build request options with credentials: 'same-origin' (for HttpOnly cookies)
+ * and optional Bearer Authorization header if token is present.
+ */
+function buildRequestOptions(options = {}) {
+  const opts = { ...options };
+  opts.credentials = opts.credentials || 'same-origin';
+
+  const headers = new Headers(opts.headers || {});
+  const token = getAuthToken();
+  if (token && !headers.has('Authorization')) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+
+  opts.headers = headers;
+  return opts;
+}
 
 /**
  * Generic fetch wrapper: throws an Error (preferring the backend's `detail`
@@ -6,8 +46,17 @@
  * otherwise resolves with the parsed JSON body.
  */
 async function apiRequest(url, options, fallbackErrorMessage) {
-  const res = await fetch(url, options);
+  const finalOptions = buildRequestOptions(options);
+  const res = await fetch(url, finalOptions);
+
   if (!res.ok) {
+    if (res.status === 401 && !url.startsWith('/auth/login')) {
+      clearAuthSession();
+      if (typeof handleUnauthenticatedSession === 'function') {
+        handleUnauthenticatedSession();
+      }
+    }
+
     let detail;
     try {
       const data = await res.json();
@@ -15,180 +64,189 @@ async function apiRequest(url, options, fallbackErrorMessage) {
     } catch (_) {
       // non-JSON error body — fall back to the provided message
     }
-    throw new Error(detail || fallbackErrorMessage);
+    throw new Error(detail || fallbackErrorMessage || `Request failed with status ${res.status}`);
   }
   return res.json();
 }
 
 /**
  * Generic fetch wrapper for best-effort/background loads: resolves with the
- * parsed JSON body on success, or null on a non-OK response (never throws
- * for HTTP errors, matching the historical `if (!res.ok) return;` call sites).
+ * parsed JSON body on success, or null on a non-OK response.
  */
 async function apiRequestOrNull(url, options) {
-  const res = await fetch(url, options);
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const finalOptions = buildRequestOptions(options);
+    const res = await fetch(url, finalOptions);
+    if (!res.ok) {
+      if (res.status === 401 && !url.startsWith('/auth/login')) {
+        clearAuthSession();
+      }
+      return null;
+    }
+    return res.json();
+  } catch (_) {
+    return null;
+  }
 }
 
 const API = {
   request: apiRequest,
   requestOrNull: apiRequestOrNull,
+  setAuthToken,
+  getAuthToken,
+  clearAuthSession,
 
+  /* ========================================================================
+     AUTHENTICATION APIS
+     ======================================================================== */
+  async login(email, password) {
+    const data = await apiRequest('/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    }, 'Invalid email or password.');
+
+    if (data && data.access_token) {
+      setAuthToken(data.access_token);
+      currentUser = data.user;
+      isAuthenticated = true;
+    }
+    return data;
+  },
+
+  async getMe() {
+    return apiRequestOrNull('/auth/me');
+  },
+
+  async logout() {
+    try {
+      await apiRequestOrNull('/auth/logout', { method: 'POST' });
+    } finally {
+      clearAuthSession();
+    }
+  },
+
+  async register(email, password) {
+    return apiRequest('/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    }, 'Failed to register account.');
+  },
+
+  /* ========================================================================
+     APPLICATION APIS
+     ======================================================================== */
   async createJourney(topic) {
-    const res = await fetch('/journeys', {
+    return apiRequest('/journeys', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ topic }),
-    });
-    if (!res.ok) throw new Error((await res.json()).detail || 'Failed to create journey');
-    return res.json();
+    }, 'Failed to create journey');
   },
 
   async startDiscovery(journeyId) {
-    const res = await fetch(`/journeys/${journeyId}/discovery/start`, { method: 'POST' });
-    if (!res.ok) throw new Error((await res.json()).detail || 'Failed to start discovery');
-    return res.json();
+    return apiRequest(`/journeys/${journeyId}/discovery/start`, { method: 'POST' }, 'Failed to start discovery');
   },
 
   async answerDiscovery(journeyId, answer) {
-    const res = await fetch(`/journeys/${journeyId}/discovery/answer`, {
+    return apiRequest(`/journeys/${journeyId}/discovery/answer`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ answer }),
-    });
-    if (!res.ok) throw new Error((await res.json()).detail || 'Failed to record answer');
-    return res.json();
+    }, 'Failed to record answer');
   },
 
   async getDiscovery(journeyId) {
-    const res = await fetch(`/journeys/${journeyId}/discovery`);
-    if (!res.ok) throw new Error((await res.json()).detail || 'Failed to load discovery');
-    return res.json();
+    return apiRequest(`/journeys/${journeyId}/discovery`, {}, 'Failed to load discovery');
   },
 
   async generateProfile(journeyId) {
-    const res = await fetch(`/journeys/${journeyId}/knowledge-profile`, { method: 'POST' });
-    if (!res.ok) throw new Error((await res.json()).detail || 'Failed to generate profile');
-    return res.json();
+    return apiRequest(`/journeys/${journeyId}/knowledge-profile`, { method: 'POST' }, 'Failed to generate profile');
   },
 
   async generateArchitecture(journeyId) {
-    const res = await fetch(`/journeys/${journeyId}/architecture`, { method: 'POST' });
-    if (!res.ok) throw new Error((await res.json()).detail || 'Failed to generate architecture');
-    return res.json();
+    return apiRequest(`/journeys/${journeyId}/architecture`, { method: 'POST' }, 'Failed to generate architecture');
   },
 
   async generateNote(journeyId) {
-    const res = await fetch(`/journeys/${journeyId}/generate-note`, { method: 'POST' });
-    if (!res.ok) throw new Error((await res.json()).detail || 'Failed to generate note');
-    return res.json();
+    return apiRequest(`/journeys/${journeyId}/generate-note`, { method: 'POST' }, 'Failed to generate note');
   },
 
   async getNote(journeyId) {
-    const res = await fetch(`/journeys/${journeyId}/note`);
-    if (!res.ok) throw new Error((await res.json()).detail || 'Failed to load note');
-    return res.json();
+    return apiRequest(`/journeys/${journeyId}/note`, {}, 'Failed to load note');
   },
 
   async getNoteById(noteId) {
-    const res = await fetch(`/notes/${noteId}`);
-    if (!res.ok) throw new Error((await res.json()).detail || 'Failed to load note by ID');
-    return res.json();
+    return apiRequest(`/notes/${noteId}`, {}, 'Failed to load note by ID');
   },
 
   async evolveSection(journeyId, sectionId, payload) {
-    const res = await fetch(`/journeys/${journeyId}/sections/${sectionId}/evolve`, {
+    return apiRequest(`/journeys/${journeyId}/sections/${sectionId}/evolve`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error((await res.json()).detail || 'Evolution failed');
-    return res.json();
+    }, 'Evolution failed');
   },
 
   async getAssessment(journeyId) {
-    const res = await fetch(`/journeys/${journeyId}/assessment`);
-    if (!res.ok) throw new Error((await res.json()).detail || 'Assessment fetch failed');
-    return res.json();
+    return apiRequest(`/journeys/${journeyId}/assessment`, {}, 'Assessment fetch failed');
   },
 
   async generateAssessment(journeyId) {
-    const res = await fetch(`/journeys/${journeyId}/assessment`, { method: 'POST' });
-    if (!res.ok) throw new Error((await res.json()).detail || 'Assessment generation failed');
-    return res.json();
+    return apiRequest(`/journeys/${journeyId}/assessment`, { method: 'POST' }, 'Assessment generation failed');
   },
 
   async submitQuiz(journeyId, answers) {
-    const res = await fetch(`/journeys/${journeyId}/assessment/quiz`, {
+    return apiRequest(`/journeys/${journeyId}/assessment/quiz`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ answers }),
-    });
-    if (!res.ok) throw new Error((await res.json()).detail || 'Quiz evaluation failed');
-    return res.json();
+    }, 'Quiz evaluation failed');
   },
 
   async generateVisual(journeyId, sectionId, payload) {
-    const res = await fetch(`/journeys/${journeyId}/sections/${sectionId}/visual`, {
+    return apiRequest(`/journeys/${journeyId}/sections/${sectionId}/visual`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error((await res.json()).detail || 'Visual generation failed');
-    return res.json();
+    }, 'Visual generation failed');
   },
 
   async planVisuals(journeyId) {
-    const res = await fetch(`/journeys/${journeyId}/plan-visuals`, { method: 'POST' });
-    if (!res.ok) throw new Error((await res.json()).detail || 'Visual planner failed');
-    return res.json();
+    return apiRequest(`/journeys/${journeyId}/plan-visuals`, { method: 'POST' }, 'Visual planner failed');
   },
 
   async generateCode(journeyId, sectionId, payload) {
-    const res = await fetch(`/journeys/${journeyId}/sections/${sectionId}/code`, {
+    return apiRequest(`/journeys/${journeyId}/sections/${sectionId}/code`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error((await res.json()).detail || 'Code synthesis failed');
-    return res.json();
+    }, 'Code synthesis failed');
   },
 
   async planCode(journeyId) {
-    const res = await fetch(`/journeys/${journeyId}/plan-code`, { method: 'POST' });
-    if (!res.ok) throw new Error((await res.json()).detail || 'Code planner failed');
-    return res.json();
+    return apiRequest(`/journeys/${journeyId}/plan-code`, { method: 'POST' }, 'Code planner failed');
   },
 
   async listJourneys() {
-    const res = await fetch('/journeys');
-    if (!res.ok) throw new Error('Failed to load journeys');
-    return res.json();
+    return apiRequest('/journeys', {}, 'Failed to load journeys');
   },
 
   async listVersions(noteId) {
-    const res = await fetch(`/notes/${noteId}/versions`);
-    if (!res.ok) throw new Error((await res.json()).detail || 'Failed to load note versions');
-    return res.json();
+    return apiRequest(`/notes/${noteId}/versions`, {}, 'Failed to load note versions');
   },
 
   async getVersion(noteId, version) {
-    const res = await fetch(`/notes/${noteId}/versions/${version}`);
-    if (!res.ok) throw new Error((await res.json()).detail || `Failed to load version ${version}`);
-    return res.json();
+    return apiRequest(`/notes/${noteId}/versions/${version}`, {}, `Failed to load version ${version}`);
   },
 
   async getDiff(noteId, fromVersion, toVersion) {
-    const res = await fetch(`/notes/${noteId}/diff?from_version=${fromVersion}&to_version=${toVersion}`);
-    if (!res.ok) throw new Error((await res.json()).detail || 'Failed to compute version diff');
-    return res.json();
+    return apiRequest(`/notes/${noteId}/diff?from_version=${fromVersion}&to_version=${toVersion}`, {}, 'Failed to compute version diff');
   },
 
   async restoreVersion(noteId, version) {
-    const res = await fetch(`/notes/${noteId}/versions/${version}/restore`, { method: 'POST' });
-    if (!res.ok) throw new Error((await res.json()).detail || `Failed to restore version ${version}`);
-    return res.json();
+    return apiRequest(`/notes/${noteId}/versions/${version}/restore`, { method: 'POST' }, `Failed to restore version ${version}`);
   },
 
   getNoteExportUrl(noteId, format = 'pdf') {
@@ -199,4 +257,3 @@ const API = {
     return `/journeys/${journeyId}/note/export?format=${format}`;
   }
 };
-

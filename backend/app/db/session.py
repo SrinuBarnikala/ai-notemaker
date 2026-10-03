@@ -56,7 +56,15 @@ def ensure_schema_migrations():
     """Add any missing columns to existing SQLite tables automatically."""
     try:
         with engine.begin() as conn:
+            # Check learning_journeys columns
+            res = conn.execute(text("PRAGMA table_info(learning_journeys)")).fetchall()
+            cols = [row[1] for row in res]
+            if cols:
+                if "user_id" not in cols:
+                    conn.execute(text("ALTER TABLE learning_journeys ADD COLUMN user_id VARCHAR(36) REFERENCES users(id)"))
+
             # Check note_revisions columns
+
             res = conn.execute(text("PRAGMA table_info(note_revisions)")).fetchall()
             cols = [row[1] for row in res]
             if cols:

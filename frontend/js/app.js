@@ -37,43 +37,17 @@ async function checkLlmStatus() {
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
-  // Check LLM diagnostic status
-  checkLlmStatus();
-
-  // Load previous journeys for quick resume
-  if (typeof loadRecentJourneys === 'function') {
-    loadRecentJourneys();
-  }
-
-  // Deep link support via ?journey_id=... or ?note_id=...
-  const params = new URLSearchParams(window.location.search);
-  const jid = params.get('journey_id');
-  const nid = params.get('note_id');
-
-  if (jid) {
-    try {
-      const note = await API.requestOrNull(`/journeys/${jid}/note`);
-      if (note) {
-        currentJourneyId = jid;
-        if (typeof resetCopilotState === 'function') resetCopilotState();
-        renderNote(note);
-      }
-    } catch (e) {
-      console.warn("Could not load deep-linked journey note", e);
-    }
-  } else if (nid) {
-    try {
-      const note = await API.requestOrNull(`/notes/${nid}`);
-      if (note) {
-        currentJourneyId = note.journey_id;
-        if (typeof resetCopilotState === 'function') resetCopilotState();
-        renderNote(note);
-      }
-    } catch (e) {
-      console.warn("Could not load deep-linked note", e);
-    }
+  // Bootstrap authentication session before initializing application views
+  if (typeof bootstrapAuthSession === 'function') {
+    await bootstrapAuthSession();
+  } else {
+    const appWorkspace = document.getElementById('app-workspace');
+    if (appWorkspace) appWorkspace.style.display = 'block';
+    checkLlmStatus();
+    if (typeof loadRecentJourneys === 'function') loadRecentJourneys();
   }
 });
+
 
 // Global Keyboard Navigation: Escape Closes Any Active Modal or Drawer
 document.addEventListener('keydown', (e) => {

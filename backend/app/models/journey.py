@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, DateTime
+from sqlalchemy import Column, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from backend.app.db.session import Base
 
@@ -16,10 +16,13 @@ class LearningJourney(Base):
     __tablename__ = "learning_journeys"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=True, index=True)
     topic = Column(String(500), nullable=False, index=True)
     status = Column(String(50), nullable=False, default="created", index=True)
     created_at = Column(DateTime(timezone=True), default=get_utc_now, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
+    user = relationship("User", back_populates="journeys")
 
     discovery_interactions = relationship(
         "DiscoveryInteraction",

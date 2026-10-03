@@ -16,10 +16,11 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
 
   <!-- Modular Stylesheets (with cache-busting query params) -->
-  <link rel="stylesheet" href="/static/css/main.css?v=20260930.1">
-  <link rel="stylesheet" href="/static/css/viewer.css?v=20260930.1">
-  <link rel="stylesheet" href="/static/css/modals.css?v=20260930.1">
-  <link rel="stylesheet" href="/static/css/components.css?v=20260930.1">
+  <link rel="stylesheet" href="/static/css/main.css?v=20261003.auth2">
+  <link rel="stylesheet" href="/static/css/viewer.css?v=20261003.auth2">
+  <link rel="stylesheet" href="/static/css/modals.css?v=20261003.auth2">
+  <link rel="stylesheet" href="/static/css/components.css?v=20261003.auth2">
+
 </head>
 <body>
   <!-- Fixed Reading Progress Bar -->
@@ -35,7 +36,7 @@
       <div class="brand-icon">N</div>
       <span class="brand-title">Personalized Technical Note Maker</span>
     </div>
-    <div class="header-badges">
+    <div class="header-badges" id="header-authenticated-actions" style="display: none;">
       <button type="button" class="header-action-btn" onclick="openSearchModal()" title="Search all notes, concepts, code & assessments (Ctrl+K)">
         <span>🔍 Search</span>
         <span class="kbd-pill">Ctrl+K</span>
@@ -44,17 +45,237 @@
         <span>🧠 Memory &amp; History</span>
       </button>
       <div id="llm-status-badge" class="phase-badge llm-status-badge" style="display: none;"></div>
-      <div class="phase-badge">PHASE 6 TO 15: SEARCH &amp; KNOWLEDGE MEMORY</div>
+      <div class="header-user-group">
+        <span class="header-user-email" id="header-user-email" title="Logged in user"></span>
+        <button type="button" class="header-action-btn btn-logout" id="btn-logout" onclick="handleLogout()" title="Sign out of account">
+          <span>⏻ Sign Out</span>
+        </button>
+      </div>
     </div>
-
-
   </header>
 
-  <main>
-    <div class="hero">
-      <h1>Living Technical Notes Built for You</h1>
-      <p>A personalized technical note structured around your mental model, addressing gaps with code, callouts, and diagrams.</p>
+  <main id="main-content">
+    <!-- Phase 16: Authentication & Login View -->
+    <div id="login-view" class="login-view-container" style="display: none;">
+      <div class="login-card-wrapper">
+        <div class="login-header-group">
+          <div class="login-pretitle">✦ PERSONALIZED LEARNING ENGINE</div>
+          <h1 class="login-title">Welcome back</h1>
+          <p class="login-subtitle">Continue building your personalized technical knowledge.</p>
+        </div>
+
+        <div class="card login-card">
+          <!-- Notification / Error Banner -->
+          <div id="login-alert" class="login-alert" style="display: none;" role="alert">
+            <span class="login-alert-icon" id="login-alert-icon">⚠️</span>
+            <span id="login-alert-text">Invalid email or password.</span>
+          </div>
+
+          <form id="login-form" onsubmit="handleLoginSubmit(event)" novalidate>
+            <div class="intake-group">
+              <label class="intake-label" for="login-email">
+                <span>Email Address</span>
+                <span class="login-label-hint">account email</span>
+              </label>
+              <input
+                type="email"
+                id="login-email"
+                class="intake-input"
+                placeholder="name@example.com"
+                autocomplete="email"
+                required
+              />
+            </div>
+
+            <div class="intake-group">
+              <label class="intake-label" for="login-password">
+                <span>Password</span>
+                <span class="login-label-hint">account password</span>
+              </label>
+              <div class="login-password-input-wrapper">
+                <input
+                  type="password"
+                  id="login-password"
+                  class="intake-input login-password-input"
+                  placeholder="••••••••••••"
+                  autocomplete="current-password"
+                  required
+                />
+                <button
+                  type="button"
+                  id="btn-toggle-password"
+                  class="password-toggle-btn"
+                  onclick="togglePasswordVisibility()"
+                  aria-label="Show password"
+                  title="Show or hide password"
+                >
+                  <span id="toggle-password-icon">👁</span>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-submit btn-login-submit" id="btn-login-submit">
+              <span id="btn-login-text">Sign In</span>
+              <span id="btn-login-spinner" style="display: none;">⏳ Signing in...</span>
+            </button>
+          </form>
+
+          <div class="login-card-footer">
+            <button type="button" class="login-link-btn" onclick="handleForgotPasswordClick()">
+              Forgot password?
+            </button>
+            <div class="login-register-hint">
+              <span>New here?</span>
+              <button type="button" class="login-link-btn create-account-link" onclick="switchToRegisterView()">
+                Create account
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subtle Info Modal / Banner for Forgot Password Placeholder -->
+        <div id="login-info-banner" class="login-info-banner" style="display: none;">
+          <span id="login-info-banner-text"></span>
+          <button type="button" class="login-info-dismiss" onclick="dismissLoginInfoBanner()" aria-label="Dismiss message">✕</button>
+        </div>
+      </div>
     </div>
+
+    <!-- Phase 17: Registration View -->
+    <div id="register-view" class="login-view-container" style="display: none;">
+      <div class="login-card-wrapper">
+        <div class="login-header-group">
+          <div class="login-pretitle">✦ PERSONALIZED LEARNING SYSTEM</div>
+          <h1 class="login-title">Create your account</h1>
+          <p class="login-subtitle">Build personalized technical notes around the way you learn.</p>
+        </div>
+
+        <div class="card login-card">
+          <!-- Notification / Error Banner -->
+          <div id="register-alert" class="login-alert" style="display: none;" role="alert">
+            <span class="login-alert-icon" id="register-alert-icon">⚠️</span>
+            <span id="register-alert-text">An account with this email already exists.</span>
+          </div>
+
+          <form id="register-form" onsubmit="handleRegisterSubmit(event)" novalidate>
+            <!-- Email Field -->
+            <div class="intake-group">
+              <label class="intake-label" for="register-email">
+                <span>Email Address</span>
+                <span class="login-label-hint">account email</span>
+              </label>
+              <input
+                type="email"
+                id="register-email"
+                class="intake-input"
+                placeholder="name@example.com"
+                autocomplete="email"
+                required
+                oninput="clearFieldError('register-email')"
+              />
+              <div id="register-email-error" class="field-error-msg"></div>
+            </div>
+
+            <!-- Password Field -->
+            <div class="intake-group">
+              <label class="intake-label" for="register-password">
+                <span>Password</span>
+                <span class="login-label-hint">min 8 characters</span>
+              </label>
+              <div class="login-password-input-wrapper">
+                <input
+                  type="password"
+                  id="register-password"
+                  class="intake-input login-password-input"
+                  placeholder="••••••••••••"
+                  autocomplete="new-password"
+                  required
+                  minlength="8"
+                  oninput="handleRegisterPasswordInput()"
+                />
+                <button
+                  type="button"
+                  id="btn-toggle-register-password"
+                  class="password-toggle-btn"
+                  onclick="toggleRegisterPasswordVisibility()"
+                  aria-label="Show password"
+                  title="Show or hide password"
+                >
+                  <span id="toggle-register-password-icon">👁</span>
+                </button>
+              </div>
+              <div id="register-password-error" class="field-error-msg"></div>
+
+              <!-- Compact Password Strength Indicator -->
+              <div id="password-strength-container" class="password-strength-container" style="display: none;">
+                <div class="password-strength-bars">
+                  <div class="strength-bar" id="str-bar-1"></div>
+                  <div class="strength-bar" id="str-bar-2"></div>
+                  <div class="strength-bar" id="str-bar-3"></div>
+                </div>
+                <div class="password-strength-text">
+                  <span>Strength: <strong id="str-label">Weak</strong></span>
+                  <span id="str-hint" style="color: var(--text-muted); font-size: 0.7rem;">At least 8 characters</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Confirm Password Field -->
+            <div class="intake-group">
+              <label class="intake-label" for="register-confirm-password">
+                <span>Confirm Password</span>
+                <span class="login-label-hint">re-enter password</span>
+              </label>
+              <div class="login-password-input-wrapper">
+                <input
+                  type="password"
+                  id="register-confirm-password"
+                  class="intake-input login-password-input"
+                  placeholder="••••••••••••"
+                  autocomplete="new-password"
+                  required
+                  oninput="clearFieldError('register-confirm-password')"
+                />
+                <button
+                  type="button"
+                  id="btn-toggle-register-confirm"
+                  class="password-toggle-btn"
+                  onclick="toggleRegisterConfirmPasswordVisibility()"
+                  aria-label="Show confirm password"
+                  title="Show or hide confirm password"
+                >
+                  <span id="toggle-register-confirm-icon">👁</span>
+                </button>
+              </div>
+              <div id="register-confirm-error" class="field-error-msg"></div>
+            </div>
+
+            <button type="submit" class="btn-submit btn-login-submit" id="btn-register-submit">
+              <span id="btn-register-text">Create Account</span>
+              <span id="btn-register-spinner" style="display: none;">⏳ Creating account...</span>
+            </button>
+          </form>
+
+          <div class="login-card-footer" style="justify-content: center;">
+            <div class="login-register-hint">
+              <span>Already have an account?</span>
+              <button type="button" class="login-link-btn create-account-link" onclick="switchToLoginView()">
+                Sign in
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Authenticated Personalized Note Maker Workspace -->
+    <div id="app-workspace" style="display: none;">
+      <div class="hero">
+        <h1>Living Technical Notes Built for You</h1>
+        <p>A personalized technical note structured around your mental model, addressing gaps with code, callouts, and diagrams.</p>
+      </div>
+
 
     <!-- Phase 1: Topic Intake Card -->
     <div class="card" id="intake-card">
@@ -1344,19 +1565,22 @@
         </div>
       </div>
     </div>
+    </div><!-- /#app-workspace -->
 
   </main>
 
   <footer class="footer">
-    Personalized Technical Note Maker &bull; Phase 15: Living Note Viewer, Evolution, Visuals, Sandbox, Copilot, Knowledge Graph, Versioning, PDF Export &amp; Knowledge Memory
+    Personalized Technical Note Maker &bull; Living Note Viewer, Socratic Copilot, Knowledge Graph &amp; Knowledge Memory
   </footer>
 
 
   <!-- Modular Application Scripts -->
-  <script src="/static/js/state.js"></script>
-  <script src="/static/js/api.js"></script>
-  <script src="/static/js/journey.js"></script>
-  <script src="/static/js/viewer.js" data-feature="copyCode copy-btn"></script>
+  <script src="/static/js/state.js?v=20261003.auth2"></script>
+  <script src="/static/js/api.js?v=20261003.auth2"></script>
+  <script src="/static/js/auth.js?v=20261003.auth2"></script>
+  <script src="/static/js/journey.js?v=20261003.auth2"></script>
+  <script src="/static/js/viewer.js?v=20261003.auth2" data-feature="copyCode copy-btn"></script>
+
   <script src="/static/js/evolution.js"></script>
   <script src="/static/js/assessment.js"></script>
   <script src="/static/js/visuals.js"></script>
