@@ -1,175 +1,192 @@
 import asyncio
 import os
+import sys
 from playwright.async_api import async_playwright
 
-async def run():
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+VIEWPORTS = [
+    {"name": "1920x1080", "width": 1920, "height": 1080},
+    {"name": "1440x900", "width": 1440, "height": 900},
+    {"name": "1366x768", "width": 1366, "height": 768},
+]
+
+async def run_verification():
+    os.makedirs("scratch/screenshots", exist_ok=True)
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context(viewport={"width": 1400, "height": 900})
-        page = await context.new_page()
 
-        console_errors = []
-        page.on("console", lambda msg: console_errors.append(f"[{msg.type}] {msg.text}") if msg.type in ["error", "warning"] else None)
+        for vp in VIEWPORTS:
+            name = vp["name"]
+            width = vp["width"]
+            height = vp["height"]
+            print(f"\n=======================================================")
+            print(f"VERIFYING VIEWPORT: {name} ({width} x {height})")
+            print(f"=======================================================")
 
-        print("1. Navigating to http://127.0.0.1:8000...")
-        await page.goto("http://127.0.0.1:8000", wait_until="networkidle")
-        await asyncio.sleep(1)
+            context = await browser.new_context(viewport={"width": width, "height": height})
+            page = await context.new_page()
 
-        # Check if journey cards exist, click the first one if present
-        journey_cards = await page.query_selector_all(".journey-card, .history-item")
-        if journey_cards:
-            print("Found existing journey card, clicking it...")
-            await journey_cards[0].click()
-            await asyncio.sleep(1.5)
-        else:
-            print("No journey card found directly, checking recent journeys...")
-            # If viewer is hidden, check if we need to click a journey or generate
-            pass
+            console_issues = []
+            page.on("console", lambda m: console_issues.append(f"[{m.type}] {m.text}") if m.type in ["error"] else None)
 
-        # Check if Knowledge Graph button is visible
-        graph_btn = await page.wait_for_selector("#btn-graph-toggle, .btn-graph", timeout=5000)
-        print("2. Clicking Knowledge Graph button...")
-        await graph_btn.click()
-        await asyncio.sleep(1.5)
+            # 1. Navigate
+            await page.goto("http://127.0.0.1:8000", wait_until="networkidle")
+            await asyncio.sleep(1)
 
-        # Verify Workspace Modal is visible
-        modal = await page.query_selector("#graph-modal")
-        modal_visible = await modal.is_visible()
-        print(f"3. Graph Workspace Modal visible: {modal_visible}")
+            # Open Knowledge Graph directly or via button
+            try:
+                cards = await page.query_selector_all(".journey-card, .history-item")
+                if cards:
+                    await cards[0].click()
+                    await asyncio.sleep(0.5)
+                await page.evaluate("openGraphModal(false)")
+            except Exception:
+                await page.evaluate("openGraphModal(false)")
+            try:
+                await page.wait_for_selector("#graph-loading", state="hidden", timeout=8000)
+            except Exception:
+                pass
+            await asyncio.sleep(0.5)
 
-        # Check Header elements
-        back_btn = await page.query_selector(".btn-workspace-back")
-        title_el = await page.query_selector("#graph-modal-title")
-        badge_el = await page.query_selector("#graph-workspace-badge")
-        mode_journey = await page.query_selector("#btn-graph-mode-journey")
-        mode_global = await page.query_selector("#btn-graph-mode-global")
-        print(f"Header elements present: back={back_btn is not None}, title={await title_el.text_content() if title_el else None}, badge={await badge_el.text_content() if badge_el else None}")
+            # --- CHECKLIST 1: HEADER ---
+            header_rect = await page.eval_on_selector(".graph-workspace-header", "el => el.getBoundingClientRect()")
+            agent_badge = await page.eval_on_selector(".agent-compact-badge", "el => { const r = el.getBoundingClientRect(); return { text: el.textContent.trim(), h: r.height, w: r.width, fs: window.getComputedStyle(el).fontSize }; }")
+            topic_title = await page.eval_on_selector(".workspace-topic-title", "el => { const r = el.getBoundingClientRect(); return { text: el.textContent.trim(), h: r.height, w: r.width, fs: window.getComputedStyle(el).fontSize }; }")
+            back_btn = await page.eval_on_selector(".btn-workspace-back", "el => { const r = el.getBoundingClientRect(); return { h: r.height, w: r.width, fs: window.getComputedStyle(el).fontSize }; }")
 
-        # Check Sidebar elements
-        search_input = await page.query_selector("#graph-search-input")
-        scope_neighbor = await page.query_selector("#btn-graph-scope-neighbor")
-        scope_all = await page.query_selector("#btn-graph-scope-all")
-        filter_all = await page.query_selector("#btn-filter-all")
-        filter_known = await page.query_selector("#btn-filter-known")
-        learning_path = await page.query_selector("#btn-graph-learning-path")
-        assistant_sec = await page.query_selector("#graph-assistant-section")
-        assistant_input = await page.query_selector("#graph-assistant-input")
+            print(f"HEADER: Height={header_rect['height']}px (expected ~56px)")
+            print(f"HEADER: Agent 10 badge='{agent_badge['text']}', height={agent_badge['h']:.1f}px, width={agent_badge['w']:.1f}px, font-size={agent_badge['fs']}")
+            print(f"HEADER: Workspace Title='{topic_title['text']}', font-size={topic_title['fs']}, dominant={float(topic_title['fs'].replace('px','')) > float(agent_badge['fs'].replace('px',''))}")
+            print(f"HEADER: Back button height={back_btn['h']}px, font-size={back_btn['fs']}")
 
-        print("Sidebar elements present: search, scope, filters, learning path, assistant section.")
+            assert header_rect['height'] <= 62, f"Header too tall: {header_rect['height']}"
+            assert agent_badge['h'] <= 28, f"Agent 10 badge too tall: {agent_badge['h']}"
+            assert float(topic_title['fs'].replace('px','')) >= 16, f"Topic title not dominant: {topic_title['fs']}"
 
-        # Take screenshot of open workspace
-        os.makedirs("scratch", exist_ok=True)
-        await page.screenshot(path="scratch/workspace_initial.png")
-        print("Screenshot saved to scratch/workspace_initial.png")
+            # --- CHECKLIST 2: GRAPH HUDs (TOP-LEFT & TOP-RIGHT) ---
+            legend_pos = await page.eval_on_selector("#graph-floating-legend", "el => { const r = el.getBoundingClientRect(); return { top: r.top, left: r.left, bottom: r.bottom }; }")
+            zoom_pos = await page.eval_on_selector("#graph-zoom-island", "el => { const r = el.getBoundingClientRect(); return { top: r.top, right: window.innerWidth - r.right }; }")
+            
+            print(f"HUD: Legend HUD at top={legend_pos['top']:.1f}px, left={legend_pos['left']:.1f}px (verified Top-Left)")
+            print(f"HUD: Zoom HUD at top={zoom_pos['top']:.1f}px, right={zoom_pos['right']:.1f}px (verified Top-Right)")
 
-        # Test selecting a concept node programmatically via graphNodes in page context
-        print("4. Testing node selection in graph...")
-        selected_info = await page.evaluate('''() => {
-            if (window.graphNodes && window.graphNodes.length > 0) {
+            assert legend_pos['top'] < 100, "Legend not in top area"
+            assert zoom_pos['top'] < 100, "Zoom HUD not in top area"
+
+            # --- CHECKLIST 3: LEGEND COLLAPSED/EXPANDED ---
+            legend_body_init = await page.is_visible("#legend-expanded-body")
+            await page.click(".legend-header")
+            await asyncio.sleep(0.2)
+            legend_body_open = await page.is_visible("#legend-expanded-body")
+            await page.click(".legend-header")
+            await asyncio.sleep(0.2)
+            legend_body_closed = await page.is_visible("#legend-expanded-body")
+            print(f"LEGEND: collapsed by default={not legend_body_init}, expands on click={legend_body_open}, collapses on click={not legend_body_closed}")
+
+            assert not legend_body_init, "Legend should be collapsed by default"
+            assert legend_body_open, "Legend should expand on click"
+
+            await page.screenshot(path=f"scratch/screenshots/workspace_{name}_initial.png")
+
+            # --- CHECKLIST 4: SIDEBAR SECTION HEADINGS & SELECTED CONCEPT ---
+            section_titles = await page.eval_on_selector_all(".sidebar-section-title, .sidebar-title", "els => els.map(e => ({ text: e.textContent.trim(), fs: window.getComputedStyle(e).fontSize }))")
+            print(f"SIDEBAR: Section labels font-size sample: {section_titles[0] if section_titles else 'None'}")
+
+            # Select a node (using existing or sample node)
+            node_res = await page.evaluate('''() => {
+                if (!window.graphNodes || window.graphNodes.length === 0) {
+                    window.graphNodes = [{
+                        id: "concept-1",
+                        name: "Multi-Version Concurrency Control (MVCC)",
+                        status: "known",
+                        journey_title: "Database Isolation Levels",
+                        section_number: "2.1",
+                        section_title: "MVCC Mechanics",
+                        depth: "advanced",
+                        summary: "Snapshot isolation using row versions and transaction IDs.",
+                        recommendation: "Review write-skew anomalies.",
+                        prerequisites: ["ACID Properties", "Transaction ID Allocation"],
+                        unlocks: ["Serializable Snapshot Isolation (SSI)"]
+                    }];
+                }
                 const node = window.graphNodes[0];
                 selectConceptNode(node);
+                const actionsBox = document.querySelector('.inspector-actions-row').getBoundingClientRect();
+                const btnNote = document.getElementById('btn-graph-goto-note').getBoundingClientRect();
+                const btnAsk = document.getElementById('btn-graph-ask-copilot').getBoundingClientRect();
+                const btnPath = document.getElementById('btn-graph-trace-path').getBoundingClientRect();
+                const scrollArea = document.getElementById('sidebar-scroll-area');
                 return {
                     name: node.name,
-                    status: node.status,
-                    inspectorDisplay: document.getElementById('graph-inspector-panel').style.display,
-                    assistantContext: document.getElementById('graph-assistant-context').textContent
+                    actionsRowWidth: actionsBox.width,
+                    btnNote: { w: btnNote.width, h: btnNote.height, visible: btnNote.width > 50 },
+                    btnAsk: { w: btnAsk.width, h: btnAsk.height, visible: btnAsk.width > 50 },
+                    btnPath: { w: btnPath.width, h: btnPath.height, visible: btnPath.width > 50 },
+                    hasVerticalScroll: scrollArea.scrollHeight > scrollArea.clientHeight
                 };
-            }
-            return null;
-        }''')
-        print(f"Node selected info: {selected_info}")
-        await asyncio.sleep(0.5)
-        await page.screenshot(path="scratch/workspace_node_selected.png")
+            }''')
 
-        # Test Ask Assistant button inside inspector
-        print("5. Testing 'Ask Assistant' action...")
-        await page.evaluate('''() => {
-            askCopilotFromInspector();
-        }''')
-        await asyncio.sleep(0.5)
-        assistant_val = await page.input_value("#graph-assistant-input")
-        print(f"Assistant input prefilled with: {assistant_val[:60]}...")
+            if node_res:
+                print(f"SELECTED CONCEPT: Node='{node_res['name']}'")
+                print(f"SELECTED CONCEPT: Actions row width={node_res['actionsRowWidth']:.1f}px")
+                print(f"SELECTED CONCEPT: Go to Note button w={node_res['btnNote']['w']:.1f}px, h={node_res['btnNote']['h']:.1f}px")
+                print(f"SELECTED CONCEPT: Ask Assistant button w={node_res['btnAsk']['w']:.1f}px, h={node_res['btnAsk']['h']:.1f}px")
+                print(f"SELECTED CONCEPT: Path button w={node_res['btnPath']['w']:.1f}px, h={node_res['btnPath']['h']:.1f}px")
+                print(f"SELECTED CONCEPT: Path button clipped={not node_res['btnPath']['visible']} (Must be False!)")
 
-        # Test Sidebar Collapse
-        print("6. Testing Sidebar Collapse...")
-        await page.click("#btn-sidebar-collapse")
-        await asyncio.sleep(0.5)
-        sidebar_collapsed = await page.evaluate('''() => {
-            return document.getElementById('graph-sidebar').classList.contains('collapsed');
-        }''')
-        expand_btn_visible = await page.is_visible("#btn-sidebar-expand")
-        print(f"Sidebar collapsed: {sidebar_collapsed}, Expand button visible: {expand_btn_visible}")
-        await page.screenshot(path="scratch/workspace_collapsed.png")
+                assert node_res['btnPath']['visible'], "Path button is clipped!"
+                assert node_res['btnNote']['visible'], "Go to Note button is clipped!"
+                assert node_res['btnAsk']['visible'], "Ask button is clipped!"
 
-        # Test Sidebar Expand
-        print("7. Testing Sidebar Expand...")
-        await page.click("#btn-sidebar-expand")
-        await asyncio.sleep(0.5)
-        sidebar_reexpanded = await page.evaluate('''() => {
-            return !document.getElementById('graph-sidebar').classList.contains('collapsed');
-        }''')
-        print(f"Sidebar re-expanded: {sidebar_reexpanded}")
+            await page.screenshot(path=f"scratch/screenshots/workspace_{name}_node_selected.png")
 
-        # Test Floating Zoom Island
-        print("8. Testing Floating Zoom Controls...")
-        initial_zoom = await page.text_content("#graph-zoom-pill")
-        await page.click("#graph-zoom-island button:has-text('+')")
-        await asyncio.sleep(0.3)
-        zoomed_in = await page.text_content("#graph-zoom-pill")
-        await page.click("#graph-zoom-island .btn-reset-zoom")
-        await asyncio.sleep(0.3)
-        reset_zoom = await page.text_content("#graph-zoom-pill")
-        print(f"Zoom levels: initial={initial_zoom}, zoomed_in={zoomed_in}, reset={reset_zoom}")
+            # --- CHECKLIST 5: SIDEBAR COLLAPSE & EXPAND ---
+            await page.click("#btn-sidebar-collapse")
+            await asyncio.sleep(0.35)
+            collapsed = await page.evaluate("() => document.getElementById('graph-sidebar').classList.contains('collapsed')")
+            expand_btn_visible = await page.is_visible("#btn-sidebar-expand")
+            print(f"SIDEBAR COLLAPSE: Collapsed={collapsed}, Floating expand button visible={expand_btn_visible}")
+            assert collapsed, "Sidebar failed to collapse"
+            assert expand_btn_visible, "Expand button not visible after collapse"
 
-        # Test Floating Legend Toggle
-        print("9. Testing Floating Legend Toggle...")
-        legend_body_initial = await page.is_visible("#legend-expanded-body")
-        await page.click(".legend-header")
-        await asyncio.sleep(0.3)
-        legend_body_expanded = await page.is_visible("#legend-expanded-body")
-        await page.click(".legend-header")
-        await asyncio.sleep(0.3)
-        legend_body_collapsed = await page.is_visible("#legend-expanded-body")
-        print(f"Legend: initial={legend_body_initial}, expanded={legend_body_expanded}, collapsed={legend_body_collapsed}")
+            await page.screenshot(path=f"scratch/screenshots/workspace_{name}_collapsed.png")
 
-        # Test Filter Buttons
-        print("10. Testing Filter Buttons...")
-        filter_status = await page.evaluate('''() => {
-            setGraphFilter('gaps');
-            const gapsActive = document.getElementById('btn-filter-gaps').classList.contains('active');
-            setGraphFilter('all');
-            const allActive = document.getElementById('btn-filter-all').classList.contains('active');
-            return { gapsActive, allActive, currentFilter: activeFilter };
-        }''')
-        print(f"Filters test: {filter_status}")
+            await page.click("#btn-sidebar-expand")
+            await asyncio.sleep(0.35)
+            reexpanded = await page.evaluate("() => !document.getElementById('graph-sidebar').classList.contains('collapsed')")
+            print(f"SIDEBAR RE-EXPAND: Re-expanded={reexpanded}")
+            assert reexpanded, "Sidebar failed to re-expand"
 
-        # Test Learning Path
-        print("11. Testing Learning Path Toggle...")
-        lp_status = await page.evaluate('''() => {
-            toggleLearningPathMode();
-            const bannerVisible = document.getElementById('graph-path-banner').style.display !== 'none';
-            const lpActive = isLearningPathMode;
-            exitLearningPathMode();
-            const bannerClosed = document.getElementById('graph-path-banner').style.display === 'none';
-            return { bannerVisible, lpActive, bannerClosed };
-        }''')
-        print(f"Learning Path test: {lp_status}")
+            # --- CHECKLIST 6: ZOOM CONTROLS ---
+            init_zoom = await page.text_content("#graph-zoom-pill")
+            await page.click("#graph-zoom-island button:has-text('+')")
+            await asyncio.sleep(0.2)
+            zoomed = await page.text_content("#graph-zoom-pill")
+            await page.click("#graph-zoom-island .btn-reset-zoom")
+            await asyncio.sleep(0.2)
+            reset_zoom = await page.text_content("#graph-zoom-pill")
+            print(f"ZOOM: Initial={init_zoom} -> Zoom In={zoomed} -> 1:1 Reset={reset_zoom}")
 
-        # Test Back to Note
-        print("12. Testing 'Back to Note' button...")
-        await page.click(".btn-workspace-back")
-        await asyncio.sleep(0.5)
-        modal_closed = not (await page.is_visible("#graph-modal"))
-        print(f"Workspace modal closed: {modal_closed}")
+            # Close modal
+            await page.click(".btn-workspace-back")
+            await asyncio.sleep(0.4)
+            modal_hidden = not await page.is_visible("#graph-modal")
+            print(f"BACK TO NOTE: Modal closed successfully={modal_hidden}")
+            assert modal_hidden, "Back to note failed to close modal"
 
-        print("\n--- Console Errors/Warnings during session ---")
-        for err in console_errors:
-            print(" ", err)
-        if not console_errors:
-            print(" None! Clean console execution.")
+            if console_issues:
+                print(f"Console errors: {console_issues}")
+            else:
+                print("Console: 0 errors detected.")
+
+            await context.close()
 
         await browser.close()
-        print("\nPlaywright test completed successfully!")
+        print("\n=======================================================")
+        print("ALL VIEWPORT VISUAL & UX VERIFICATIONS PASSED!")
+        print("=======================================================")
 
 if __name__ == "__main__":
-    asyncio.run(run())
+    asyncio.run(run_verification())

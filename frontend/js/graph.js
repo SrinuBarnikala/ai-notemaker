@@ -87,8 +87,8 @@ function openGraphModal(asGlobal = false) {
   const titleEl = document.getElementById('graph-modal-title');
   if (titleEl) {
     titleEl.textContent = isGlobalMode 
-      ? '🌐 Explore Knowledge: Multi-Journey Topology' 
-      : (currentTopic ? `🕸️ Concept Dependency Graph: ${currentTopic}` : '🕸️ Concept Dependency Graph');
+      ? 'Explore Knowledge: Multi-Journey Topology' 
+      : (currentTopic ? `Concept Dependency Graph: ${currentTopic}` : 'Concept Dependency Graph');
   }
 
   const globalToggleBtn = document.getElementById('btn-graph-mode-global');
@@ -173,8 +173,8 @@ function switchGraphMode(mode) {
   const titleEl = document.getElementById('graph-modal-title');
   if (titleEl) {
     titleEl.textContent = isGlobalMode 
-      ? '🌐 Explore Knowledge: Multi-Journey Topology' 
-      : (currentTopic ? `🕸️ Concept Dependency Graph: ${currentTopic}` : '🕸️ Concept Dependency Graph');
+      ? 'Explore Knowledge: Multi-Journey Topology' 
+      : (currentTopic ? `Concept Dependency Graph: ${currentTopic}` : 'Concept Dependency Graph');
   }
 
   selectedNode = null;
