@@ -31,8 +31,12 @@ let isLearningPathMode = false;
 let learningPathNodes = new Set();
 let learningPathEdges = new Set();
 
-// Fullscreen Workspace State
-let isGraphFullscreen = false;
+// Workspace State & Navigation Preservation
+let previousNoteScrollY = 0;
+let isSidebarCollapsed = false;
+let isLegendExpanded = false;
+let graphAssistantHistory = [];
+let isGraphFullscreen = true; // Workspace is full-viewport by default
 let graphResizeObserver = null;
 
 const COLOR_MAP = {
@@ -72,6 +76,7 @@ function requestRender() {
 // --------------------------------------------------------------------------
 
 function openGraphModal(asGlobal = false) {
+  previousNoteScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
   isGlobalMode = asGlobal;
   const modal = document.getElementById('graph-modal');
   if (!modal) return;
@@ -93,6 +98,9 @@ function openGraphModal(asGlobal = false) {
     journeyToggleBtn.classList.toggle('active', !isGlobalMode);
   }
 
+  // Reset visual filter state to all
+  setGraphFilter('all');
+
   // Default to 1-Hop Focus
   selectedNode = null;
   activeExploreCenterId = null;
@@ -103,7 +111,7 @@ function openGraphModal(asGlobal = false) {
   loadGraphData();
 }
 
-function closeGraphModal() {
+function closeGraphModal(preserveScroll = true) {
   const modal = document.getElementById('graph-modal');
   if (modal) modal.style.display = 'none';
   document.body.style.overflow = '';
@@ -114,15 +122,43 @@ function closeGraphModal() {
   }
   targetCamera = null;
 
-  if (isGraphFullscreen) {
-    isGraphFullscreen = false;
-    applyGraphFullscreenState();
-  }
   closeConceptInspector();
   exitLearningPathMode();
 
   const dropdown = document.getElementById('graph-search-dropdown');
   if (dropdown) dropdown.style.display = 'none';
+
+  if (preserveScroll && typeof previousNoteScrollY === 'number') {
+    window.scrollTo({ top: previousNoteScrollY, behavior: 'instant' });
+  }
+}
+
+function toggleGraphSidebar(forceState = null) {
+  if (forceState !== null) {
+    isSidebarCollapsed = forceState;
+  } else {
+    isSidebarCollapsed = !isSidebarCollapsed;
+  }
+
+  const sidebar = document.getElementById('graph-sidebar');
+  const expandBtn = document.getElementById('btn-sidebar-expand');
+
+  if (sidebar) {
+    sidebar.classList.toggle('collapsed', isSidebarCollapsed);
+  }
+  if (expandBtn) {
+    expandBtn.style.display = isSidebarCollapsed ? 'inline-flex' : 'none';
+  }
+
+  handleCanvasResizeTransition();
+}
+
+function toggleLegendExpand() {
+  isLegendExpanded = !isLegendExpanded;
+  const body = document.getElementById('legend-expanded-body');
+  const arrow = document.getElementById('legend-toggle-arrow');
+  if (body) body.style.display = isLegendExpanded ? 'block' : 'none';
+  if (arrow) arrow.textContent = isLegendExpanded ? '▴' : '▾';
 }
 
 function switchGraphMode(mode) {
@@ -889,7 +925,17 @@ function selectConceptNode(node) {
   smoothCenterOnNode(node);
 
   const panel = document.getElementById('graph-inspector-panel');
-  if (panel) panel.style.display = 'flex';
+  if (panel) {
+    panel.style.display = 'block';
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // Update Assistant context pill in sidebar
+  const assistantContext = document.getElementById('graph-assistant-context');
+  if (assistantContext) {
+    assistantContext.textContent = `📍 ${node.name.length > 18 ? node.name.substring(0, 16) + '...' : node.name}`;
+    assistantContext.title = `Context: ${node.name}`;
+  }
 
   const titleEl = document.getElementById('inspector-concept-title');
   if (titleEl) titleEl.textContent = node.name;
@@ -910,7 +956,7 @@ function selectConceptNode(node) {
     descEl.textContent = node.summary || `Core architectural concept relevant to ${node.journey_topic || currentTopic || 'the curriculum'}.`;
   }
 
-  const secBlock = document.getElementById('inspector-section-block');
+  const secBlock = document.getElementById('inspector-section-card') || document.getElementById('inspector-section-block');
   const secNum = document.getElementById('inspector-sec-num');
   const secDepth = document.getElementById('inspector-sec-depth');
   const secTitle = document.getElementById('inspector-sec-title');
@@ -1031,6 +1077,13 @@ function closeConceptInspector() {
   const panel = document.getElementById('graph-inspector-panel');
   if (panel) panel.style.display = 'none';
   selectedNode = null;
+
+  const assistantContext = document.getElementById('graph-assistant-context');
+  if (assistantContext) {
+    assistantContext.textContent = '📍 Note Context';
+    assistantContext.title = 'Default note context';
+  }
+
   requestRender();
 }
 
@@ -1170,7 +1223,7 @@ function traceLearningPath(targetNode) {
 function goToSectionFromInspector() {
   if (!selectedNode) return;
   const node = selectedNode;
-  closeGraphModal();
+  closeGraphModal(false);
 
   let secEl = node.section_id ? document.getElementById(`sec-${node.section_id}`) : null;
   if (!secEl && currentNote && currentNote.sections) {
@@ -1184,16 +1237,167 @@ function goToSectionFromInspector() {
       secEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
       secEl.classList.add('section-highlight-flash');
       setTimeout(() => secEl.classList.remove('section-highlight-flash'), 2400);
-    }, 350);
+    }, 200);
   }
 }
 
 function askCopilotFromInspector() {
   if (!selectedNode) return;
   const node = selectedNode;
-  const prefill = `Can you explain the concept "${node.name}" in depth? How does it connect to its prerequisites and where does it fit in the technical architecture?`;
-  closeGraphModal();
-  openCopilotDrawer(node.section_id || null, node.section_title || null, prefill, null);
+
+  // Ensure sidebar is open
+  if (isSidebarCollapsed) {
+    toggleGraphSidebar(false);
+  }
+
+  const assistantContext = document.getElementById('graph-assistant-context');
+  if (assistantContext) {
+    assistantContext.textContent = `📍 ${node.name.length > 18 ? node.name.substring(0, 16) + '...' : node.name}`;
+    assistantContext.title = `Context: ${node.name}`;
+  }
+
+  const input = document.getElementById('graph-assistant-input');
+  if (input) {
+    input.value = `Can you explain the concept "${node.name}" in depth? How does it connect to its prerequisites and where does it fit in the technical architecture?`;
+    input.focus();
+    input.select();
+  }
+
+  const assistantSec = document.getElementById('graph-assistant-section');
+  if (assistantSec) {
+    assistantSec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+async function sendGraphAssistantMessage() {
+  const input = document.getElementById('graph-assistant-input');
+  const msgContainer = document.getElementById('graph-assistant-messages');
+  if (!input || !msgContainer) return;
+
+  const question = input.value.trim();
+  if (!question) return;
+
+  input.value = '';
+
+  // Render User Message
+  const userMsgHtml = `
+    <div class="assistant-msg user">
+      <div class="assistant-avatar">👤</div>
+      <div class="assistant-bubble">${escapeHtml(question)}</div>
+    </div>
+  `;
+  msgContainer.insertAdjacentHTML('beforeend', userMsgHtml);
+  msgContainer.scrollTop = msgContainer.scrollHeight;
+
+  graphAssistantHistory.push({ role: 'user', content: question });
+
+  const jId = currentJourneyId || (selectedNode && selectedNode.journey_id ? selectedNode.journey_id : null);
+  const secId = selectedNode ? selectedNode.section_id : null;
+  const selectedText = selectedNode 
+    ? `Concept: ${selectedNode.name}. Summary: ${selectedNode.summary || ''}. Status: ${selectedNode.status}. Group: ${selectedNode.group}.` 
+    : (currentTopic ? `Topic: ${currentTopic}` : null);
+
+  const loadingId = 'graph-assistant-typing-' + Date.now();
+  const loadingHtml = `
+    <div class="assistant-msg assistant" id="${loadingId}">
+      <div class="assistant-avatar">🤖</div>
+      <div class="assistant-bubble assistant-typing">
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
+        <span style="margin-left: 0.45rem; font-size: 0.72rem; color: #a5b4fc;">Reasoning over concept topology...</span>
+      </div>
+    </div>
+  `;
+  msgContainer.insertAdjacentHTML('beforeend', loadingHtml);
+  msgContainer.scrollTop = msgContainer.scrollHeight;
+
+  const btnSend = document.getElementById('btn-send-graph-assistant');
+  if (btnSend) btnSend.disabled = true;
+
+  try {
+    if (!jId) {
+      throw new Error('No active learning journey is loaded. Explore knowledge or open a journey note to converse with the assistant.');
+    }
+
+    const payload = {
+      question: question,
+      section_id: secId,
+      selected_text: selectedText,
+      history: graphAssistantHistory.slice(-6)
+    };
+
+    const data = await API.request(`/journeys/${jId}/copilot/ask`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }, 'Failed to consult Graph Assistant.');
+
+    const loader = document.getElementById(loadingId);
+    if (loader) loader.remove();
+
+    graphAssistantHistory.push({ role: 'assistant', content: data.answer });
+
+    let formattedAnswer = (typeof formatMarkdownContent === 'function') 
+      ? formatMarkdownContent(data.answer) 
+      : escapeHtml(data.answer).replace(/\n/g, '<br>');
+
+    let followUpsHtml = '';
+    if (data.follow_up_prompts && data.follow_up_prompts.length > 0) {
+      followUpsHtml = `
+        <div class="assistant-follow-ups">
+          ${data.follow_up_prompts.map(p => `
+            <button type="button" class="assistant-follow-pill" onclick="sendGraphAssistantPrompt('${escapeHtml(p).replace(/'/g, "\\'")}')">
+              ${escapeHtml(p)}
+            </button>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    const assistantMsgHtml = `
+      <div class="assistant-msg assistant">
+        <div class="assistant-avatar">🤖</div>
+        <div class="assistant-bubble">
+          <div class="assistant-bubble-content">${formattedAnswer}</div>
+          ${followUpsHtml}
+        </div>
+      </div>
+    `;
+    msgContainer.insertAdjacentHTML('beforeend', assistantMsgHtml);
+  } catch (err) {
+    const loader = document.getElementById(loadingId);
+    if (loader) loader.remove();
+
+    const errorHtml = `
+      <div class="assistant-msg assistant">
+        <div class="assistant-avatar">⚠️</div>
+        <div class="assistant-bubble" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.1);">
+          <div style="font-weight: 700; color: #f87171; font-size: 0.76rem; margin-bottom: 0.2rem;">Assistant Notice</div>
+          <div style="font-size: 0.74rem; color: #cbd5e1;">${escapeHtml(err.message)}</div>
+        </div>
+      </div>
+    `;
+    msgContainer.insertAdjacentHTML('beforeend', errorHtml);
+  } finally {
+    if (btnSend) btnSend.disabled = false;
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+  }
+}
+
+function sendGraphAssistantPrompt(text) {
+  const input = document.getElementById('graph-assistant-input');
+  if (input) {
+    input.value = text;
+    sendGraphAssistantMessage();
+  }
+}
+
+function handleGraphAssistantKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendGraphAssistantMessage();
+  }
 }
 
 function tracePathFromInspector() {
@@ -1233,12 +1437,25 @@ function updateGraphTooltip(node, clientX, clientY) {
 
 function setGraphFilter(filterName, btn) {
   activeFilter = filterName;
-  document.querySelectorAll('.graph-filter-btn').forEach(b => {
+  document.querySelectorAll('.graph-filter-btn, .filter-stack-btn').forEach(b => {
     if (b.id !== 'btn-graph-scope-neighbor' && b.id !== 'btn-graph-scope-all' && b.id !== 'btn-graph-learning-path') {
       b.classList.remove('active');
     }
   });
-  if (btn) btn.classList.add('active');
+
+  if (btn) {
+    btn.classList.add('active');
+  } else {
+    const idMap = {
+      all: 'btn-filter-all',
+      known: 'btn-filter-known',
+      gaps: 'btn-filter-gaps',
+      misc: 'btn-filter-misc'
+    };
+    const target = document.getElementById(idMap[filterName]);
+    if (target) target.classList.add('active');
+  }
+
   requestRender();
 }
 
@@ -1374,7 +1591,13 @@ function handleCanvasResizeTransition() {
   resizeGraphCanvas();
   setTimeout(() => {
     resizeGraphCanvas();
-  }, 290);
+  }, 100);
+  setTimeout(() => {
+    resizeGraphCanvas();
+  }, 280);
+  setTimeout(() => {
+    resizeGraphCanvas();
+  }, 400);
 }
 
 function resizeGraphCanvas() {
@@ -1425,22 +1648,31 @@ function setupGraphResizeObserver() {
   }
 }
 
-// Global Keyboard Shortcuts for Graph Modal
+// Global Keyboard Shortcuts for Graph Workspace
 window.addEventListener('keydown', (e) => {
   const modal = document.getElementById('graph-modal');
   if (!modal || modal.style.display === 'none') return;
 
   const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
-  if (activeTag === 'input' || activeTag === 'textarea') return;
+  if (activeTag === 'input' || activeTag === 'textarea') {
+    if (e.key === 'Escape') {
+      document.activeElement.blur();
+    }
+    return;
+  }
 
-  if (e.key === 'f' || e.key === 'F') {
+  // Ctrl+[ or Cmd+[ toggles left sidebar
+  if ((e.ctrlKey || e.metaKey) && (e.key === '[' || e.key === ']')) {
     e.preventDefault();
-    toggleGraphFullscreen();
+    toggleGraphSidebar();
   } else if (e.key === 'Escape') {
-    if (isGraphFullscreen) {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleGraphFullscreen();
+    e.preventDefault();
+    if (isLearningPathMode) {
+      exitLearningPathMode();
+    } else if (selectedNode) {
+      closeConceptInspector();
+    } else {
+      closeGraphModal(true);
     }
   }
 });
