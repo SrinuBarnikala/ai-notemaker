@@ -109,6 +109,37 @@ def parse_markdown_table_to_items(text: str) -> Optional[List[Dict[str, Any]]]:
     return items if items else None
 
 
+def sanitize_latex_text(text: Optional[str]) -> Optional[str]:
+    """Sanitizes unescaped ASCII control characters (such as form feed \x0c) and restores missing LaTeX backslashes."""
+    if not text:
+        return text
+    # 1. Recover form feed control characters (0x0C / \f) resulting from unescaped \frac in JSON strings
+    text = text.replace('\x0c', '\\f').replace('\f', '\\f')
+
+    # 2. Inside math delimiters ($...$ or $$...$$), restore missing backslashes for common LaTeX commands
+    math_commands = [
+        'frac', 'partial', 'leftarrow', 'rightarrow', 'Leftarrow', 'Rightarrow',
+        'sum', 'prod', 'int', 'infty', 'nabla', 'cdot', 'times',
+        'alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta', 'eta', 'theta',
+        'iota', 'kappa', 'lambda', 'mu', 'nu', 'xi', 'pi', 'rho', 'sigma',
+        'tau', 'upsilon', 'phi', 'chi', 'psi', 'omega',
+        'Gamma', 'Delta', 'Theta', 'Lambda', 'Xi', 'Pi', 'Sigma', 'Phi', 'Psi', 'Omega',
+        'dots', 'ldots', 'cdots', 'approx', 'neq', 'leq', 'geq', 'in', 'subset',
+        'forall', 'exists', 'to', 'mapsto'
+    ]
+    cmd_pattern = r'(?<!\\)(?<![a-zA-Z])(' + '|'.join(math_commands) + r')(?![a-zA-Z])'
+
+    def fix_math_block(match):
+        inner_content = match.group(1)
+        fixed_inner = re.sub(cmd_pattern, r'\\\1', inner_content)
+        delim = match.group(0)[0:2] if match.group(0).startswith('$$') else '$'
+        return f"{delim}{fixed_inner}{delim}"
+
+    text = re.sub(r'\$\$([\s\S]*?)\$\$', fix_math_block, text)
+    text = re.sub(r'(?<!\$)\$(?!\$)([^\$\n]+?)\$(?!\$)', fix_math_block, text)
+    return text
+
+
 def parse_section_blocks(
     raw_text: str,
     section_title: str,
@@ -145,6 +176,12 @@ def parse_section_blocks(
                 term = item.get("term")
                 code_snippet = item.get("code")
                 diag_spec = item.get("diagram_spec")
+
+                # Sanitize LaTeX formatting in non-code content and terms
+                if b_type != "code" and content:
+                    content = sanitize_latex_text(content)
+                if term:
+                    term = sanitize_latex_text(term)
 
                 # Sanitize Mermaid if diagram block
                 if b_type == "diagram" and diag_spec:

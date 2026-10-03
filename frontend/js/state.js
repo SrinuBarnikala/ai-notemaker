@@ -51,11 +51,29 @@ function escapeJsString(str) {
 function normalizeLatexEscapes(text) {
   if (!text) return '';
   let str = String(text);
-  // Normalize double-escaped backslashes from JSON stringification: \\frac -> \frac, \\sum -> \sum, etc.
+  // 1. Recover ASCII Form Feed control characters (0x0C / \f) which occur when \frac is unescaped by JSON parsers
+  str = str.replace(/[\x0c\f]/g, '\\f');
+  // 2. Normalize double-escaped backslashes from JSON stringification: \\frac -> \frac, \\sum -> \sum, etc.
   str = str.replace(/\\\\([a-zA-Z]+|[()\[\]{}_^+\-*,.<>=|/])/g, '\\$1');
-  // Normalize standard bracket-style math delimiters: \[ ... \] -> $$ ... $$, \( ... \) -> $ ... $
+  // 3. Normalize standard bracket-style math delimiters: \[ ... \] -> $$ ... $$, \( ... \) -> $ ... $
   str = str.replace(/\\\[([\s\S]*?)\\\]/g, '$$$1$$');
   str = str.replace(/\\\(([\s\S]*?)\\\)/g, '$$$1$');
+
+  // 4. Auto-repair missing backslashes for common LaTeX commands inside $...$ or $$...$$ math delimiters
+  const mathCommands = [
+    'frac', 'partial', 'leftarrow', 'rightarrow', 'Leftarrow', 'Rightarrow',
+    'sum', 'prod', 'int', 'infty', 'nabla', 'cdot', 'times',
+    'alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta', 'eta', 'theta',
+    'iota', 'kappa', 'lambda', 'mu', 'nu', 'xi', 'pi', 'rho', 'sigma',
+    'tau', 'upsilon', 'phi', 'chi', 'psi', 'omega',
+    'Gamma', 'Delta', 'Theta', 'Lambda', 'Xi', 'Pi', 'Sigma', 'Phi', 'Psi', 'Omega',
+    'dots', 'ldots', 'cdots', 'approx', 'neq', 'leq', 'geq', 'in', 'subset',
+    'forall', 'exists', 'to', 'mapsto'
+  ];
+  const cmdRegex = new RegExp('(?<!\\\\)(?<![a-zA-Z])(' + mathCommands.join('|') + ')(?![a-zA-Z])', 'g');
+  str = str.replace(/\$\$([\s\S]*?)\$\$/g, (m, inner) => '$$' + inner.replace(cmdRegex, '\\$1') + '$$');
+  str = str.replace(/(?<!\$)\$(?!\$)([^\$\n]+?)\$(?!\$)/g, (m, inner) => '$' + inner.replace(cmdRegex, '\\$1') + '$');
+
   return str;
 }
 

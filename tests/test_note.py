@@ -150,3 +150,16 @@ def test_note_not_found(client):
 
     res2 = client.get("/notes/unknown-note-id-12345")
     assert res2.status_code == 404
+
+
+def test_sanitize_latex_text():
+    from backend.app.note.parser import sanitize_latex_text
+
+    raw = f"Loss gradient: ${chr(12)}rac{{partial L}}{{partial z}} = {chr(12)}rac{{partial L}}{{partial a}},sigma'(z)$"
+    cleaned = sanitize_latex_text(raw)
+    assert cleaned == "Loss gradient: $\\frac{\\partial L}{\\partial z} = \\frac{\\partial L}{\\partial a},\\sigma'(z)$"
+
+    step = f"$w leftarrow w - eta,{chr(12)}rac{{partial L}}{{partial w}}$"
+    cleaned_step = sanitize_latex_text(step)
+    assert cleaned_step == "$w \\leftarrow w - \\eta,\\frac{\\partial L}{\\partial w}$"
+
