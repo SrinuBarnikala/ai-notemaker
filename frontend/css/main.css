@@ -1043,6 +1043,57 @@ footer.footer {
   display: inline-block;
 }
 
+/* Interactive Header Profile Pill */
+.header-profile-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  padding: 0.2rem 0.55rem 0.2rem 0.3rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  height: 32px;
+  color: var(--text-primary);
+  transition: all 0.15s ease;
+  max-width: 190px;
+}
+
+.header-profile-pill:hover {
+  background: var(--bg-surface-raised);
+  border-color: var(--border-strong);
+  color: var(--accent-primary);
+}
+
+.user-avatar-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #06b6d4);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.72rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.header-user-name {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header-profile-pill:hover .header-user-name {
+  color: var(--text-primary);
+}
+
 .btn-logout:hover {
   color: var(--color-danger) !important;
   border-color: rgba(248, 113, 113, 0.4) !important;

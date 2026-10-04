@@ -58,6 +58,9 @@ document.addEventListener('keydown', (e) => {
     // 2. Spotlight Universal Search Modal
     if (typeof closeSearchModal === 'function') closeSearchModal();
 
+    // 2.1 Learner Profile & Settings Modal
+    if (typeof closeProfileModal === 'function') closeProfileModal();
+
     // 3. Version History & Diff Modal
     if (typeof closeVersionHistoryModal === 'function') closeVersionHistoryModal();
 

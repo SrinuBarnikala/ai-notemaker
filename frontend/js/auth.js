@@ -466,10 +466,23 @@ function transitionToAuthenticatedApp(user) {
   // Update header state
   const headerActions = document.getElementById('header-authenticated-actions');
   const userEmail = document.getElementById('header-user-email');
+  const userName = document.getElementById('header-user-name');
+  const avatarBadge = document.getElementById('header-avatar-badge');
+
   if (headerActions) headerActions.style.display = 'flex';
   if (userEmail) {
     userEmail.textContent = (user && user.email) ? user.email : 'Learner';
-    userEmail.title = `Logged in as ${(user && user.email) ? user.email : 'Learner'}`;
+  }
+  if (userName) {
+    userName.textContent = (user && user.email) ? user.email.split('@')[0] : 'Learner';
+  }
+  if (avatarBadge) {
+    avatarBadge.textContent = (user && user.email) ? user.email[0].toUpperCase() : 'U';
+  }
+
+  // Load enriched profile if available
+  if (typeof loadHeaderProfile === 'function') {
+    loadHeaderProfile();
   }
 
   // Hide login and register views, reveal app workspace
@@ -529,14 +542,21 @@ async function handleLogout() {
 function handleUnauthenticatedSession() {
   currentUser = null;
   isAuthenticated = false;
+  currentProfile = null;
+  currentLearnerSettings = null;
   currentJourneyId = null;
   currentNote = null;
 
   // Update header
   const headerActions = document.getElementById('header-authenticated-actions');
   const userEmail = document.getElementById('header-user-email');
+  const userName = document.getElementById('header-user-name');
+  const avatarBadge = document.getElementById('header-avatar-badge');
+
   if (headerActions) headerActions.style.display = 'none';
   if (userEmail) userEmail.textContent = '';
+  if (userName) userName.textContent = 'Learner';
+  if (avatarBadge) avatarBadge.textContent = '?';
 
   // Close any open modals or drawers
   document.querySelectorAll('.modal-overlay').forEach(modal => {

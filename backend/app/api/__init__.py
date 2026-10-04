@@ -11,9 +11,11 @@ from backend.app.api.code import router as code_router
 from backend.app.api.copilot import router as copilot_router
 from backend.app.api.graph import router as graph_router
 from backend.app.api.memory import router as memory_router
+from backend.app.api.user_profile import router as user_profile_router
 
 api_router = APIRouter()
 api_router.include_router(auth_router, prefix="/auth", tags=["Authentication"])
+api_router.include_router(user_profile_router, prefix="/profile", tags=["Profile & Settings"])
 api_router.include_router(journeys_router, prefix="/journeys", tags=["Journeys"])
 
 api_router.include_router(discovery_router, prefix="/journeys", tags=["Discovery"])

@@ -1,4 +1,5 @@
 from backend.app.models.user import User
+from backend.app.models.user_profile import UserProfile
 from backend.app.models.journey import LearningJourney
 from backend.app.models.discovery import DiscoveryInteraction
 from backend.app.models.profile import KnowledgeProfile, KnowledgeConcept
@@ -8,6 +9,7 @@ from backend.app.models.assessment import Assessment, AssessmentSubmission
 
 __all__ = [
     "User",
+    "UserProfile",
     "LearningJourney",
     "DiscoveryInteraction",
     "KnowledgeProfile",

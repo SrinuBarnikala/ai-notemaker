@@ -2,6 +2,8 @@
 
 let currentUser = null;
 let isAuthenticated = false;
+let currentProfile = null;
+let currentLearnerSettings = null;
 
 let currentJourneyId = null;
 let currentTopic = "";

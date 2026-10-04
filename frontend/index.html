@@ -46,7 +46,11 @@
       </button>
       <div id="llm-status-badge" class="phase-badge llm-status-badge" style="display: none;"></div>
       <div class="header-user-group">
-        <span class="header-user-email" id="header-user-email" title="Logged in user"></span>
+        <button type="button" class="header-action-btn header-profile-pill" id="btn-header-profile" onclick="openProfileModal()" title="View and edit your profile & learner settings">
+          <span class="user-avatar-badge" id="header-avatar-badge">?</span>
+          <span class="header-user-name" id="header-user-name">Learner</span>
+          <span id="header-user-email" style="display: none;"></span>
+        </button>
         <button type="button" class="header-action-btn btn-logout" id="btn-logout" onclick="handleLogout()" title="Sign out of account">
           <span>⏻ Sign Out</span>
         </button>
@@ -1454,7 +1458,7 @@
         <div class="modal-header">
           <div>
             <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-              <span class="vcard-num-badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border-color: #38bdf8;">🧠 PHASE 15</span>
+              <span class="vcard-num-badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border-color: #38bdf8;">🧠 PHASE 6 TO 15: SEARCH &amp; KNOWLEDGE MEMORY</span>
               <h3 class="modal-title" style="margin: 0;">Knowledge Memory &amp; Learning History</h3>
             </div>
             <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">
@@ -1565,6 +1569,278 @@
         </div>
       </div>
     </div>
+
+    <!-- Phase 18: Learner Profile & Settings Modal -->
+    <div class="modal-overlay" id="profile-modal" style="display: none; z-index: 10000;" onclick="closeModalOnOverlay(event)">
+      <div class="modal-card" style="max-width: 660px; width: 92vw; max-height: 88vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span style="font-size: 1.4rem;">👤</span>
+            <div>
+              <h3 class="modal-title" style="margin: 0;">Learner Profile &amp; Settings</h3>
+              <div style="font-size: 0.75rem; color: #a5b4fc; font-family: var(--font-mono);">Identity, Pedagogical Defaults &amp; Security</div>
+            </div>
+          </div>
+          <button type="button" class="modal-close" onclick="closeProfileModal()" aria-label="Close profile modal">&times;</button>
+        </div>
+
+        <!-- Modal Tab Navigation -->
+        <div class="profile-tabs">
+          <button type="button" class="profile-tab-btn active" id="btn-ptab-identity" onclick="switchProfileTab('identity')">
+            <span>👤 Identity</span>
+          </button>
+          <button type="button" class="profile-tab-btn" id="btn-ptab-learning" onclick="switchProfileTab('learning')">
+            <span>⚙️ Learner Defaults</span>
+          </button>
+          <button type="button" class="profile-tab-btn" id="btn-ptab-security" onclick="switchProfileTab('security')">
+            <span>🔒 Security</span>
+          </button>
+        </div>
+
+        <!-- Tab 1: Profile & Identity -->
+        <div class="profile-tab-content active" id="ptab-identity">
+          <div id="profile-identity-alert" class="login-alert" style="display: none;"></div>
+
+          <div class="profile-avatar-row">
+            <div class="profile-avatar-large" id="profile-avatar-large">U</div>
+            <div class="profile-avatar-info">
+              <div class="profile-avatar-name" id="profile-hero-name">Learner</div>
+              <div class="profile-avatar-meta" id="profile-hero-email">user@example.com</div>
+            </div>
+          </div>
+
+          <form onsubmit="saveProfileIdentity(event)">
+            <div class="intake-group" style="margin-bottom: 1rem;">
+              <label class="intake-label" for="profile-display-name">
+                <span>Display Name</span>
+                <span class="login-label-hint">name shown across notes &amp; copilot</span>
+              </label>
+              <input
+                type="text"
+                id="profile-display-name"
+                class="intake-input"
+                placeholder="e.g. Alex Vance"
+                maxlength="100"
+              />
+            </div>
+
+            <div class="intake-group" style="margin-bottom: 1rem;">
+              <label class="intake-label" for="profile-bio">
+                <span>Technical Headline / Bio</span>
+                <span class="login-label-hint">role or technical focus</span>
+              </label>
+              <input
+                type="text"
+                id="profile-bio"
+                class="intake-input"
+                placeholder="e.g. Staff Systems Engineer &bull; Distributed Systems"
+                maxlength="255"
+              />
+            </div>
+
+            <div class="profile-form-grid">
+              <div class="intake-group">
+                <label class="intake-label" for="profile-email-readonly">
+                  <span>Registered Email</span>
+                </label>
+                <input
+                  type="text"
+                  id="profile-email-readonly"
+                  class="intake-input"
+                  style="background: rgba(255, 255, 255, 0.03); color: var(--text-muted); cursor: not-allowed;"
+                  readonly
+                />
+              </div>
+
+              <div class="intake-group">
+                <label class="intake-label" for="profile-created-readonly">
+                  <span>Member Since</span>
+                </label>
+                <input
+                  type="text"
+                  id="profile-created-readonly"
+                  class="intake-input"
+                  style="background: rgba(255, 255, 255, 0.03); color: var(--text-muted); cursor: not-allowed;"
+                  readonly
+                />
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
+              <button type="submit" class="btn-submit" id="btn-save-profile" style="width: auto; padding: 0.6rem 1.4rem;">
+                <span id="btn-save-profile-text">Save Identity</span>
+                <span id="btn-save-profile-spinner" style="display: none;">⏳ Saving...</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tab 2: Learner Defaults -->
+        <div class="profile-tab-content" id="ptab-learning">
+          <div id="profile-learning-alert" class="login-alert" style="display: none;"></div>
+
+          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.5;">
+            These defaults shape how AI agents research, architect, and synthesize your technical notes. Real-time discovery probing adapts to you based on these priors.
+          </div>
+
+          <form onsubmit="saveLearnerSettings(event)">
+            <div class="profile-form-grid">
+              <div class="intake-group">
+                <label class="intake-label" for="profile-experience-level">
+                  <span>Technical Experience Level</span>
+                </label>
+                <select id="profile-experience-level" class="profile-select">
+                  <option value="beginner">Beginner (Foundational Learner)</option>
+                  <option value="intermediate">Mid-Level Developer</option>
+                  <option value="senior">Senior Software Engineer</option>
+                  <option value="staff">Staff / Principal Architect</option>
+                </select>
+              </div>
+
+              <div class="intake-group">
+                <label class="intake-label" for="profile-preferred-language">
+                  <span>Primary Code Language</span>
+                </label>
+                <select id="profile-preferred-language" class="profile-select">
+                  <option value="python">Python 3.x</option>
+                  <option value="typescript">TypeScript / Node</option>
+                  <option value="rust">Rust</option>
+                  <option value="go">Go (Golang)</option>
+                  <option value="cpp">C++ (Systems)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="profile-form-grid">
+              <div class="intake-group">
+                <label class="intake-label" for="profile-explanation-depth">
+                  <span>Explanation Depth Bias</span>
+                </label>
+                <select id="profile-explanation-depth" class="profile-select">
+                  <option value="intuitive">Intuitive (Mental Models &amp; Analogies)</option>
+                  <option value="internals">Deep Internals (System Design &amp; Architecture)</option>
+                  <option value="mechanics">Mechanics (Rigorous Code &amp; Low-Level Internals)</option>
+                </select>
+              </div>
+
+              <div class="intake-group">
+                <label class="intake-label" for="profile-learning-style">
+                  <span>Learning Style Bias</span>
+                </label>
+                <select id="profile-learning-style" class="profile-select">
+                  <option value="code_and_visual">Balanced (Code Walkthroughs &amp; Diagrams)</option>
+                  <option value="visual_first">Visual-First (Flowcharts &amp; Architecture)</option>
+                  <option value="code_first">Code-First (Executable Snippets &amp; Tests)</option>
+                  <option value="text_first">Text-First (In-Depth Technical Discourse)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="intake-group" style="margin-bottom: 1rem;">
+              <label class="intake-label" for="profile-target-goals">
+                <span>Learning Goals &amp; Context</span>
+                <span class="login-label-hint">e.g. Distributed systems interview preparation</span>
+              </label>
+              <textarea
+                id="profile-target-goals"
+                class="answer-textarea"
+                style="min-height: 60px; height: 75px;"
+                placeholder="e.g. Deeply understanding distributed consensus, kernel tracing, and LLM inference optimizations"
+                maxlength="500"
+              ></textarea>
+            </div>
+
+            <!-- Live Knowledge Summary -->
+            <div style="font-size: 0.78rem; font-weight: 700; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1.25rem;">
+              Live Knowledge Memory Summary
+            </div>
+            <div class="profile-stats-grid">
+              <div class="profile-stat-card">
+                <div class="profile-stat-val" id="pstat-journeys">0</div>
+                <div class="profile-stat-lbl">Journeys</div>
+              </div>
+              <div class="profile-stat-card">
+                <div class="profile-stat-val" id="pstat-concepts">0</div>
+                <div class="profile-stat-lbl">Concepts</div>
+              </div>
+              <div class="profile-stat-card">
+                <div class="profile-stat-val" style="color: #34d399;" id="pstat-mastered">0</div>
+                <div class="profile-stat-lbl">Mastered</div>
+              </div>
+              <div class="profile-stat-card">
+                <div class="profile-stat-val" style="color: #c084fc;" id="pstat-gaps">0</div>
+                <div class="profile-stat-lbl">Active Gaps</div>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
+              <button type="submit" class="btn-submit" id="btn-save-learning" style="width: auto; padding: 0.6rem 1.4rem;">
+                <span id="btn-save-learning-text">Save Learner Settings</span>
+                <span id="btn-save-learning-spinner" style="display: none;">⏳ Saving...</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tab 3: Security & Account -->
+        <div class="profile-tab-content" id="ptab-security">
+          <div id="profile-security-alert" class="login-alert" style="display: none;"></div>
+
+          <form onsubmit="submitChangePassword(event)" style="max-width: 480px;">
+            <div class="intake-group" style="margin-bottom: 1rem;">
+              <label class="intake-label" for="profile-current-password">
+                <span>Current Password</span>
+              </label>
+              <input
+                type="password"
+                id="profile-current-password"
+                class="intake-input"
+                placeholder="••••••••••••"
+                required
+              />
+            </div>
+
+            <div class="intake-group" style="margin-bottom: 1rem;">
+              <label class="intake-label" for="profile-new-password">
+                <span>New Password</span>
+                <span class="login-label-hint">at least 8 characters</span>
+              </label>
+              <input
+                type="password"
+                id="profile-new-password"
+                class="intake-input"
+                placeholder="••••••••••••"
+                minlength="8"
+                required
+              />
+            </div>
+
+            <div class="intake-group" style="margin-bottom: 1.25rem;">
+              <label class="intake-label" for="profile-confirm-password">
+                <span>Confirm New Password</span>
+              </label>
+              <input
+                type="password"
+                id="profile-confirm-password"
+                class="intake-input"
+                placeholder="••••••••••••"
+                minlength="8"
+                required
+              />
+            </div>
+
+            <button type="submit" class="btn-submit" id="btn-change-password" style="width: auto; padding: 0.6rem 1.4rem;">
+              <span id="btn-change-password-text">Update Password</span>
+              <span id="btn-change-password-spinner" style="display: none;">⏳ Updating...</span>
+            </button>
+          </form>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; padding: 0.85rem 1.25rem; border-top: 1px solid var(--border-subtle);">
+          <button type="button" class="tool-btn" onclick="closeProfileModal()">Done</button>
+        </div>
+      </div>
+    </div>
     </div><!-- /#app-workspace -->
 
   </main>
@@ -1589,6 +1865,7 @@
   <script src="/static/js/graph.js"></script>
   <script src="/static/js/versioning.js"></script>
   <script src="/static/js/memory.js"></script>
+  <script src="/static/js/profile.js"></script>
   <script src="/static/js/app.js"></script>
 
 </body>

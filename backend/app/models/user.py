@@ -27,5 +27,12 @@ class User(Base):
         order_by="desc(LearningJourney.created_at)",
     )
 
+    profile = relationship(
+        "UserProfile",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email})>"

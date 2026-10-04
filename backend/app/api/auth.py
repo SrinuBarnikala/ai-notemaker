@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.db.session import get_db
 from backend.app.models.user import User
+from backend.app.models.user_profile import UserProfile
 from backend.app.schemas.auth import (
     UserLogin,
     UserRegister,
@@ -115,6 +116,15 @@ def register(
         hashed_password=hashed_pw,
     )
     db.add(new_user)
+    db.flush()
+
+    email_prefix = email.split("@")[0]
+    fallback_name = email_prefix.replace(".", " ").replace("-", " ").replace("_", " ").title()
+    new_profile = UserProfile(
+        user_id=new_user.id,
+        display_name=fallback_name,
+    )
+    db.add(new_profile)
     db.commit()
     db.refresh(new_user)
 

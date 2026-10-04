@@ -135,6 +135,41 @@ const API = {
   },
 
   /* ========================================================================
+     PROFILE & LEARNER SETTINGS APIS
+     ======================================================================== */
+  async getProfile() {
+    return apiRequestOrNull('/profile/me');
+  },
+
+  async updateProfile(payload) {
+    return apiRequest('/profile/me', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }, 'Failed to update profile.');
+  },
+
+  async getLearnerSettings() {
+    return apiRequestOrNull('/profile/me/learning');
+  },
+
+  async updateLearnerSettings(payload) {
+    return apiRequest('/profile/me/learning', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }, 'Failed to update learner preferences.');
+  },
+
+  async changePassword(currentPassword, newPassword) {
+    return apiRequest('/profile/me/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+    }, 'Failed to update password.');
+  },
+
+  /* ========================================================================
      APPLICATION APIS
      ======================================================================== */
   async createJourney(topic) {
