@@ -68,6 +68,7 @@ def search_knowledge_base(
     query: str,
     result_type: str = "all",
     journey_id: Optional[str] = None,
+    user_id: Optional[str] = None,
     limit: int = 30,
 ) -> SearchResponse:
     """
@@ -80,7 +81,7 @@ def search_knowledge_base(
             query=query,
             total_results=0,
             results=[],
-            filters_applied={"result_type": result_type, "journey_id": journey_id},
+            filters_applied={"result_type": result_type, "journey_id": journey_id, "user_id": user_id},
         )
     
     results: List[Dict[str, Any]] = []
@@ -93,6 +94,8 @@ def search_knowledge_base(
         journeys_query = db.query(LearningJourney)
         if journey_id:
             journeys_query = journeys_query.filter(LearningJourney.id == journey_id)
+        if user_id is not None:
+            journeys_query = journeys_query.filter(LearningJourney.user_id == user_id)
         
         for j in journeys_query.all():
             if any_term_pattern.search(j.topic):
@@ -116,6 +119,8 @@ def search_knowledge_base(
         notes_query = db.query(Note)
         if journey_id:
             notes_query = notes_query.filter(Note.journey_id == journey_id)
+        if user_id is not None:
+            notes_query = notes_query.join(LearningJourney).filter(LearningJourney.user_id == user_id)
         
         for note in notes_query.all():
             j_topic = note.journey.topic if note.journey else note.topic
@@ -211,8 +216,12 @@ def search_knowledge_base(
     # 3. Search Knowledge Concepts
     if result_type in ["all", "concept"]:
         concepts_query = db.query(KnowledgeConcept)
-        if journey_id:
-            concepts_query = concepts_query.join(KnowledgeProfile).filter(KnowledgeProfile.journey_id == journey_id)
+        if journey_id or user_id is not None:
+            concepts_query = concepts_query.join(KnowledgeProfile).join(LearningJourney)
+            if journey_id:
+                concepts_query = concepts_query.filter(KnowledgeProfile.journey_id == journey_id)
+            if user_id is not None:
+                concepts_query = concepts_query.filter(LearningJourney.user_id == user_id)
         
         for c in concepts_query.all():
             j_id = c.profile.journey_id if c.profile else None
@@ -244,6 +253,8 @@ def search_knowledge_base(
         assessments_query = db.query(Assessment)
         if journey_id:
             assessments_query = assessments_query.filter(Assessment.journey_id == journey_id)
+        if user_id is not None:
+            assessments_query = assessments_query.join(LearningJourney).filter(LearningJourney.user_id == user_id)
         
         for assess in assessments_query.all():
             j_topic = assess.journey.topic if assess.journey else "Mastery Assessment"

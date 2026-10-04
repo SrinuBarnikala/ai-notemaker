@@ -33,13 +33,16 @@ def safe_json_load(val: Any) -> Any:
     return val if val is not None else []
 
 
-def get_all_concept_memories(db: Session) -> List[ConceptProvenance]:
+def get_all_concept_memories(db: Session, user_id: Optional[str] = None) -> List[ConceptProvenance]:
     """
     Constructs a comprehensive concept memory inventory across all learner journeys.
     Identifies provenance, first encountered journey, subsequent appearances, and mastery trajectory.
     """
-    # Fetch all journeys ordered by created_at ascending (chronological)
-    journeys = db.query(LearningJourney).order_by(LearningJourney.created_at.asc()).all()
+    # Fetch all journeys ordered by created_at ascending (chronological), scoped to user if provided
+    journeys_query = db.query(LearningJourney)
+    if user_id is not None:
+        journeys_query = journeys_query.filter(LearningJourney.user_id == user_id)
+    journeys = journeys_query.order_by(LearningJourney.created_at.asc()).all()
     if not journeys:
         return []
 
@@ -164,12 +167,12 @@ def get_all_concept_memories(db: Session) -> List[ConceptProvenance]:
     return provenances
 
 
-def get_concept_memory(concept_name: str, db: Session) -> ConceptProvenance:
+def get_concept_memory(concept_name: str, db: Session, user_id: Optional[str] = None) -> ConceptProvenance:
     """
     Retrieves deep provenance and evolution memory for a specific concept.
     """
     clean_target = concept_name.strip().lower()
-    all_memories = get_all_concept_memories(db)
+    all_memories = get_all_concept_memories(db, user_id=user_id)
 
     for mem in all_memories:
         if mem.concept_name.lower() == clean_target:
@@ -186,12 +189,15 @@ def get_concept_memory(concept_name: str, db: Session) -> ConceptProvenance:
     )
 
 
-def get_learning_history(db: Session) -> List[LearningHistoryJourney]:
+def get_learning_history(db: Session, user_id: Optional[str] = None) -> List[LearningHistoryJourney]:
     """
     Retrieves chronological timeline of all learning journeys, their notes,
     concept breakdowns, and assessment stats.
     """
-    journeys = db.query(LearningJourney).order_by(LearningJourney.created_at.desc()).all()
+    journeys_query = db.query(LearningJourney)
+    if user_id is not None:
+        journeys_query = journeys_query.filter(LearningJourney.user_id == user_id)
+    journeys = journeys_query.order_by(LearningJourney.created_at.desc()).all()
     history_items: List[LearningHistoryJourney] = []
 
     for j in journeys:
@@ -237,20 +243,26 @@ def get_learning_history(db: Session) -> List[LearningHistoryJourney]:
     return history_items
 
 
-def get_memory_overview(db: Session) -> KnowledgeMemoryOverview:
+def get_memory_overview(db: Session, user_id: Optional[str] = None) -> KnowledgeMemoryOverview:
     """
     Computes global knowledge memory statistics across all journeys.
     """
-    history = get_learning_history(db)
-    all_memories = get_all_concept_memories(db)
-    notes_count = db.query(Note).count()
+    history = get_learning_history(db, user_id=user_id)
+    all_memories = get_all_concept_memories(db, user_id=user_id)
+
+    if user_id is not None:
+        user_journey_ids = [j.id for j in db.query(LearningJourney.id).filter(LearningJourney.user_id == user_id).all()]
+        notes_count = db.query(Note).filter(Note.journey_id.in_(user_journey_ids)).count() if user_journey_ids else 0
+        profiles = db.query(KnowledgeProfile).filter(KnowledgeProfile.journey_id.in_(user_journey_ids)).all() if user_journey_ids else []
+    else:
+        notes_count = db.query(Note).count()
+        profiles = db.query(KnowledgeProfile).all()
 
     total_mastered = 0
     total_gaps = 0
     total_misconceptions = 0
 
     # Count profile misconceptions
-    profiles = db.query(KnowledgeProfile).all()
     for p in profiles:
         misc = safe_json_load(p.misconceptions)
         total_misconceptions += len(misc)
@@ -285,7 +297,7 @@ def get_memory_overview(db: Session) -> KnowledgeMemoryOverview:
     )
 
 
-def get_related_topics(journey_id: str, db: Session) -> RelatedTopicsResponse:
+def get_related_topics(journey_id: str, db: Session, user_id: Optional[str] = None) -> RelatedTopicsResponse:
     """
     Identifies related technical topics and suggests next learning paths
     derived from bridging concepts, unresolved gaps, and cross-journey linkages.
@@ -297,8 +309,19 @@ def get_related_topics(journey_id: str, db: Session) -> RelatedTopicsResponse:
             detail=f"Journey '{journey_id}' not found.",
         )
 
+    if user_id is not None and current_journey.user_id is not None and current_journey.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to access memory for this journey.",
+        )
+
+    target_user_id = user_id or current_journey.user_id
     profile = db.query(KnowledgeProfile).filter(KnowledgeProfile.journey_id == journey_id).first()
-    other_journeys = db.query(LearningJourney).filter(LearningJourney.id != journey_id).all()
+    
+    other_query = db.query(LearningJourney).filter(LearningJourney.id != journey_id)
+    if target_user_id is not None:
+        other_query = other_query.filter(LearningJourney.user_id == target_user_id)
+    other_journeys = other_query.all()
     
     current_concepts: Set[str] = set()
     current_gaps: List[str] = []
@@ -394,7 +417,7 @@ def get_related_topics(journey_id: str, db: Session) -> RelatedTopicsResponse:
     )
 
 
-def get_note_cross_references(note_id: str, db: Session) -> NoteMemoryReferencesResponse:
+def get_note_cross_references(note_id: str, db: Session, user_id: Optional[str] = None) -> NoteMemoryReferencesResponse:
     """
     Identifies concepts within a canonical note that have prior memory provenance
     from EARLIER learning journeys (e.g. "You first encountered reranking in RAG").
@@ -406,8 +429,15 @@ def get_note_cross_references(note_id: str, db: Session) -> NoteMemoryReferences
             detail=f"Note '{note_id}' not found.",
         )
 
+    if user_id is not None and note.journey and note.journey.user_id is not None and note.journey.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to access cross references for this note.",
+        )
+
+    target_user_id = user_id or (note.journey.user_id if note.journey else None)
     current_journey = note.journey
-    all_memories = get_all_concept_memories(db)
+    all_memories = get_all_concept_memories(db, user_id=target_user_id)
 
     # Filter memories that originated in EARLIER journeys (not this journey)
     cross_refs: List[CrossReferenceTag] = []

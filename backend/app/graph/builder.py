@@ -55,6 +55,7 @@ async def build_journey_concept_graph(
     journey_id: str,
     db: Session,
     provider: Optional[LLMProvider] = None,
+    user_id: Optional[str] = None,
 ) -> ConceptGraphResponse:
     """
     Agent 10: Synthesizes an interactive concept dependency graph for a specific journey.
@@ -64,6 +65,12 @@ async def build_journey_concept_graph(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Journey '{journey_id}' not found.",
+        )
+
+    if user_id is not None and journey.user_id is not None and journey.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to access graph for this learning journey.",
         )
 
     note = db.query(Note).filter(Note.journey_id == journey_id).first()
@@ -288,11 +295,14 @@ async def build_journey_concept_graph(
     )
 
 
-def build_global_concept_graph(db: Session) -> ConceptGraphResponse:
+def build_global_concept_graph(db: Session, user_id: Optional[str] = None) -> ConceptGraphResponse:
     """
     Agent 10: Merges concepts across all user learning journeys into a cohesive global knowledge map.
     """
-    journeys = db.query(LearningJourney).all()
+    journeys_query = db.query(LearningJourney)
+    if user_id is not None:
+        journeys_query = journeys_query.filter(LearningJourney.user_id == user_id)
+    journeys = journeys_query.all()
     if not journeys:
         return ConceptGraphResponse(
             journey_id=None,
