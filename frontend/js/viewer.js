@@ -477,6 +477,9 @@
         const langIcons = {
           python: '🐍',
           py: '🐍',
+          cpp: '⚙️',
+          'c++': '⚙️',
+          c: '⚙️',
           go: '🐹',
           golang: '🐹',
           rust: '🦀',

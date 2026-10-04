@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
 from backend.app.config import Settings
+from backend.app.models.journey import LearningJourney
+from backend.app.models.user_profile import UserProfile
 from backend.app.models.note import Note, NoteSection, NoteRevision
 from backend.app.schemas.note import (
     NoteResponse,
@@ -89,6 +91,13 @@ async def evolve_structured_note(
     provider = get_llm_provider(settings)
     target_section_title = None
 
+    preferred_language = "python"
+    journey = db.query(LearningJourney).filter(LearningJourney.id == note.journey_id).first()
+    if journey and journey.user_id:
+        user_prof = db.query(UserProfile).filter(UserProfile.user_id == journey.user_id).first()
+        if user_prof and user_prof.preferred_language:
+            preferred_language = user_prof.preferred_language
+
     # Case 1: Targeted Section Evolution
     if request.section_id:
         section = (
@@ -138,6 +147,7 @@ async def evolve_structured_note(
             rationale=request.user_prompt,
             needs_code=request.evolution_type == "add_code",
             needs_visual=False,
+            preferred_language=preferred_language,
         )
 
         if not new_blocks:
@@ -198,6 +208,7 @@ async def evolve_structured_note(
             rationale=request.user_prompt,
             needs_code=True,
             needs_visual=False,
+            preferred_language=preferred_language,
         )
 
         new_section = NoteSection(
@@ -249,6 +260,7 @@ async def evolve_structured_note(
                 rationale=request.user_prompt,
                 needs_code=request.evolution_type == "add_code",
                 needs_visual=False,
+                preferred_language=preferred_language,
             )
             last_section.blocks = json.dumps([b.model_dump() for b in new_blocks])
 

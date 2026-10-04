@@ -163,3 +163,219 @@ def test_sanitize_latex_text():
     cleaned_step = sanitize_latex_text(step)
     assert cleaned_step == "$w \\leftarrow w - \\eta,\\frac{\\partial L}{\\partial w}$"
 
+
+def test_parse_section_blocks_with_cpp_fallback():
+    corrupt = "Not a json array."
+    blocks = parse_section_blocks(
+        raw_text=corrupt,
+        section_title="Stack Operations",
+        section_type="code_walkthrough",
+        depth="standard",
+        target_concepts=["Stack Mechanics"],
+        rationale="Implements stack operations.",
+        needs_code=True,
+        needs_visual=False,
+        preferred_language="cpp",
+    )
+    code_blocks = [b for b in blocks if b.type == "code"]
+    assert len(code_blocks) == 1
+    assert code_blocks[0].language == "cpp"
+    assert "class" in code_blocks[0].code
+    assert "#include <iostream>" in code_blocks[0].code
+
+
+def test_parse_section_blocks_preserves_llm_cpp_language():
+    raw_json = """
+    {
+      "blocks": [
+        {
+          "type": "code",
+          "language": "cpp",
+          "title": "Stack in C++",
+          "code": "#include <stack>\\nstd::stack<int> s;"
+        }
+      ]
+    }
+    """
+    blocks = parse_section_blocks(
+        raw_text=raw_json,
+        section_title="Stack Implementation",
+        section_type="code_walkthrough",
+        depth="standard",
+        target_concepts=["Stack"],
+        rationale="C++ stack implementation.",
+        needs_code=True,
+        needs_visual=False,
+        preferred_language="cpp",
+    )
+    assert len(blocks) == 1
+    assert blocks[0].type == "code"
+    assert blocks[0].language == "cpp"
+    assert "#include <stack>" in blocks[0].code
+
+
+@pytest.mark.asyncio
+async def test_note_generation_prompt_receives_user_preferred_language():
+    import json
+    import uuid
+    from unittest.mock import patch
+    from backend.app.note.generator import generate_structured_note
+    from backend.app.models.user import User
+    from backend.app.models.user_profile import UserProfile
+    from backend.app.models.journey import LearningJourney
+    from backend.app.models.profile import KnowledgeProfile
+    from backend.app.models.architecture import NoteArchitecture, NoteArchitectureSection
+    from backend.app.db.session import SessionLocal
+    from backend.app.config import get_settings
+    from backend.app.providers.mock import MockLLMProvider
+
+    db = SessionLocal()
+    try:
+        user = User(
+            email=f"srinu_test_{uuid.uuid4().hex[:8]}@example.com",
+            hashed_password="pw",
+        )
+        db.add(user)
+        db.commit()
+
+        up = UserProfile(
+            user_id=user.id,
+            experience_level="intermediate",
+            preferred_language="cpp",
+            explanation_depth="internals",
+            learning_style="code_and_visual",
+        )
+        db.add(up)
+
+        journey = LearningJourney(
+            user_id=user.id,
+            topic="Stack in DSA",
+            status="architecture_generated",
+        )
+        db.add(journey)
+        db.commit()
+
+        kp = KnowledgeProfile(
+            journey_id=journey.id,
+            overall_confidence="intermediate",
+            summary="Learner knows basic arrays but needs stack invariants.",
+            gaps=json.dumps(["LIFO Invariant"]),
+            misconceptions=json.dumps([]),
+        )
+        db.add(kp)
+
+        arch = NoteArchitecture(
+            journey_id=journey.id,
+            topic="Stack in DSA",
+            learning_goal="Master Stack operations in C++",
+            summary_rationale="Personalized for C++ learner.",
+        )
+        db.add(arch)
+        db.flush()
+
+        sec = NoteArchitectureSection(
+            architecture_id=arch.id,
+            order_index=1,
+            title="Core Stack Mechanics",
+            section_type="code_walkthrough",
+            depth="standard",
+            target_concepts=json.dumps(["Stack"]),
+            rationale="Practical C++ implementation",
+            needs_code=True,
+            needs_visual=False,
+        )
+        db.add(sec)
+        db.commit()
+
+        mock_provider = MockLLMProvider(
+            response_text=json.dumps({
+                "blocks": [
+                    {
+                        "type": "code",
+                        "language": "cpp",
+                        "title": "C++ Stack Implementation",
+                        "code": "#include <vector>\nclass Stack { std::vector<int> data; };",
+                    }
+                ]
+            })
+        )
+
+        settings = get_settings()
+
+        with patch("backend.app.note.generator.get_llm_provider", return_value=mock_provider):
+            note_res = await generate_structured_note(
+                journey_id=journey.id,
+                db=db,
+                settings=settings,
+                user_id=user.id,
+            )
+
+        assert note_res.status_code if hasattr(note_res, "status_code") else True
+        assert len(note_res.sections) == 1
+        assert note_res.sections[0].blocks[0].language == "cpp"
+
+        # Verify prompt instructed C++
+        last_prompt = mock_provider.last_prompt
+        assert "- Preferred Programming Language: cpp" in last_prompt
+        assert "write all code implementations in cpp" in last_prompt
+        assert '"language": "cpp"' in last_prompt
+    finally:
+        db.close()
+
+
+def test_generate_note_endpoint_with_auth_header(client):
+    import uuid
+    from backend.app.models.user import User
+    from backend.app.models.user_profile import UserProfile
+    from backend.app.models.journey import LearningJourney
+    from backend.app.core.security import create_access_token
+    from backend.app.db.session import SessionLocal
+
+    db = SessionLocal()
+    try:
+        user = User(
+            email=f"auth_note_{uuid.uuid4().hex[:8]}@example.com",
+            hashed_password="pw",
+        )
+        db.add(user)
+        db.commit()
+
+        up = UserProfile(
+            user_id=user.id,
+            experience_level="intermediate",
+            preferred_language="cpp",
+        )
+        db.add(up)
+
+        journey = LearningJourney(
+            user_id=user.id,
+            topic="Stack in DSA",
+            status="created",
+        )
+        db.add(journey)
+        db.commit()
+        journey_id = journey.id
+        token = create_access_token(user.id)
+    finally:
+        db.close()
+
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Step through pipeline
+    client.post(f"/journeys/{journey_id}/discovery/start", headers=headers)
+    client.post(
+        f"/journeys/{journey_id}/discovery/answer",
+        json={"answer": "I know arrays well in C++"},
+        headers=headers,
+    )
+    client.post(f"/journeys/{journey_id}/knowledge-profile", headers=headers)
+    client.post(f"/journeys/{journey_id}/architecture", headers=headers)
+
+    # Generate note with auth
+    res = client.post(f"/journeys/{journey_id}/generate-note", headers=headers)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["journey_id"] == journey_id
+    assert len(data["sections"]) >= 1
+
+

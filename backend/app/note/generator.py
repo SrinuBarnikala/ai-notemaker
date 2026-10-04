@@ -18,6 +18,8 @@ from backend.app.note.prompts import (
 )
 from backend.app.note.parser import parse_section_blocks
 from backend.app.note.versioning import serialize_note_snapshot
+from backend.app.personalization.builder import PersonalizationContextBuilder
+from backend.app.personalization.models import PersonalizationContext
 
 logger = logging.getLogger(__name__)
 
@@ -27,12 +29,14 @@ async def generate_note_content(
     db: Session,
     settings: Settings,
     style_preference: str = "rigorous_technical",
+    user_id: Optional[str] = None,
 ) -> NoteResponse:
     return await generate_structured_note(
         journey_id=journey_id,
         db=db,
         settings=settings,
         style_preference=style_preference,
+        user_id=user_id,
     )
 
 
@@ -41,6 +45,7 @@ async def generate_structured_note(
     db: Session,
     settings: Settings,
     style_preference: str = "rigorous_technical",
+    user_id: Optional[str] = None,
 ) -> NoteResponse:
 
     """
@@ -78,19 +83,19 @@ async def generate_structured_note(
             detail="Note architecture contains no sections.",
         )
 
-    # Load rich learner context
-    profile = db.query(KnowledgeProfile).filter(KnowledgeProfile.journey_id == journey_id).first()
-    profile_summary = profile.summary if profile else "No profile summary available."
-    overall_confidence = profile.overall_confidence if profile else "intermediate"
-    misconceptions_list = json.loads(profile.misconceptions or "[]") if profile else []
-    gaps_list = json.loads(profile.gaps or "[]") if profile else []
-
-    concepts = (
-        db.query(KnowledgeConcept).filter(KnowledgeConcept.profile_id == profile.id).all()
-        if profile else []
+    # Build unified personalization context (enforces journey validation & ownership)
+    context: PersonalizationContext = PersonalizationContextBuilder.build(
+        journey_id=journey_id,
+        db=db,
+        user_id=user_id,
     )
-    known_concepts = [c.name for c in concepts if c.level == "strong"]
-    partial_concepts = [c.name for c in concepts if c.level == "moderate"]
+
+    profile_summary = context.mental_model_summary or "No profile summary available."
+    overall_confidence = context.overall_confidence or "intermediate"
+    misconceptions_list = context.misconceptions
+    gaps_list = context.active_gaps
+    known_concepts = context.known_concepts
+    preferred_language = context.preferred_language or "python"
 
     interactions = (
         db.query(DiscoveryInteraction)
@@ -152,6 +157,7 @@ async def generate_structured_note(
             known_concepts=", ".join(known_concepts) or "None explicitly confirmed",
             gaps=", ".join(gaps_list) or "None explicitly flagged",
             misconceptions=", ".join(misconceptions_list) or "None detected",
+            preferred_language=preferred_language,
             discovery_summary=discovery_summary,
             total_sections=total_sections,
             section_order=s.order_index,
@@ -191,6 +197,7 @@ async def generate_structured_note(
             needs_visual=s.needs_visual,
             visual_type=s.visual_type,
             topic=journey.topic,
+            preferred_language=preferred_language,
         )
 
         used_fallback = getattr(blocks, "used_fallback", False)

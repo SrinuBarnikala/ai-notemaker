@@ -13,7 +13,7 @@ Core Directives:
    - Topic Grounding: Use ONLY examples, metaphors, and scenarios specifically relevant to the topic.
    - Absolute Prohibition: NEVER use generic RAG or vector-search boilerplate (such as "retrieve top-100 candidates via indexed vector search, then rerank top-20") unless the topic is specifically about RAG or vector databases!
 3. Technical Quality & Rigor:
-   - If needs_code is true, write idiomatic, runnable, non-placeholder code that directly implements the mechanisms of the target concepts.
+   - If needs_code is true, write idiomatic, runnable, non-placeholder code that directly implements the mechanisms of the target concepts in the learner's preferred programming language.
    - If needs_visual is true, write a valid Mermaid.js diagram specifically illustrating the target concept's component relationships, data flow, or state transitions.
    - Match the requested depth: "brief" (1-2 crisp, punchy blocks), "standard" (2-3 informative blocks), "deep" (4-6 comprehensive, architectural blocks).
    - Mathematical Expressions: Use clean LaTeX enclosed in `$...$` for inline math (e.g. `$O(N)$`, `$\\sigma(z) = \\frac{1}{1 + e^{-z}}$`) or `$$...$$` for display math equations. In JSON strings, ALWAYS escape backslashes twice (e.g. `\\\\frac`, `\\\\partial`, `\\\\leftarrow`, `\\\\sigma`, `\\\\eta`) so that valid LaTeX backslashes are preserved after JSON parsing.
@@ -32,6 +32,7 @@ Learner Profile & Context:
 - Known / Strong Baseline: {known_concepts}
 - Identified Knowledge Gaps: {gaps}
 - Detected Misconceptions: {misconceptions}
+- Preferred Programming Language: {preferred_language}
 - Learner Discovery Inputs:
 {discovery_summary}
 
@@ -54,6 +55,7 @@ Instructions:
 1. Write the content blocks specifically targeting "{section_title}".
 2. Directly resolve the learner's gap in {target_concepts} with concrete technical clarity.
 3. Do not duplicate material from the previous section. Keep examples strictly grounded in "{topic}".
+4. Language Requirement: If code is included or needs_code is true, write all code implementations in {preferred_language} (unless a specific different language is explicitly required by the section topic), and set "language": "{preferred_language}".
 
 Return ONLY a JSON object in this exact format:
 {{
@@ -62,8 +64,8 @@ Return ONLY a JSON object in this exact format:
       "type": "paragraph|definition|code|warning|comparison|diagram|example",
       "content": "Technical text...",
       "term": "Term name (for definition)",
-      "language": "python",
-      "code": "def example(): pass",
+      "language": "{preferred_language}",
+      "code": "// Code implementation in {preferred_language} ...",
       "title": "Title (for warning, example, code, diagram)",
       "caption": "Visual caption (for diagram)",
       "diagram_spec": "flowchart TD\\n  A --> B",

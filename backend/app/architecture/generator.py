@@ -16,17 +16,26 @@ from backend.app.architecture.prompts import (
     ARCHITECTURE_GENERATION_PROMPT_TEMPLATE,
 )
 from backend.app.architecture.parser import parse_note_architecture
+from backend.app.personalization.builder import PersonalizationContextBuilder
+from backend.app.personalization.models import PersonalizationContext
 
 logger = logging.getLogger(__name__)
 
 
-def format_concepts_for_prompt(concepts: List[KnowledgeConcept]) -> str:
+def format_concepts_for_prompt(concepts: List[Any]) -> str:
     if not concepts:
         return "No specific concepts classified."
     lines = []
     for c in concepts:
-        lines.append(f"- {c.name} (level: {c.level}, category: {c.category}): {c.notes or 'No notes'}")
-    return "\n".join(lines)
+        if isinstance(c, str):
+            lines.append(f"- {c}")
+        elif hasattr(c, "name"):
+            notes = getattr(c, "notes", None) or "No notes"
+            lines.append(f"- {c.name} (level: {getattr(c, 'level', 'unknown')}, category: {getattr(c, 'category', 'general')}): {notes}")
+        elif isinstance(c, dict):
+            notes = c.get("notes") or "No notes"
+            lines.append(f"- {c.get('name', '')} (level: {c.get('level', 'unknown')}, category: {c.get('category', 'general')}): {notes}")
+    return "\n".join(lines) or "No specific concepts classified."
 
 
 async def generate_note_architecture(
@@ -34,17 +43,12 @@ async def generate_note_architecture(
     db: Session,
     settings: Settings,
     learning_goal: Optional[str] = "Master core mechanics, resolve gaps, and implement in production",
+    user_id: Optional[str] = None,
 ) -> NoteArchitectureResponse:
     """
-    Synthesizes a personalized NoteArchitecture for a learning journey based on its KnowledgeProfile.
+    Synthesizes a personalized NoteArchitecture for a learning journey based on its KnowledgeProfile
+    and unified PersonalizationContext.
     """
-    journey = db.query(LearningJourney).filter(LearningJourney.id == journey_id).first()
-    if not journey:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Learning journey '{journey_id}' not found.",
-        )
-
     profile = (
         db.query(KnowledgeProfile)
         .filter(KnowledgeProfile.journey_id == journey_id)
@@ -56,12 +60,16 @@ async def generate_note_architecture(
             detail="Cannot generate note architecture without a completed knowledge profile.",
         )
 
-    concepts = (
-        db.query(KnowledgeConcept)
-        .filter(KnowledgeConcept.profile_id == profile.id)
-        .all()
+    # Build unified personalization context (enforces journey validation & ownership)
+    context: PersonalizationContext = PersonalizationContextBuilder.build(
+        journey_id=journey_id,
+        db=db,
+        user_id=user_id,
     )
 
+    journey = db.query(LearningJourney).filter(LearningJourney.id == journey_id).first()
+
+    # Preserve compact discovery interaction summary
     interactions = (
         db.query(DiscoveryInteraction)
         .filter(DiscoveryInteraction.journey_id == journey_id)
@@ -77,28 +85,57 @@ async def generate_note_architecture(
                 discovery_lines.append(f"  Assessed: {item.quick_assessment}")
     discovery_summary = "\n".join(discovery_lines) or "No prior discovery responses recorded."
 
-    misconceptions = json.loads(profile.misconceptions or "[]")
-    gaps = json.loads(profile.gaps or "[]")
+    # Format structured concept classifications from context
+    concept_lines = []
+    for c in context.known_concepts:
+        concept_lines.append(f"- {c} (level: strong, category: known)")
+    for c in context.partially_known_concepts:
+        concept_lines.append(f"- {c} (level: moderate, category: partially_known)")
+    concepts_formatted = "\n".join(concept_lines) or "No specific concepts classified."
 
-    concepts_formatted = format_concepts_for_prompt(concepts)
-    misconceptions_formatted = "\n".join(f"- {m}" for m in misconceptions) or "None detected."
-    gaps_formatted = "\n".join(f"- {g}" for g in gaps) or "None explicitly flagged."
+    dict_concepts = [
+        {"name": c, "level": "strong", "category": "known", "notes": None}
+        for c in context.known_concepts
+    ] + [
+        {"name": c, "level": "moderate", "category": "partially_known", "notes": None}
+        for c in context.partially_known_concepts
+    ]
+
+    misconceptions_formatted = (
+        "\n".join(f"- {m}" for m in context.misconceptions) or "None detected."
+    )
+    gaps_formatted = (
+        "\n".join(f"- {g}" for g in context.active_gaps) or "None explicitly flagged."
+    )
+
+    verified_mastery_formatted = (
+        ", ".join(context.verified_mastered_concepts)
+        if context.verified_mastered_concepts
+        else "None verified yet"
+    )
+    prior_concepts_formatted = (
+        ", ".join(context.prior_related_concepts)
+        if context.prior_related_concepts
+        else "None recorded from prior journeys"
+    )
 
     prompt = ARCHITECTURE_GENERATION_PROMPT_TEMPLATE.format(
-        topic=journey.topic,
+        topic=context.topic,
         learning_goal=learning_goal,
-        overall_confidence=profile.overall_confidence,
-        summary=profile.summary,
+        experience_level=context.experience_level,
+        preferred_language=context.preferred_language,
+        explanation_depth=context.explanation_depth,
+        learning_style=context.learning_style,
+        target_goals=context.target_goals or "None explicitly specified",
+        verified_mastery_formatted=verified_mastery_formatted,
+        prior_concepts_formatted=prior_concepts_formatted,
+        overall_confidence=context.overall_confidence,
+        summary=context.mental_model_summary,
         discovery_summary=discovery_summary,
         concepts_formatted=concepts_formatted,
         misconceptions_formatted=misconceptions_formatted,
         gaps_formatted=gaps_formatted,
     )
-
-    dict_concepts = [
-        {"name": c.name, "level": c.level, "category": c.category, "notes": c.notes}
-        for c in concepts
-    ]
 
     provider = get_llm_provider(settings)
     failure_reason = None
@@ -116,11 +153,11 @@ async def generate_note_architecture(
 
     parsed = parse_note_architecture(
         raw_text=raw_output,
-        topic=journey.topic,
-        profile_summary=profile.summary,
+        topic=context.topic,
+        profile_summary=context.mental_model_summary,
         concepts=dict_concepts,
-        gaps=gaps,
-        misconceptions=misconceptions,
+        gaps=context.active_gaps,
+        misconceptions=context.misconceptions,
     )
 
     generation_status = "llm_fallback" if parsed.used_fallback else "llm_success"

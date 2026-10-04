@@ -1,13 +1,15 @@
 import json
 import re
-from typing import Literal
+from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Response, status, Query
 from sqlalchemy.orm import Session
 
 from backend.app.config import Settings, get_settings
 from backend.app.db.session import get_db
 from backend.app.models.journey import LearningJourney
+from backend.app.models.user import User
 from backend.app.models.note import Note, NoteSection, NoteRevision
+from backend.app.api.deps import get_optional_current_user
 from backend.app.schemas.note import (
     NoteResponse,
     NoteSectionData,
@@ -103,6 +105,7 @@ def build_note_response(note: Note, db: Session) -> NoteResponse:
 )
 async def generate_note_endpoint(
     journey_id: str,
+    current_user: Optional[User] = Depends(get_optional_current_user),
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
 ):
@@ -113,6 +116,7 @@ async def generate_note_endpoint(
         journey_id=journey_id,
         db=db,
         settings=settings,
+        user_id=current_user.id if current_user else None,
     )
 
 

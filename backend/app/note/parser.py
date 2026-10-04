@@ -151,6 +151,7 @@ def parse_section_blocks(
     needs_visual: bool,
     visual_type: str = None,
     topic: str = "Systems Engineering",
+    preferred_language: str = "python",
 ) -> ParsedBlocksList:
     """
     Parses and validates LLM output into structured NoteBlock objects.
@@ -208,7 +209,7 @@ def parse_section_blocks(
                             type=b_type,  # type: ignore
                             content=content,
                             term=term,
-                            language=item.get("language") or ("python" if b_type == "code" else None),
+                            language=item.get("language") or (preferred_language if b_type == "code" else None),
                             code=code_snippet,
                             title=item.get("title"),
                             caption=item.get("caption"),
@@ -302,27 +303,93 @@ def parse_section_blocks(
     # 5. Add Code block if requested or if walkthrough
     if needs_code or section_type == "code_walkthrough":
         clean_name = "".join(w.capitalize() for w in re.sub(r"[^a-zA-Z0-9 ]", "", primary_concept).split()) or "Core"
+        lang_lower = (preferred_language or "python").lower()
+
+        if lang_lower in ["cpp", "c++"]:
+            code_text = (
+                f"#include <iostream>\n"
+                f"#include <string>\n"
+                f"#include <stdexcept>\n\n"
+                f"class {clean_name}Controller {{\n"
+                f"private:\n"
+                f"    int capacity_limit;\n\n"
+                f"public:\n"
+                f"    explicit {clean_name}Controller(int limit = 1000) : capacity_limit(limit) {{}}\n\n"
+                f"    void processPayload(const std::string& payload) {{\n"
+                f"        if (payload.empty()) {{\n"
+                f"            throw std::invalid_argument(\"Context payload cannot be empty\");\n"
+                f"        }}\n"
+                f"        std::cout << \"Executing {primary_concept} with capacity: \" << capacity_limit << std::endl;\n"
+                f"    }}\n"
+                f"}};\n"
+            )
+            fallback_lang = "cpp"
+        elif lang_lower in ["rust", "rs"]:
+            code_text = (
+                f"pub struct {clean_name}Controller {{\n"
+                f"    pub capacity_limit: usize,\n"
+                f"}}\n\n"
+                f"impl {clean_name}Controller {{\n"
+                f"    pub fn new(capacity_limit: usize) -> Self {{\n"
+                f"        Self {{ capacity_limit }}\n"
+                f"    }}\n\n"
+                f"    pub fn process(&self, payload: &str) -> Result<(), &'static str> {{\n"
+                f"        if payload.is_empty() {{\n"
+                f"            return Err(\"Payload cannot be empty\");\n"
+                f"        }}\n"
+                f"        println!(\"Processing {primary_concept}...\");\n"
+                f"        Ok(())\n"
+                f"    }}\n"
+                f"}}\n"
+            )
+            fallback_lang = "rust"
+        elif lang_lower in ["go", "golang"]:
+            code_text = (
+                f"package main\n\n"
+                f"import (\n"
+                f"    \"errors\"\n"
+                f"    \"fmt\"\n"
+                f")\n\n"
+                f"type {clean_name}Controller struct {{\n"
+                f"    CapacityLimit int\n"
+                f"}}\n\n"
+                f"func New{clean_name}Controller(limit int) *{clean_name}Controller {{\n"
+                f"    return &{clean_name}Controller{{CapacityLimit: limit}}\n"
+                f"}}\n\n"
+                f"func (c *{clean_name}Controller) Process(payload string) error {{\n"
+                f"    if payload == \"\" {{\n"
+                f"        return errors.New(\"payload cannot be empty\")\n"
+                f"    }}\n"
+                f"    fmt.Printf(\"Processing {primary_concept}...\\n\")\n"
+                f"    return nil\n"
+                f"}}\n"
+            )
+            fallback_lang = "go"
+        else:
+            code_text = (
+                f"from typing import Dict, Any\n\n"
+                f"class {clean_name}Controller:\n"
+                f"    \"\"\"\n"
+                f"    Manages operational lifecycle and state invariants for {primary_concept}.\n"
+                f"    \"\"\"\n"
+                f"    def __init__(self, capacity_limit: int = 1000):\n"
+                f"        self.capacity_limit = capacity_limit\n"
+                f"        self._active_state: Dict[str, Any] = {{}}\n\n"
+                f"    def process_context(self, payload: Dict[str, Any]) -> Dict[str, Any]:\n"
+                f"        if not payload:\n"
+                f"            raise ValueError('Context payload cannot be empty')\n"
+                f"        # Verify operational bounds and execute state transformation\n"
+                f"        processed = {{'status': 'applied', 'concept': '{primary_concept}', 'data': payload}}\n"
+                f"        return processed\n"
+            )
+            fallback_lang = "python"
+
         blocks.append(
             NoteBlock(
                 type="code",
-                language="python",
+                language=fallback_lang,
                 title=f"Production Pattern: {primary_concept}",
-                code=(
-                    f"from typing import Dict, Any\n\n"
-                    f"class {clean_name}Controller:\n"
-                    f"    \"\"\"\n"
-                    f"    Manages operational lifecycle and state invariants for {primary_concept}.\n"
-                    f"    \"\"\"\n"
-                    f"    def __init__(self, capacity_limit: int = 1000):\n"
-                    f"        self.capacity_limit = capacity_limit\n"
-                    f"        self._active_state: Dict[str, Any] = {{}}\n\n"
-                    f"    def process_context(self, payload: Dict[str, Any]) -> Dict[str, Any]:\n"
-                    f"        if not payload:\n"
-                    f"            raise ValueError('Context payload cannot be empty')\n"
-                    f"        # Verify operational bounds and execute state transformation\n"
-                    f"        processed = {{'status': 'applied', 'concept': '{primary_concept}', 'data': payload}}\n"
-                    f"        return processed\n"
-                ),
+                code=code_text,
             )
         )
 

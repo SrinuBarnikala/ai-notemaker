@@ -1,10 +1,12 @@
 import json
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from backend.app.config import Settings, get_settings
 from backend.app.db.session import get_db
 from backend.app.models.journey import LearningJourney
+from backend.app.models.user import User
 from backend.app.models.architecture import NoteArchitecture, NoteArchitectureSection
 from backend.app.schemas.architecture import (
     GenerateArchitectureRequest,
@@ -12,6 +14,7 @@ from backend.app.schemas.architecture import (
     SectionBlueprint,
 )
 from backend.app.architecture.generator import generate_note_architecture
+from backend.app.api.deps import get_optional_current_user
 
 router = APIRouter()
 
@@ -24,6 +27,7 @@ router = APIRouter()
 async def create_note_architecture(
     journey_id: str,
     payload: GenerateArchitectureRequest = GenerateArchitectureRequest(),
+    current_user: Optional[User] = Depends(get_optional_current_user),
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
 ):
@@ -35,6 +39,7 @@ async def create_note_architecture(
         learning_goal=payload.learning_goal or "Master core mechanics and practical architecture",
         db=db,
         settings=settings,
+        user_id=current_user.id if current_user else None,
     )
 
 
