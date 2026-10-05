@@ -343,8 +343,11 @@ async function handleLoginSubmit(event) {
   if (btnText) btnText.style.display = 'none';
   if (btnSpinner) btnSpinner.style.display = 'inline';
 
+  const rememberCheckbox = document.getElementById('login-remember-me');
+  const rememberMe = rememberCheckbox ? rememberCheckbox.checked : false;
+
   try {
-    const data = await API.login(email, password);
+    const data = await API.login(email, password, rememberMe);
     if (data && data.user) {
       currentUser = data.user;
       isAuthenticated = true;

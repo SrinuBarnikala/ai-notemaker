@@ -167,3 +167,42 @@ def test_authenticated_journey_scoping(client):
     # User B tries to access User A's journey directly -> 403 Forbidden!
     forbidden_resp = client.get(f"/journeys/{journey_a_id}", headers={"Authorization": f"Bearer {token_b}"})
     assert forbidden_resp.status_code == 403
+
+
+def test_login_session_cookie_default(client):
+    """
+    Verify that default login (remember_me=False) issues a session cookie
+    without a persistent max-age, ensuring sessions expire on browser close.
+    """
+    import uuid
+    email = f"sess_{uuid.uuid4().hex[:8]}@example.com"
+    pw = "SessionPassword123!"
+
+    client.post("/auth/register", json={"email": email, "password": pw})
+
+    # Login without remember_me
+    resp = client.post("/auth/login", json={"email": email, "password": pw, "remember_me": False})
+    assert resp.status_code == 200
+    set_cookie = resp.headers.get("set-cookie", "")
+    assert "auth_token=" in set_cookie
+    # Should NOT have Max-Age attribute (session cookie)
+    assert "max-age=" not in set_cookie.lower()
+
+
+def test_login_persistent_cookie_remember_me(client):
+    """
+    Verify that login with remember_me=True issues a persistent cookie with max-age.
+    """
+    import uuid
+    email = f"persist_{uuid.uuid4().hex[:8]}@example.com"
+    pw = "PersistPassword123!"
+
+    client.post("/auth/register", json={"email": email, "password": pw})
+
+    # Login with remember_me=True
+    resp = client.post("/auth/login", json={"email": email, "password": pw, "remember_me": True})
+    assert resp.status_code == 200
+    set_cookie = resp.headers.get("set-cookie", "")
+    assert "auth_token=" in set_cookie
+    # Must have Max-Age attribute for persistence across browser restarts
+    assert "max-age=" in set_cookie.lower()

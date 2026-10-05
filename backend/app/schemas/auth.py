@@ -14,6 +14,7 @@ class UserLogin(BaseModel):
     """Payload for user login."""
     email: str = Field(..., min_length=3, max_length=255, description="User email address")
     password: str = Field(..., min_length=1, description="Account password")
+    remember_me: bool = Field(False, description="Persist session across browser restarts")
 
     @field_validator("email")
     @classmethod

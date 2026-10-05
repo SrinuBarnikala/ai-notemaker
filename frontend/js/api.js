@@ -99,11 +99,11 @@ const API = {
   /* ========================================================================
      AUTHENTICATION APIS
      ======================================================================== */
-  async login(email, password) {
+  async login(email, password, rememberMe = false) {
     const data = await apiRequest('/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, remember_me: Boolean(rememberMe) }),
     }, 'Invalid email or password.');
 
     if (data && data.access_token) {

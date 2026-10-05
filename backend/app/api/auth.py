@@ -61,7 +61,7 @@ def login(
     access_token = create_access_token(subject=user.id)
 
     # Set secure HttpOnly cookie for same-origin browsing
-    set_auth_cookie(response, access_token)
+    set_auth_cookie(response, access_token, remember_me=credentials.remember_me)
 
     logger.info("User logged in successfully: %s (%s)", user.id, user.email)
     return TokenResponse(

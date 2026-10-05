@@ -71,24 +71,41 @@ def decode_access_token(token: str) -> Optional[Dict[str, Any]]:
         return None
 
 
-def set_auth_cookie(response: Response, token: str, max_age: Optional[int] = None) -> None:
+def set_auth_cookie(
+    response: Response,
+    token: str,
+    max_age: Optional[int] = None,
+    remember_me: bool = False,
+) -> None:
     """
     Set HttpOnly, SameSite cookie with token for secure same-origin authentication.
+    - If remember_me is True or explicit max_age is passed: sets persistent cookie (survives browser close).
+    - If remember_me is False and max_age is None: sets transient session cookie (cleared when browser closes).
     """
     settings = get_settings()
-    if max_age is None:
-        max_age = settings.jwt_access_token_expire_minutes * 60
     is_secure = (settings.app_env.lower() == "production")
-    response.set_cookie(
-        key=settings.auth_cookie_name,
-        value=token,
-        httponly=True,
-        max_age=max_age,
-        expires=max_age,
-        samesite=settings.auth_cookie_samesite,
-        secure=is_secure,
-        path="/",
-    )
+    if remember_me or max_age is not None:
+        effective_max_age = max_age if max_age is not None else settings.jwt_access_token_expire_minutes * 60
+        response.set_cookie(
+            key=settings.auth_cookie_name,
+            value=token,
+            httponly=True,
+            max_age=effective_max_age,
+            expires=effective_max_age,
+            samesite=settings.auth_cookie_samesite,
+            secure=is_secure,
+            path="/",
+        )
+    else:
+        # Browser session cookie (cleared when browser is closed)
+        response.set_cookie(
+            key=settings.auth_cookie_name,
+            value=token,
+            httponly=True,
+            samesite=settings.auth_cookie_samesite,
+            secure=is_secure,
+            path="/",
+        )
 
 
 def clear_auth_cookie(response: Response) -> None:

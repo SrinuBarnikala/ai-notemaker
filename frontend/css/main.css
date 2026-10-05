@@ -948,6 +948,39 @@ footer.footer {
   outline: 2px solid var(--accent-primary);
 }
 
+.login-options-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: -0.25rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.82rem;
+}
+
+.login-remember-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.82rem;
+  transition: color 0.15s ease;
+}
+
+.login-remember-label:hover {
+  color: var(--text-primary);
+}
+
+.login-checkbox {
+  appearance: auto;
+  accent-color: var(--accent-primary);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
 .login-card-footer {
   display: flex;
   justify-content: space-between;
