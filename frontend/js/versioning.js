@@ -67,7 +67,7 @@ async function refreshNoteVersionsList() {
   } catch (err) {
     console.error('Failed to load note versions:', err);
     if (timelineContainer) {
-      timelineContainer.innerHTML = `<div style="padding: 2rem; text-align: center; color: #f87171;">⚠️ Error loading versions: ${escapeHtml(err.message)}</div>`;
+      timelineContainer.innerHTML = `<div style="padding: 2rem; text-align: center; color: var(--danger-text);">⚠️ Error loading versions: ${escapeHtml(err.message)}</div>`;
     }
   }
 }
@@ -240,7 +240,7 @@ async function executeDiffComparison(fromVer, toVer) {
   } catch (err) {
     console.error('Failed to compute diff:', err);
     if (container) {
-      container.innerHTML = `<div style="padding: 2rem; text-align: center; color: #f87171;">⚠️ Failed to compute diff: ${escapeHtml(err.message)}</div>`;
+      container.innerHTML = `<div style="padding: 2rem; text-align: center; color: var(--danger-text);">⚠️ Failed to compute diff: ${escapeHtml(err.message)}</div>`;
     }
   }
 }

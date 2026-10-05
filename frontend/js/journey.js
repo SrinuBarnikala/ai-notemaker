@@ -308,7 +308,7 @@
             </div>
             <div style="display: flex; align-items: center; gap: 0.75rem;">
               <span class="phase-badge">${formatStatus(j.status)}</span>
-              <span style="font-size: 0.85rem; color: #a5b4fc;">&rarr;</span>
+              <span style="font-size: 0.85rem; color: var(--purple-text);">&rarr;</span>
             </div>
           </div>
         `).join('');

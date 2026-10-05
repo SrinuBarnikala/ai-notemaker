@@ -1,12 +1,21 @@
 /* main.css — Core Design System, Variables, Layout & Panels */
 
 :root {
+  /* Mode hint for browser controls & scrollbars */
+  color-scheme: dark;
+
   /* Surfaces */
   --bg-app: #080d12;
   --bg-surface: #0f171d;
   --bg-surface-raised: #141e25;
   --bg-surface-overlay: #1a2730;
   --bg-surface-inset: #060a0e;
+  --bg-header: rgba(15, 23, 29, 0.92);
+  --bg-backdrop: rgba(4, 7, 12, 0.82);
+  --bg-backdrop-subtle: rgba(4, 7, 12, 0.65);
+  --bg-diagram-viewport: #040711;
+  --bg-canvas-tooltip: rgba(14, 19, 32, 0.94);
+  --bg-canvas-pill: rgba(14, 19, 32, 0.9);
 
   /* Legacy surface aliases */
   --bg-primary: var(--bg-app);
@@ -19,6 +28,10 @@
   --border-strong: #324653;
   --border-accent: rgba(53, 208, 160, 0.4);
   --border: var(--border-default);
+  --border-blue: rgba(59, 156, 255, 0.35);
+  --border-amber: rgba(245, 185, 66, 0.35);
+  --border-purple: rgba(168, 117, 255, 0.35);
+  --border-danger: rgba(248, 113, 113, 0.35);
 
   /* Text */
   --text-primary: #edf7f5;
@@ -29,6 +42,8 @@
   /* Primary Brand / Emerald */
   --accent-primary: #35d0a0;
   --accent-secondary: #159b7a;
+  --accent-bright: #42e8b4;
+  --accent-btn-text: #080d12;
   --accent-tint: rgba(53, 208, 160, 0.12);
   --accent: var(--accent-primary);
   --accent-hover: var(--accent-secondary);
@@ -37,23 +52,47 @@
   /* Semantics */
   --color-blue: #3b9cff;
   --color-blue-tint: rgba(59, 156, 255, 0.12);
+  --blue-text: #60a5fa;
 
   --color-amber: #f5b942;
   --color-amber-tint: rgba(245, 185, 66, 0.12);
   --warning: var(--color-amber);
   --warning-glow: rgba(245, 185, 66, 0.15);
+  --warning-text: #fbbf24;
+  --warning-btn-text: #060a0e;
 
   --color-purple: #a875ff;
   --color-purple-tint: rgba(168, 117, 255, 0.12);
   --purple: var(--color-purple);
+  --purple-text: #c084fc;
 
   --color-danger: #f87171;
   --color-danger-tint: rgba(248, 113, 113, 0.12);
   --danger: var(--color-danger);
+  --danger-text: #f87171;
 
   --success: var(--accent-primary);
   --success-glow: var(--accent-glow);
+  --success-text: #34d399;
   --cyan: var(--accent-primary);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.45);
+  --shadow-popover: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-inset: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+
+  /* Visual Elements & Gradients */
+  --avatar-gradient: linear-gradient(135deg, #10b981, #06b6d4);
+  --quiz-progress-bg: rgba(255, 255, 255, 0.06);
+  --hero-glow: radial-gradient(ellipse 65% 45% at 50% 25%, rgba(53, 208, 160, 0.06), transparent 75%);
+
+  /* Graph node semantics */
+  --graph-node-mastered: #059669;
+  --graph-node-partial: #f59e0b;
+  --graph-node-gap: #a855f7;
+  --graph-edge: rgba(255, 255, 255, 0.15);
 
   /* Fonts */
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
@@ -84,6 +123,101 @@
   --radius-xl: 14px;
 }
 
+[data-theme="light"] {
+  /* Mode hint for browser controls & scrollbars */
+  color-scheme: light;
+
+  /* Surfaces */
+  --bg-app: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-raised: #f1f5f9;
+  --bg-surface-overlay: #e2e8f0;
+  --bg-surface-inset: #f8fafc;
+  --bg-header: rgba(255, 255, 255, 0.92);
+  --bg-backdrop: rgba(15, 23, 42, 0.5);
+  --bg-backdrop-subtle: rgba(15, 23, 42, 0.35);
+  --bg-diagram-viewport: #f8fafc;
+  --bg-canvas-tooltip: rgba(255, 255, 255, 0.96);
+  --bg-canvas-pill: rgba(255, 255, 255, 0.94);
+
+  /* Legacy surface aliases */
+  --bg-primary: var(--bg-app);
+  --bg-secondary: var(--bg-surface-raised);
+  --bg-card: var(--bg-surface);
+
+  /* Borders */
+  --border-subtle: #e2e8f0;
+  --border-default: #cbd5e1;
+  --border-strong: #94a3b8;
+  --border-accent: rgba(4, 120, 87, 0.4);
+  --border: var(--border-default);
+  --border-blue: rgba(37, 99, 235, 0.35);
+  --border-amber: rgba(180, 83, 9, 0.35);
+  --border-purple: rgba(109, 40, 217, 0.35);
+  --border-danger: rgba(220, 38, 38, 0.35);
+
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-disabled: #94a3b8;
+
+  /* Primary Brand / Emerald */
+  --accent-primary: #047857;
+  --accent-secondary: #065f46;
+  --accent-bright: #059669;
+  --accent-btn-text: #ffffff;
+  --accent-tint: rgba(4, 120, 87, 0.10);
+  --accent: var(--accent-primary);
+  --accent-hover: var(--accent-secondary);
+  --accent-glow: rgba(4, 120, 87, 0.20);
+
+  /* Semantics (Darkened for WCAG AA >= 4.5:1 on light backgrounds) */
+  --color-blue: #1d4ed8;
+  --color-blue-tint: rgba(29, 78, 216, 0.10);
+  --blue-text: #1d4ed8;
+
+  --color-amber: #b45309;
+  --color-amber-tint: rgba(180, 83, 9, 0.10);
+  --warning: var(--color-amber);
+  --warning-glow: rgba(180, 83, 9, 0.15);
+  --warning-text: #b45309;
+  --warning-btn-text: #ffffff;
+
+  --color-purple: #6d28d9;
+  --color-purple-tint: rgba(109, 40, 217, 0.10);
+  --purple: var(--color-purple);
+  --purple-text: #6d28d9;
+
+  --color-danger: #b91c1c;
+  --color-danger-tint: rgba(185, 28, 28, 0.10);
+  --danger: var(--color-danger);
+  --danger-text: #b91c1c;
+
+  --success: var(--accent-primary);
+  --success-glow: var(--accent-glow);
+  --success-text: #047857;
+  --cyan: var(--accent-primary);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
+  --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-popover: 0 4px 16px rgba(0, 0, 0, 0.10);
+  --shadow-inset: inset 0 1px 4px rgba(0, 0, 0, 0.08);
+
+  /* Visual Elements & Gradients */
+  --avatar-gradient: linear-gradient(135deg, #047857, #0284c7);
+  --quiz-progress-bg: rgba(0, 0, 0, 0.06);
+  --hero-glow: radial-gradient(ellipse 65% 45% at 50% 25%, rgba(4, 120, 87, 0.08), transparent 75%);
+
+  /* Graph node semantics */
+  --graph-node-mastered: #047857;
+  --graph-node-partial: #d97706;
+  --graph-node-gap: #7c3aed;
+  --graph-edge: rgba(0, 0, 0, 0.15);
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -98,6 +232,21 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+body,
+header,
+.card,
+.modal-card,
+.modal-panel,
+.panel,
+.sidebar,
+.sidebar-card,
+.note-viewer-card,
+.block-code,
+.copilot-panel,
+.graph-side-card {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
 header {
   border-bottom: 1px solid var(--border-default);
   padding: 0.75rem 2rem;
@@ -105,11 +254,11 @@ header {
   justify-content: space-between;
   align-items: center;
   backdrop-filter: blur(12px);
-  background: rgba(15, 23, 29, 0.92);
+  background: var(--bg-header);
   position: sticky;
   top: 0;
   z-index: 30;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .brand { 
@@ -170,6 +319,31 @@ header {
   color: var(--text-primary);
 }
 
+.theme-toggle-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  line-height: 1;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--bg-surface-raised);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  transform: scale(1.05);
+}
+
 .kbd-pill {
   font-family: var(--font-mono);
   font-size: 0.68rem;
@@ -196,7 +370,7 @@ header {
 .llm-status-badge {
   color: var(--accent-primary);
   background: var(--accent-tint);
-  border-color: rgba(53, 208, 160, 0.3);
+  border-color: var(--border-accent);
 }
 
 main {
@@ -236,7 +410,7 @@ main {
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
   padding: 1.75rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-card);
   margin-bottom: 1.75rem;
   transition: border-color 0.2s ease, opacity 0.3s ease;
 }
@@ -346,7 +520,7 @@ main {
   width: 100%; 
   height: 42px;
   background: var(--accent-primary); 
-  color: #080d12;
+  color: var(--accent-btn-text);
   padding: 0 1.25rem; 
   border-radius: var(--radius-sm); 
   font-weight: 700; 
@@ -474,7 +648,7 @@ main {
   font-size: 0.8rem; 
   color: var(--accent-primary); 
   background: var(--accent-tint); 
-  border: 1px solid rgba(53, 208, 160, 0.25);
+  border: 1px solid var(--border-accent);
   padding: 0.35rem 0.65rem; 
   border-radius: var(--radius-xs); 
   display: inline-block; 
@@ -507,13 +681,13 @@ main {
 
 .confidence-beginner { 
   background: var(--color-amber-tint); 
-  border: 1px solid rgba(245, 185, 66, 0.35); 
+  border: 1px solid var(--border-amber); 
   color: var(--color-amber); 
 }
 
 .confidence-intermediate { 
   background: var(--color-blue-tint); 
-  border: 1px solid rgba(59, 156, 255, 0.35); 
+  border: 1px solid var(--border-blue); 
   color: var(--color-blue); 
 }
 
@@ -525,7 +699,7 @@ main {
 
 .confidence-mixed { 
   background: var(--color-purple-tint); 
-  border: 1px solid rgba(168, 117, 255, 0.35); 
+  border: 1px solid var(--border-purple); 
   color: var(--color-purple); 
 }
 
@@ -625,7 +799,7 @@ main {
 
 .misconception-card { 
   background: var(--color-danger-tint); 
-  border: 1px solid rgba(248, 113, 113, 0.3); 
+  border: 1px solid var(--border-danger); 
   border-radius: var(--radius-sm); 
   padding: 0.75rem 0.85rem; 
   font-size: 0.825rem; 
@@ -725,19 +899,19 @@ main {
 
 .depth-brief { 
   background: var(--color-blue-tint); 
-  border: 1px solid rgba(59, 156, 255, 0.35); 
+  border: 1px solid var(--border-blue); 
   color: var(--color-blue); 
 }
 
 .depth-standard { 
   background: var(--color-amber-tint); 
-  border: 1px solid rgba(245, 185, 66, 0.35); 
+  border: 1px solid var(--border-amber); 
   color: var(--color-amber); 
 }
 
 .depth-deep { 
   background: var(--color-purple-tint); 
-  border: 1px solid rgba(168, 117, 255, 0.35); 
+  border: 1px solid var(--border-purple); 
   color: var(--color-purple); 
 }
 
@@ -782,7 +956,7 @@ main {
 
 .feature-pill.active { 
   background: var(--accent-tint); 
-  border-color: rgba(53, 208, 160, 0.3); 
+  border-color: var(--border-accent); 
   color: var(--accent-primary); 
 }
 
@@ -831,7 +1005,7 @@ footer.footer {
   align-items: center;
   justify-content: center;
   padding: 2.5rem 1rem;
-  background: radial-gradient(ellipse 65% 45% at 50% 25%, rgba(53, 208, 160, 0.06), transparent 75%);
+  background: var(--hero-glow);
 }
 
 .login-card-wrapper {
@@ -874,7 +1048,7 @@ footer.footer {
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
   padding: 1.85rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--shadow-modal);
   margin-bottom: 0.75rem;
   transition: border-color 0.2s ease;
 }
@@ -891,9 +1065,9 @@ footer.footer {
   margin-bottom: 1.25rem;
   border-radius: var(--radius-sm);
   font-size: 0.84rem;
-  background: rgba(248, 113, 113, 0.12);
-  border: 1px solid rgba(248, 113, 113, 0.32);
-  color: #fca5a5;
+  background: var(--color-danger-tint);
+  border: 1px solid var(--border-danger);
+  color: var(--danger-text);
   animation: fadeIn 0.15s ease-in;
 }
 
@@ -1102,7 +1276,7 @@ footer.footer {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #10b981, #06b6d4);
+  background: var(--avatar-gradient);
   color: #ffffff;
   font-weight: 700;
   font-size: 0.72rem;
@@ -1111,7 +1285,7 @@ footer.footer {
   justify-content: center;
   text-transform: uppercase;
   flex-shrink: 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
 .header-user-name {
@@ -1129,14 +1303,14 @@ footer.footer {
 
 .btn-logout:hover {
   color: var(--color-danger) !important;
-  border-color: rgba(248, 113, 113, 0.4) !important;
-  background: rgba(248, 113, 113, 0.08) !important;
+  border-color: var(--border-danger) !important;
+  background: var(--color-danger-tint) !important;
 }
 
 /* Registration & Validation Enhancements */
 .login-alert.login-alert-success {
-  background: rgba(53, 208, 160, 0.12);
-  border-color: rgba(53, 208, 160, 0.35);
+  background: var(--accent-tint);
+  border-color: var(--border-accent);
   color: var(--accent-primary);
 }
 
@@ -1172,7 +1346,7 @@ footer.footer {
 
 .input-invalid {
   border-color: var(--color-danger) !important;
-  box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.15) !important;
+  box-shadow: 0 0 0 2px var(--color-danger-tint) !important;
 }
 
 /* Password Strength Indicator */

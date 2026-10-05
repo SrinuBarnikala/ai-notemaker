@@ -1,34 +1,78 @@
 /* visuals.js — Agent 7 Visual Planner & Mermaid Architecture Diagrams */
 
+    function getMermaidConfig(theme) {
+      const isLight = (theme === 'light');
+      if (isLight) {
+        return {
+          startOnLoad: false,
+          theme: 'default',
+          themeVariables: {
+            darkMode: false,
+            background: '#ffffff',
+            primaryColor: '#e0e7ff',
+            primaryTextColor: '#0f172a',
+            primaryBorderColor: '#6366f1',
+            lineColor: '#4f46e5',
+            secondaryColor: '#d1fae5',
+            secondaryTextColor: '#064e3b',
+            secondaryBorderColor: '#059669',
+            tertiaryColor: '#f1f5f9',
+            tertiaryTextColor: '#1e293b',
+            tertiaryBorderColor: '#cbd5e1',
+            noteBkgColor: '#fef3c7',
+            noteTextColor: '#78350f',
+            noteBorderColor: '#f59e0b',
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: '13px',
+          },
+          flowchart: { curve: 'basis', htmlLabels: true },
+          sequence: { showSequenceNumbers: true },
+          securityLevel: 'loose',
+        };
+      }
+      return {
+        startOnLoad: false,
+        theme: 'dark',
+        themeVariables: {
+          darkMode: true,
+          background: '#070b12',
+          primaryColor: '#312e81',
+          primaryTextColor: '#f8fafc',
+          primaryBorderColor: '#6366f1',
+          lineColor: '#818cf8',
+          secondaryColor: '#064e3b',
+          secondaryTextColor: '#a7f3d0',
+          secondaryBorderColor: '#10b981',
+          tertiaryColor: '#1e1b4b',
+          tertiaryTextColor: '#e0e7ff',
+          tertiaryBorderColor: '#4338ca',
+          noteBkgColor: '#2d2006',
+          noteTextColor: '#fde68a',
+          noteBorderColor: '#b45309',
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: '13px',
+        },
+        flowchart: { curve: 'basis', htmlLabels: true },
+        sequence: { showSequenceNumbers: true },
+        securityLevel: 'loose',
+      };
+    }
+
     async function ensureMermaidLoaded(maxWaitMs = 6000) {
       const start = Date.now();
       while (!window.mermaid && (Date.now() - start) < maxWaitMs) {
         await new Promise(r => setTimeout(r, 100));
       }
-      if (window.mermaid && !window._mermaidInitialized) {
-        try {
-          mermaid.initialize({
-            startOnLoad: false,
-            theme: 'dark',
-            themeVariables: {
-              darkMode: true,
-              background: '#070b12',
-              primaryColor: '#312e81',
-              primaryTextColor: '#f8fafc',
-              primaryBorderColor: '#6366f1',
-              lineColor: '#818cf8',
-              secondaryColor: '#064e3b',
-              tertiaryColor: '#1e1b4b',
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: '13px',
-            },
-            flowchart: { curve: 'basis', htmlLabels: true },
-            sequence: { showSequenceNumbers: true },
-            securityLevel: 'loose',
-          });
-          window._mermaidInitialized = true;
-        } catch (err) {
-          console.warn("Mermaid initialize warning:", err);
+      if (window.mermaid) {
+        const activeTheme = (typeof getTheme === 'function') ? getTheme() : (document.documentElement.getAttribute('data-theme') || 'dark');
+        if (!window._mermaidInitialized || window._mermaidCurrentTheme !== activeTheme) {
+          try {
+            mermaid.initialize(getMermaidConfig(activeTheme));
+            window._mermaidInitialized = true;
+            window._mermaidCurrentTheme = activeTheme;
+          } catch (err) {
+            console.warn("Mermaid initialize warning:", err);
+          }
         }
       }
       return !!window.mermaid;
@@ -44,8 +88,9 @@
       for (let el of blocks) {
         const id = el.id;
         const rawEl = document.getElementById('raw-' + id);
-        const cleanSpec = rawEl ? rawEl.value.trim() : '';
+        const cleanSpec = (rawEl && rawEl.value) ? rawEl.value.trim() : (el.dataset.mermaidSpec || '');
         if (!cleanSpec) continue;
+        el.dataset.mermaidSpec = cleanSpec;
 
         try {
           const cleanId = id.replace(/[^a-zA-Z0-9]/g, '');
@@ -64,6 +109,45 @@
         }
       }
     }
+
+    // Re-initialize and re-render Mermaid on theme change
+    document.addEventListener('themechange', async (e) => {
+      const newTheme = e.detail && e.detail.theme ? e.detail.theme : ((typeof getTheme === 'function') ? getTheme() : 'dark');
+      if (window.mermaid) {
+        try {
+          mermaid.initialize(getMermaidConfig(newTheme));
+          window._mermaidCurrentTheme = newTheme;
+        } catch (err) {
+          console.warn("Mermaid re-init error:", err);
+        }
+
+        // Re-render all diagrams on page
+        await renderAllMermaidDiagrams();
+
+        // If diagram fullscreen modal is open, re-render its content
+        const modal = document.getElementById('diag-fullscreen-modal');
+        if (modal && (modal.style.display === 'flex' || modal.style.display === 'block') && currentModalDiagId) {
+          const rawEl = document.getElementById('raw-' + currentModalDiagId);
+          const modalSpec = (rawEl && rawEl.value) ? rawEl.value.trim() : '';
+          const canvas = document.getElementById('diag-modal-svg-canvas');
+          if (canvas && modalSpec) {
+            try {
+              const modalSvgId = 'modal-svg-' + Math.random().toString(36).substring(2, 7);
+              const { svg } = await mermaid.render(modalSvgId, modalSpec);
+              canvas.innerHTML = svg;
+              const newSvg = canvas.querySelector('svg');
+              if (newSvg) {
+                newSvg.style.maxWidth = '100%';
+                newSvg.style.height = 'auto';
+                newSvg.style.maxHeight = '70vh';
+              }
+            } catch (err) {
+              console.warn("Modal re-render on theme change error:", err);
+            }
+          }
+        }
+      }
+    });
 
     function copyDiagramSpec(btn, diagId) {
       const rawEl = document.getElementById('raw-' + diagId);
@@ -282,8 +366,8 @@
         closeSectionVisualModal();
       } catch (err) {
         statusEl.style.display = 'block';
-        statusEl.style.background = 'rgba(239, 68, 68, 0.15)';
-        statusEl.style.color = '#fca5a5';
+        statusEl.style.background = 'var(--color-danger-tint)';
+        statusEl.style.color = 'var(--danger-text)';
         statusEl.textContent = `Error: ${err.message}`;
       } finally {
         btn.disabled = false;

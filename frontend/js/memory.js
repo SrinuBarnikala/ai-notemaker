@@ -98,7 +98,7 @@ function renderInitialSearchState() {
   container.innerHTML = `
     <div class="search-empty-state">
       <div style="font-size: 2.2rem; margin-bottom: 0.6rem;">🔍</div>
-      <div style="font-weight: 600; color: #e2e8f0; margin-bottom: 0.3rem;">Instant Universal Technical Search</div>
+      <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.3rem;">Instant Universal Technical Search</div>
       <div style="font-size: 0.82rem; color: var(--text-muted); max-width: 440px; margin: 0 auto;">
         Type any concept, code keyword, section title, or flashcard term. Press <kbd>↑</kbd> <kbd>↓</kbd> to navigate and <kbd>Enter</kbd> to jump.
       </div>
@@ -127,7 +127,7 @@ async function triggerSearch() {
     renderSearchResults(data);
   } catch (err) {
     container.innerHTML = `
-      <div style="padding: 2rem; text-align: center; color: #f87171; font-size: 0.85rem;">
+      <div style="padding: 2rem; text-align: center; color: var(--danger-text); font-size: 0.85rem;">
         Failed to fetch search results: ${escapeHtml(err.message)}
       </div>
     `;
@@ -144,7 +144,7 @@ function renderSearchResults(data) {
     container.innerHTML = `
       <div class="search-empty-state">
         <div style="font-size: 1.8rem; margin-bottom: 0.5rem;">🕵️</div>
-        <div style="font-weight: 600; color: #e2e8f0;">No results found for "${escapeHtml(data.query)}"</div>
+        <div style="font-weight: 600; color: var(--text-primary);">No results found for "${escapeHtml(data.query)}"</div>
         <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
           Try searching for another technical concept, journey, or keyword.
         </div>
@@ -163,17 +163,17 @@ function renderSearchResults(data) {
   };
 
   const typeColors = {
-    journey: '#818cf8',
-    note: '#38bdf8',
-    section: '#34d399',
-    concept: '#fbbf24',
-    code: '#a78bfa',
-    flashcard: '#f472b6',
+    journey: 'var(--color-purple)',
+    note: 'var(--color-blue)',
+    section: 'var(--success-text)',
+    concept: 'var(--warning-text)',
+    code: 'var(--color-purple)',
+    flashcard: 'var(--color-blue)',
   };
 
   container.innerHTML = data.results.map((r, idx) => {
     const icon = typeIcons[r.result_type] || '🔍';
-    const color = typeColors[r.result_type] || '#94a3b8';
+    const color = typeColors[r.result_type] || 'var(--text-muted)';
     return `
       <div class="search-result-row" data-index="${idx}" onclick="selectSearchResult('${escapeJsString(r.id)}', '${r.result_type}', '${escapeJsString(r.journey_id || '')}', '${escapeJsString(r.note_id || '')}', '${escapeJsString(r.section_id || '')}', '${escapeJsString(r.title)}')">
         <div class="result-icon-col" style="color: ${color};">
@@ -291,19 +291,19 @@ async function loadMemoryOverview() {
         <div class="mstat-label">Learning Journeys</div>
       </div>
       <div class="mstat-card">
-        <div class="mstat-num" style="color: #38bdf8;">${data.total_concepts_tracked}</div>
+        <div class="mstat-num" style="color: var(--color-blue);">${data.total_concepts_tracked}</div>
         <div class="mstat-label">Concepts Tracked</div>
       </div>
       <div class="mstat-card">
-        <div class="mstat-num" style="color: #34d399;">${data.total_concepts_mastered}</div>
+        <div class="mstat-num" style="color: var(--success-text);">${data.total_concepts_mastered}</div>
         <div class="mstat-label">Concepts Mastered</div>
       </div>
       <div class="mstat-card">
-        <div class="mstat-num" style="color: #f87171;">${data.total_knowledge_gaps}</div>
+        <div class="mstat-num" style="color: var(--danger-text);">${data.total_knowledge_gaps}</div>
         <div class="mstat-label">Knowledge Gaps</div>
       </div>
       <div class="mstat-card">
-        <div class="mstat-num" style="color: #a78bfa;">${data.top_bridging_concepts.length}</div>
+        <div class="mstat-num" style="color: var(--purple-text);">${data.top_bridging_concepts.length}</div>
         <div class="mstat-label">Cross-Journey Bridges</div>
       </div>
     `;
@@ -329,7 +329,7 @@ async function loadLearningHistory() {
       container.innerHTML = `
         <div class="search-empty-state">
           <div style="font-size: 1.8rem; margin-bottom: 0.4rem;">🌱</div>
-          <div style="font-weight: 600; color: #e2e8f0;">No learning journeys yet</div>
+          <div style="font-weight: 600; color: var(--text-primary);">No learning journeys yet</div>
           <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">
             Start your first technical exploration using the topic intake form above!
           </div>
@@ -372,14 +372,14 @@ async function loadLearningHistory() {
           <div class="mhistory-concepts-row">
             <span style="font-size: 0.75rem; color: var(--text-muted); margin-right: 0.3rem;">Concepts:</span>
             ${conceptChips || '<span style="font-size: 0.75rem; color: var(--text-muted);">None recorded</span>'}
-            ${(item.concept_names || []).length > 6 ? `<span style="font-size: 0.75rem; color: #a5b4fc;">+${item.concept_names.length - 6} more</span>` : ''}
+            ${(item.concept_names || []).length > 6 ? `<span style="font-size: 0.75rem; color: var(--purple-text);">+${item.concept_names.length - 6} more</span>` : ''}
           </div>
         </div>
       `;
     }).join('');
   } catch (err) {
     container.innerHTML = `
-      <div style="padding: 2rem; text-align: center; color: #f87171; font-size: 0.85rem;">
+      <div style="padding: 2rem; text-align: center; color: var(--danger-text); font-size: 0.85rem;">
         Failed to load history: ${escapeHtml(err.message)}
       </div>
     `;
@@ -408,7 +408,7 @@ async function loadConceptMemories() {
     renderFilteredConceptGrid('');
   } catch (err) {
     container.innerHTML = `
-      <div style="padding: 2rem; text-align: center; color: #f87171; font-size: 0.85rem;">
+      <div style="padding: 2rem; text-align: center; color: var(--danger-text); font-size: 0.85rem;">
         Failed to load concepts: ${escapeHtml(err.message)}
       </div>
     `;
@@ -441,7 +441,7 @@ function renderFilteredConceptGrid(q) {
 
   container.innerHTML = filtered.map(c => {
     const isMastered = c.current_status === 'mastered' || c.current_status === 'known';
-    const statusColor = isMastered ? '#34d399' : (c.current_status === 'partial' ? '#fbbf24' : '#f87171');
+    const statusColor = isMastered ? 'var(--success-text)' : (c.current_status === 'partial' ? 'var(--warning-text)' : 'var(--danger-text)');
     const firstDate = new Date(c.first_encountered_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
     return `
@@ -470,7 +470,7 @@ async function loadRelatedTopics() {
     container.innerHTML = `
       <div class="search-empty-state">
         <div style="font-size: 1.8rem; margin-bottom: 0.4rem;">🧭</div>
-        <div style="font-weight: 600; color: #e2e8f0;">No active journey selected</div>
+        <div style="font-weight: 600; color: var(--text-primary);">No active journey selected</div>
         <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">
           Select or start a learning journey to see cross-journey concept links and recommended next paths.
         </div>
@@ -490,7 +490,7 @@ async function loadRelatedTopics() {
 
     const bridgingHtml = (data.bridging_concepts || []).length > 0 ? `
       <div class="mbridge-banner">
-        <div style="font-weight: 600; color: #a5b4fc; font-size: 0.85rem; margin-bottom: 0.3rem;">
+        <div style="font-weight: 600; color: var(--purple-text); font-size: 0.85rem; margin-bottom: 0.3rem;">
           🌉 Cross-Journey Concept Bridges (${data.bridging_concepts.length})
         </div>
         <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.6rem;">
@@ -517,7 +517,7 @@ async function loadRelatedTopics() {
               <span>📖 Open Existing Journey</span>
             </button>
           ` : `
-            <button type="button" class="btn-submit" onclick="startNewJourneyWithTopic('${escapeJsString(item.topic)}')" style="padding: 0.35rem 0.8rem; font-size: 0.775rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+            <button type="button" class="btn-submit" onclick="startNewJourneyWithTopic('${escapeJsString(item.topic)}')" style="padding: 0.35rem 0.8rem; font-size: 0.775rem; background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);">
               <span>🚀 Start This Journey</span>
             </button>
           `}
@@ -533,7 +533,7 @@ async function loadRelatedTopics() {
     `;
   } catch (err) {
     container.innerHTML = `
-      <div style="padding: 2rem; text-align: center; color: #f87171; font-size: 0.85rem;">
+      <div style="padding: 2rem; text-align: center; color: var(--danger-text); font-size: 0.85rem;">
         Failed to load related topics: ${escapeHtml(err.message)}
       </div>
     `;
@@ -582,11 +582,11 @@ async function openConceptProvenanceModal(conceptName) {
         <div class="cprov-step-item">
           <div class="cprov-step-num">${idx + 1}</div>
           <div class="cprov-step-content">
-            <div style="font-weight: 600; color: #e2e8f0; font-size: 0.85rem;">${escapeHtml(step.journey_topic)}</div>
+            <div style="font-weight: 600; color: var(--text-primary); font-size: 0.85rem;">${escapeHtml(step.journey_topic)}</div>
             <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">
-              <span>${dt}</span> • <span>Event: ${step.event_type.replace(/_/g, ' ')}</span> • <span style="color: #a5b4fc;">Category: ${step.category}</span>
+              <span>${dt}</span> • <span>Event: ${step.event_type.replace(/_/g, ' ')}</span> • <span style="color: var(--purple-text);">Category: ${step.category}</span>
             </div>
-            ${step.context_note ? `<div style="font-size: 0.775rem; color: #cbd5e1; background: rgba(0,0,0,0.25); padding: 0.4rem; border-radius: 4px;">${escapeHtml(step.context_note)}</div>` : ''}
+            ${step.context_note ? `<div style="font-size: 0.775rem; color: var(--text-secondary); background: var(--bg-surface-raised);; padding: 0.4rem; border-radius: 4px;">${escapeHtml(step.context_note)}</div>` : ''}
           </div>
         </div>
       `;

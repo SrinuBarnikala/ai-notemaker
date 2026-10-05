@@ -291,16 +291,16 @@
         if (fill) {
           fill.style.width = `${lastQuizSubmissionResult.percentage}%`;
           if (lastQuizSubmissionResult.percentage >= 70) {
-            fill.style.background = 'linear-gradient(90deg, #10b981, #059669)';
+            fill.style.background = 'linear-gradient(90deg, var(--accent-primary), var(--accent-secondary))';
           } else {
-            fill.style.background = 'linear-gradient(90deg, #f59e0b, #ef4444)';
+            fill.style.background = 'linear-gradient(90deg, var(--color-amber), var(--color-danger))';
           }
         }
       } else {
         if (label) label.textContent = `${answered}/${total} Answered (${pct}%)`;
         if (fill) {
           fill.style.width = `${pct}%`;
-          fill.style.background = 'linear-gradient(90deg, #6366f1, #10b981)';
+          fill.style.background = 'linear-gradient(90deg, var(--color-purple), var(--accent-primary))';
         }
       }
     }
@@ -308,27 +308,27 @@
     function renderQuizScoreBanners(result) {
       if (!result) return;
       const masteredHtml = (result.mastered_concepts && result.mastered_concepts.length > 0) ? `
-        <div style="margin-top: 0.6rem; font-size: 0.8rem; color: #e0e7ff; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
-          <strong style="color: #818cf8;">🚀 Promoted to Mastered:</strong>
-          ${result.mastered_concepts.map(c => `<span class="card-concept-badge" style="color: #34d399; border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.15);">${escapeHtml(c)}</span>`).join('')}
+        <div style="margin-top: 0.6rem; font-size: 0.8rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+          <strong style="color: var(--purple-text);">🚀 Promoted to Mastered:</strong>
+          ${result.mastered_concepts.map(c => `<span class="card-concept-badge" style="color: var(--success-text); border-color: var(--border-accent); background: var(--accent-tint);">${escapeHtml(c)}</span>`).join('')}
         </div>
       ` : '';
 
       const scoreHtml = `
         <div class="quiz-score-banner">
           <div>
-            <div style="font-size: 0.75rem; font-family: var(--font-mono); color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">AGENT 6 &bull; MASTERY EVALUATION</div>
-            <div style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-top: 0.25rem;">${escapeHtml(result.message)}</div>
-            <div style="font-size: 0.85rem; color: #a7f3d0; margin-top: 0.4rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <div style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--purple-text); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">AGENT 6 &bull; MASTERY EVALUATION</div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin-top: 0.25rem;">${escapeHtml(result.message)}</div>
+            <div style="font-size: 0.85rem; color: var(--success-text); margin-top: 0.4rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
               <span>🧠 Mental Model Confidence:</span>
-              <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-weight: 700; padding: 0.15rem 0.6rem; border-radius: 9999px; font-size: 0.75rem;">${escapeHtml(result.updated_confidence.toUpperCase())}</span>
+              <span style="background: var(--accent-tint); border: 1px solid var(--border-accent); color: var(--success-text); font-weight: 700; padding: 0.15rem 0.6rem; border-radius: 9999px; font-size: 0.75rem;">${escapeHtml(result.updated_confidence.toUpperCase())}</span>
             </div>
             ${masteredHtml}
           </div>
           <div style="text-align: right; min-width: 130px;">
             <div class="score-badge-num">${result.percentage}%</div>
-            <div style="font-size: 0.85rem; font-family: var(--font-mono); font-weight: 700; color: #cbd5e1;">${result.score} of ${result.total} Correct</div>
-            <div style="font-size: 0.725rem; color: ${result.percentage >= 70 ? '#34d399' : '#f59e0b'}; margin-top: 0.25rem; font-weight: 600;">${result.percentage >= 70 ? '🎯 Technical Mastery Standard Met' : '📖 Knowledge Gaps Retained for Review'}</div>
+            <div style="font-size: 0.85rem; font-family: var(--font-mono); font-weight: 700; color: var(--text-secondary);">${result.score} of ${result.total} Correct</div>
+            <div style="font-size: 0.725rem; color: ${result.percentage >= 70 ? 'var(--success-text)' : 'var(--warning-text)'}; margin-top: 0.25rem; font-weight: 600;">${result.percentage >= 70 ? '🎯 Technical Mastery Standard Met' : '📖 Knowledge Gaps Retained for Review'}</div>
           </div>
         </div>
       `;
@@ -383,7 +383,7 @@
             return `
               <button type="button" class="qstep-pill ${isActive ? 'active' : ''} ${isAnswered ? 'answered' : ''}" onclick="jumpToQuizQuestion(${idx})" title="Jump to Question ${idx + 1}">
                 <span>Q${idx + 1}</span>
-                ${isAnswered ? '<span style="font-size: 0.7rem; color: #34d399;">✓</span>' : ''}
+                ${isAnswered ? '<span style="font-size: 0.7rem; color: var(--success-text);">✓</span>' : ''}
               </button>
             `;
           }
@@ -518,7 +518,7 @@
           return `
             <div class="quiz-question-card ${isAnswered ? 'answered' : ''}" id="quiz-card-${q.id}" style="display: ${isVisible ? 'block' : 'none'};">
               <div class="quiz-card-header">
-                <span style="font-family: var(--font-mono); font-size: 0.75rem; color: #a5b4fc; font-weight: 700; letter-spacing: 0.05em;">QUESTION ${qIdx + 1} OF ${questions.length} &bull; ${escapeHtml(q.concept)}</span>
+                <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--purple-text); font-weight: 700; letter-spacing: 0.05em;">QUESTION ${qIdx + 1} OF ${questions.length} &bull; ${escapeHtml(q.concept)}</span>
                 <span class="card-diff-badge diff-medium" style="font-size: 0.675rem;">SCENARIO</span>
               </div>
               <div class="quiz-question-title">${escapeHtml(q.question)}</div>
@@ -596,7 +596,7 @@
           return `
             <button type="button" class="qstep-pill ${isActive ? 'active' : ''} ${isAnswered ? 'answered' : ''}" onclick="jumpToQuizQuestion(${idx})" title="Jump to Question ${idx + 1}">
               <span>Q${idx + 1}</span>
-              ${isAnswered ? '<span style="font-size: 0.7rem; color: #34d399;">✓</span>' : ''}
+              ${isAnswered ? '<span style="font-size: 0.7rem; color: var(--success-text);">✓</span>' : ''}
             </button>
           `;
         }).join('');

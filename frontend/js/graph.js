@@ -48,7 +48,6 @@ const COLOR_MAP = {
   journey: { fill: '#4338ca', stroke: '#818cf8', glow: 'rgba(129, 140, 248, 0.5)', text: '#e0e7ff' }
 };
 
-// Relation Typography & Styling Tokens
 const RELATION_STYLES = {
   prerequisite: { stroke: '#38bdf8', width: 2.2, dash: [], arrow: '#38bdf8', label: 'prerequisite' },
   subconcept: { stroke: '#a855f7', width: 1.8, dash: [6, 4], arrow: '#a855f7', label: 'subconcept' },
@@ -56,6 +55,82 @@ const RELATION_STYLES = {
   compares_to: { stroke: '#f87171', width: 1.8, dash: [3, 3], arrow: '#f87171', label: 'compares to' },
   relates_to: { stroke: 'rgba(148, 163, 184, 0.4)', width: 1.2, dash: [], arrow: 'rgba(148, 163, 184, 0.6)', label: 'relates to' }
 };
+
+let GRAPH_THEME = null;
+
+function refreshGraphThemeColors() {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const styles = getComputedStyle(document.documentElement);
+  const textPrimary = styles.getPropertyValue('--text-primary').trim() || (isLight ? '#0f172a' : '#edf7f5');
+
+  GRAPH_THEME = {
+    isLight,
+    filteredEdge: isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.04)',
+    filteredNode: isLight ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.04)',
+    filteredNodeBorder: isLight ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.08)',
+    labelPillBg: isLight ? 'rgba(255, 255, 255, 0.92)' : 'rgba(4, 7, 17, 0.78)',
+    labelPillBgSelected: isLight ? 'rgba(241, 245, 249, 0.96)' : 'rgba(15, 23, 42, 0.95)',
+    labelPillBorder: isLight ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.2)',
+    labelPillText: textPrimary,
+    labelPillTextSelected: textPrimary,
+    selectionRing: isLight ? 'rgba(4, 120, 87, 0.8)' : 'rgba(255, 255, 255, 0.7)',
+    selectedBorder: isLight ? '#047857' : '#ffffff',
+    hoveredBorder: isLight ? '#0f172a' : '#ffffff',
+    midpointBg: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(11, 15, 28, 0.92)',
+    midpointBorder: isLight ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.2)',
+    midpointText: textPrimary,
+    pathHighlight: isLight ? '#b45309' : '#facc15',
+    pathHighlightGlow: isLight ? 'rgba(180, 83, 9, 0.45)' : 'rgba(250, 204, 21, 0.85)',
+    pathText: isLight ? '#78350f' : '#fef08a',
+    edgeHighlight: isLight ? '#4f46e5' : 'rgba(129, 140, 248, 0.95)',
+    edgeHighlightGlow: isLight ? 'rgba(79, 70, 229, 0.35)' : 'rgba(129, 140, 248, 0.6)',
+    edgeHighlightArrow: isLight ? '#4f46e5' : '#818cf8',
+
+    colorMap: isLight ? {
+      known: { fill: '#059669', stroke: '#047857', glow: 'rgba(5, 150, 105, 0.30)', text: '#064e3b' },
+      partial: { fill: '#d97706', stroke: '#b45309', glow: 'rgba(217, 119, 6, 0.30)', text: '#78350f' },
+      gap: { fill: '#7c3aed', stroke: '#6d28d9', glow: 'rgba(124, 58, 237, 0.30)', text: '#4c1d95' },
+      misconception: { fill: '#dc2626', stroke: '#b91c1c', glow: 'rgba(220, 38, 38, 0.35)', text: '#7f1d1d' },
+      topic: { fill: '#4338ca', stroke: '#3730a3', glow: 'rgba(67, 56, 202, 0.35)', text: '#1e1b4b' },
+      journey: { fill: '#4338ca', stroke: '#3730a3', glow: 'rgba(67, 56, 202, 0.35)', text: '#1e1b4b' }
+    } : {
+      known: { fill: '#059669', stroke: '#34d399', glow: 'rgba(52, 211, 153, 0.45)', text: '#a7f3d0' },
+      partial: { fill: '#d97706', stroke: '#fbbf24', glow: 'rgba(251, 191, 36, 0.45)', text: '#fde68a' },
+      gap: { fill: '#7c3aed', stroke: '#c084fc', glow: 'rgba(192, 132, 252, 0.45)', text: '#e9d5ff' },
+      misconception: { fill: '#dc2626', stroke: '#f87171', glow: 'rgba(248, 113, 113, 0.55)', text: '#fecaca' },
+      topic: { fill: '#4338ca', stroke: '#818cf8', glow: 'rgba(129, 140, 248, 0.5)', text: '#e0e7ff' },
+      journey: { fill: '#4338ca', stroke: '#818cf8', glow: 'rgba(129, 140, 248, 0.5)', text: '#e0e7ff' }
+    },
+
+    relationStyles: isLight ? {
+      prerequisite: { stroke: '#0284c7', width: 2.2, dash: [], arrow: '#0284c7', label: 'prerequisite' },
+      subconcept: { stroke: '#7c3aed', width: 1.8, dash: [6, 4], arrow: '#7c3aed', label: 'subconcept' },
+      implements: { stroke: '#059669', width: 2.2, dash: [], arrow: '#059669', label: 'implements' },
+      compares_to: { stroke: '#dc2626', width: 1.8, dash: [3, 3], arrow: '#dc2626', label: 'compares to' },
+      relates_to: { stroke: 'rgba(100, 116, 139, 0.5)', width: 1.2, dash: [], arrow: 'rgba(100, 116, 139, 0.7)', label: 'relates to' }
+    } : {
+      prerequisite: { stroke: '#38bdf8', width: 2.2, dash: [], arrow: '#38bdf8', label: 'prerequisite' },
+      subconcept: { stroke: '#a855f7', width: 1.8, dash: [6, 4], arrow: '#a855f7', label: 'subconcept' },
+      implements: { stroke: '#34d399', width: 2.2, dash: [], arrow: '#34d399', label: 'implements' },
+      compares_to: { stroke: '#f87171', width: 1.8, dash: [3, 3], arrow: '#f87171', label: 'compares to' },
+      relates_to: { stroke: 'rgba(148, 163, 184, 0.4)', width: 1.2, dash: [], arrow: 'rgba(148, 163, 184, 0.6)', label: 'relates to' }
+    }
+  };
+
+  Object.assign(COLOR_MAP, GRAPH_THEME.colorMap);
+  Object.assign(RELATION_STYLES, GRAPH_THEME.relationStyles);
+}
+
+// Initial color calculation
+refreshGraphThemeColors();
+
+// Refresh colors and trigger canvas redraw on theme change
+document.addEventListener('themechange', () => {
+  refreshGraphThemeColors();
+  if (typeof requestRender === 'function') {
+    requestRender();
+  }
+});
 
 // --------------------------------------------------------------------------
 // On-Demand Render Scheduler (No continuous animation loop when idle)
@@ -997,7 +1072,7 @@ function selectConceptNode(node) {
     } else {
       prereqList.innerHTML = prereqEdges.map(e => {
         const p = e.sourceNode;
-        const statusColor = COLOR_MAP[p.status]?.stroke || '#34d399';
+        const statusColor = COLOR_MAP[p.status]?.stroke || (GRAPH_THEME ? GRAPH_THEME.colorMap.known.stroke : 'var(--accent-primary)');
         return `
           <div class="inspector-chip" onclick="inspectNodeById('${p.id}')" title="Inspect prerequisite: ${escapeHtml(p.name)}">
             <div style="display: flex; align-items: center; gap: 0.4rem; overflow: hidden;">
@@ -1022,7 +1097,7 @@ function selectConceptNode(node) {
     } else {
       unlockList.innerHTML = unlockEdges.map(e => {
         const u = e.targetNode;
-        const statusColor = COLOR_MAP[u.status]?.stroke || '#c084fc';
+        const statusColor = COLOR_MAP[u.status]?.stroke || (GRAPH_THEME ? GRAPH_THEME.colorMap.gap.stroke : 'var(--purple-text)');
         return `
           <div class="inspector-chip" onclick="inspectNodeById('${u.id}')" title="Inspect unlocked concept: ${escapeHtml(u.name)}">
             <div style="display: flex; align-items: center; gap: 0.4rem; overflow: hidden;">
@@ -1200,16 +1275,16 @@ function traceLearningPath(targetNode) {
       .filter(n => n && n.id !== targetNode.id);
 
     if (prereqNodes.length === 0) {
-      bannerSteps.innerHTML = `<span style="color: #6ee7b7; font-weight: 700;">${escapeHtml(targetNode.name)}</span> is a foundational concept with no prior prerequisites. You can start here!`;
+      bannerSteps.innerHTML = `<span style="color: var(--success-text); font-weight: 700;">${escapeHtml(targetNode.name)}</span> is a foundational concept with no prior prerequisites. You can start here!`;
     } else {
       const stepsHtml = prereqNodes.map(n => {
         const isMastered = n.status === 'known';
-        const color = isMastered ? '#6ee7b7' : (n.status === 'partial' ? '#fde68a' : '#c084fc');
+        const color = isMastered ? 'var(--success-text)' : (n.status === 'partial' ? 'var(--warning-text)' : 'var(--purple-text)');
         const icon = isMastered ? '✓ ' : (n.status === 'gap' ? '⚠️ ' : '⏳ ');
         return `<span style="color: ${color}; cursor: pointer; text-decoration: underline;" onclick="inspectNodeById('${n.id}')">${icon}${escapeHtml(n.name)}</span>`;
-      }).join(' <span style="color: rgba(255,255,255,0.4); margin: 0 4px;">➔</span> ');
+      }).join(' <span style="color: var(--text-muted); margin: 0 4px;">➔</span> ');
 
-      bannerSteps.innerHTML = `${stepsHtml} <span style="color: rgba(255,255,255,0.4); margin: 0 4px;">➔</span> <strong style="color: #fde047;">${escapeHtml(targetNode.name)} (Target)</strong>`;
+      bannerSteps.innerHTML = `${stepsHtml} <span style="color: var(--text-muted); margin: 0 4px;">➔</span> <strong style="color: var(--warning-text);">${escapeHtml(targetNode.name)} (Target)</strong>`;
     }
   }
 
@@ -1305,7 +1380,7 @@ async function sendGraphAssistantMessage() {
         <span class="typing-dot"></span>
         <span class="typing-dot"></span>
         <span class="typing-dot"></span>
-        <span style="margin-left: 0.45rem; font-size: 0.72rem; color: #a5b4fc;">Reasoning over concept topology...</span>
+        <span style="margin-left: 0.45rem; font-size: 0.72rem; color: var(--purple-text);">Reasoning over concept topology...</span>
       </div>
     </div>
   `;
@@ -1372,9 +1447,9 @@ async function sendGraphAssistantMessage() {
     const errorHtml = `
       <div class="assistant-msg assistant">
         <div class="assistant-avatar">⚠️</div>
-        <div class="assistant-bubble" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.1);">
-          <div style="font-weight: 700; color: #f87171; font-size: 0.76rem; margin-bottom: 0.2rem;">Assistant Notice</div>
-          <div style="font-size: 0.74rem; color: #cbd5e1;">${escapeHtml(err.message)}</div>
+        <div class="assistant-bubble" style="border-color: var(--border-danger); background: var(--color-danger-tint);">
+          <div style="font-weight: 700; color: var(--danger-text); font-size: 0.76rem; margin-bottom: 0.2rem;">Assistant Notice</div>
+          <div style="font-size: 0.74rem; color: var(--text-secondary);">${escapeHtml(err.message)}</div>
         </div>
       </div>
     `;
@@ -1425,9 +1500,9 @@ function updateGraphTooltip(node, clientX, clientY) {
       </span>
       <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">${escapeHtml(domainLabel)}</span>
     </div>
-    <div style="font-size: 0.95rem; font-weight: 800; color: #ffffff; margin-bottom: 0.25rem;">${escapeHtml(node.name)}</div>
-    ${node.summary ? `<div style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.4; margin-bottom: 0.35rem;">${escapeHtml(node.summary)}</div>` : ''}
-    <div style="font-size: 0.74rem; color: #a5b4fc; font-family: var(--font-mono); margin-top: 0.25rem;">💡 Click to inspect prerequisites &amp; explore neighborhood</div>
+    <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.25rem;">${escapeHtml(node.name)}</div>
+    ${node.summary ? `<div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin-bottom: 0.35rem;">${escapeHtml(node.summary)}</div>` : ''}
+    <div style="font-size: 0.74rem; color: var(--purple-text); font-family: var(--font-mono); margin-top: 0.25rem;">💡 Click to inspect prerequisites &amp; explore neighborhood</div>
   `;
 
   tooltip.style.left = `${clientX + 14}px`;
@@ -1492,7 +1567,7 @@ function handleGraphSearch(input) {
     }
 
     dropdown.innerHTML = matches.map(n => {
-      const color = COLOR_MAP[n.status]?.stroke || '#38bdf8';
+      const color = COLOR_MAP[n.status]?.stroke || 'var(--color-blue)';
       const statusLabel = n.status.toUpperCase();
       const domain = n.journey_topic || (n.group === 'journey' ? 'Domain Hub' : 'Technical Concept');
       return `
@@ -1738,8 +1813,10 @@ function renderGraph() {
     graphCtx.moveTo(s.x, s.y);
     graphCtx.lineTo(t.x, t.y);
 
+    if (!GRAPH_THEME) refreshGraphThemeColors();
+
     if (isFiltered || !isEdgeInScope) {
-      graphCtx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+      graphCtx.strokeStyle = GRAPH_THEME.filteredEdge;
       graphCtx.lineWidth = 0.8;
       graphCtx.stroke();
       graphCtx.restore();
@@ -1747,15 +1824,15 @@ function renderGraph() {
     }
 
     if (isPathEdge) {
-      graphCtx.strokeStyle = '#facc15';
+      graphCtx.strokeStyle = GRAPH_THEME.pathHighlight;
       graphCtx.lineWidth = 3.6;
-      graphCtx.shadowColor = 'rgba(250, 204, 21, 0.85)';
+      graphCtx.shadowColor = GRAPH_THEME.pathHighlightGlow;
       graphCtx.shadowBlur = 12;
       graphCtx.setLineDash([]);
     } else if (isHighlighted) {
-      graphCtx.strokeStyle = 'rgba(129, 140, 248, 0.95)';
+      graphCtx.strokeStyle = GRAPH_THEME.edgeHighlight;
       graphCtx.lineWidth = 2.8;
-      graphCtx.shadowColor = 'rgba(129, 140, 248, 0.6)';
+      graphCtx.shadowColor = GRAPH_THEME.edgeHighlightGlow;
       graphCtx.shadowBlur = 8;
       graphCtx.setLineDash([]);
     } else {
@@ -1775,7 +1852,7 @@ function renderGraph() {
 
     graphCtx.save();
     graphCtx.beginPath();
-    graphCtx.fillStyle = isPathEdge ? '#facc15' : (isHighlighted ? '#818cf8' : style.arrow);
+    graphCtx.fillStyle = isPathEdge ? GRAPH_THEME.pathHighlight : (isHighlighted ? GRAPH_THEME.edgeHighlightArrow : style.arrow);
     graphCtx.moveTo(arrowX, arrowY);
     graphCtx.lineTo(arrowX - 8 * Math.cos(angle - Math.PI / 6), arrowY - 8 * Math.sin(angle - Math.PI / 6));
     graphCtx.lineTo(arrowX - 8 * Math.cos(angle + Math.PI / 6), arrowY - 8 * Math.sin(angle + Math.PI / 6));
@@ -1794,14 +1871,14 @@ function renderGraph() {
       const textW = graphCtx.measureText(relLabel).width + 8;
       const textH = 14;
 
-      graphCtx.fillStyle = 'rgba(11, 15, 28, 0.92)';
-      graphCtx.strokeStyle = isPathEdge ? '#facc15' : 'rgba(255, 255, 255, 0.2)';
+      graphCtx.fillStyle = GRAPH_THEME.midpointBg;
+      graphCtx.strokeStyle = isPathEdge ? GRAPH_THEME.pathHighlight : GRAPH_THEME.midpointBorder;
       graphCtx.lineWidth = 1;
       roundRect(graphCtx, midX - textW / 2, midY - textH / 2, textW, textH, 4);
       graphCtx.fill();
       graphCtx.stroke();
 
-      graphCtx.fillStyle = isPathEdge ? '#fef08a' : '#e2e8f0';
+      graphCtx.fillStyle = isPathEdge ? GRAPH_THEME.pathText : GRAPH_THEME.midpointText;
       graphCtx.textAlign = 'center';
       graphCtx.textBaseline = 'middle';
       graphCtx.fillText(relLabel, midX, midY);
@@ -1833,9 +1910,9 @@ function renderGraph() {
     if (isFiltered || !inScope) {
       graphCtx.beginPath();
       graphCtx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-      graphCtx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+      graphCtx.fillStyle = GRAPH_THEME.filteredNode;
       graphCtx.fill();
-      graphCtx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      graphCtx.strokeStyle = GRAPH_THEME.filteredNodeBorder;
       graphCtx.lineWidth = 1;
       graphCtx.stroke();
       continue;
@@ -1845,7 +1922,7 @@ function renderGraph() {
     if (isHovered || isSelected || isNeighbor || isPathNode) {
       graphCtx.beginPath();
       graphCtx.arc(node.x, node.y, radius + (isPathNode ? 12 : 8), 0, Math.PI * 2);
-      graphCtx.fillStyle = isPathNode ? 'rgba(250, 204, 21, 0.35)' : colors.glow;
+      graphCtx.fillStyle = isPathNode ? GRAPH_THEME.pathHighlightGlow : colors.glow;
       graphCtx.fill();
     }
 
@@ -1856,7 +1933,7 @@ function renderGraph() {
     graphCtx.fill();
 
     // Node Border
-    graphCtx.strokeStyle = isPathNode ? '#facc15' : (isSelected ? '#ffffff' : (isHovered ? '#ffffff' : colors.stroke));
+    graphCtx.strokeStyle = isPathNode ? GRAPH_THEME.pathHighlight : (isSelected ? GRAPH_THEME.selectedBorder : (isHovered ? GRAPH_THEME.hoveredBorder : colors.stroke));
     graphCtx.lineWidth = isSelected ? 3.5 : (isHovered || isPathNode ? 3 : 2);
     graphCtx.stroke();
 
@@ -1864,7 +1941,7 @@ function renderGraph() {
     if (isSelected) {
       graphCtx.beginPath();
       graphCtx.arc(node.x, node.y, radius + 5, 0, Math.PI * 2);
-      graphCtx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+      graphCtx.strokeStyle = GRAPH_THEME.selectionRing;
       graphCtx.lineWidth = 1.5;
       graphCtx.stroke();
     }
@@ -1884,17 +1961,17 @@ function renderGraph() {
       const textH = 15;
       const pillY = node.y + radius + 4;
 
-      graphCtx.fillStyle = isSelected ? 'rgba(15, 23, 42, 0.95)' : 'rgba(4, 7, 17, 0.78)';
+      graphCtx.fillStyle = isSelected ? GRAPH_THEME.labelPillBgSelected : GRAPH_THEME.labelPillBg;
       roundRect(graphCtx, node.x - textW / 2, pillY, textW, textH, 4);
       graphCtx.fill();
 
       if (isSelected || isPathNode) {
-        graphCtx.strokeStyle = isPathNode ? 'rgba(250, 204, 21, 0.7)' : 'rgba(255, 255, 255, 0.4)';
+        graphCtx.strokeStyle = isPathNode ? GRAPH_THEME.pathHighlight : GRAPH_THEME.labelPillBorder;
         graphCtx.lineWidth = 1;
         graphCtx.stroke();
       }
 
-      graphCtx.fillStyle = isSelected ? '#ffffff' : (isPathNode ? '#fde047' : colors.text);
+      graphCtx.fillStyle = isSelected ? GRAPH_THEME.labelPillTextSelected : (isPathNode ? GRAPH_THEME.pathText : colors.text);
       graphCtx.fillText(label, node.x, pillY + 2);
     }
   }

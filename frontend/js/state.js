@@ -89,7 +89,7 @@ function formatInlineMarkdown(text) {
   let safe = escapeHtml(str);
   safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   safe = safe.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
-  safe = safe.replace(/`([^`]+)`/g, '<code style="font-family: var(--font-mono); background: rgba(255,255,255,0.06); padding: 0.15rem 0.4rem; border-radius: 4px; color: #a5b4fc; font-size: 0.9em;">$1</code>');
+  safe = safe.replace(/`([^`]+)`/g, '<code style="font-family: var(--font-mono); background: var(--color-purple-tint); border: 1px solid var(--border-purple); padding: 0.15rem 0.4rem; border-radius: 4px; color: var(--purple-text); font-size: 0.9em;">$1</code>');
   return safe;
 }
 
@@ -267,3 +267,126 @@ function formatStatus(status) {
   if (!status) return 'In Progress';
   return status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
+
+/* ==========================================================================
+   THEME MANAGEMENT (Dark / Light / System)
+   ========================================================================== */
+
+const THEME_STORAGE_KEY = 'ai_notemaker_theme';
+
+function getSystemTheme() {
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+    return 'light';
+  }
+  return 'dark';
+}
+
+function getTheme() {
+  return document.documentElement.getAttribute('data-theme') ||
+    localStorage.getItem(THEME_STORAGE_KEY) ||
+    getSystemTheme();
+}
+
+function updateThemeUI(activeTheme) {
+  const toggleBtn = document.getElementById('btn-theme-toggle');
+  const toggleIcon = document.getElementById('theme-toggle-icon');
+  if (toggleBtn && toggleIcon) {
+    if (activeTheme === 'light') {
+      toggleIcon.textContent = '🌙';
+      toggleBtn.setAttribute('aria-label', 'Switch to dark theme');
+      toggleBtn.setAttribute('title', 'Switch to dark theme');
+    } else {
+      toggleIcon.textContent = '☀️';
+      toggleBtn.setAttribute('aria-label', 'Switch to light theme');
+      toggleBtn.setAttribute('title', 'Switch to light theme');
+    }
+  }
+
+  const profileThemeSelect = document.getElementById('profile-theme-select');
+  if (profileThemeSelect) {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    profileThemeSelect.value = (saved === 'light' || saved === 'dark') ? saved : 'system';
+  }
+}
+
+function setTheme(theme) {
+  let resolvedTheme = 'dark';
+  if (theme === 'system') {
+    try {
+      localStorage.removeItem(THEME_STORAGE_KEY);
+    } catch (e) {}
+    resolvedTheme = getSystemTheme();
+  } else {
+    resolvedTheme = (theme === 'light') ? 'light' : 'dark';
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, resolvedTheme);
+    } catch (e) {}
+  }
+
+  document.documentElement.setAttribute('data-theme', resolvedTheme);
+  updateThemeUI(resolvedTheme);
+
+  document.dispatchEvent(new CustomEvent('themechange', {
+    detail: { theme: resolvedTheme, isSystem: (theme === 'system') }
+  }));
+}
+
+function toggleTheme() {
+  const current = getTheme();
+  const next = (current === 'light') ? 'dark' : 'light';
+  setTheme(next);
+}
+
+function handleThemeSelectChange(val) {
+  setTheme(val);
+}
+
+function initTheme() {
+  let saved = null;
+  try {
+    saved = localStorage.getItem(THEME_STORAGE_KEY);
+  } catch (e) {}
+
+  let effectiveTheme = 'dark';
+  if (saved === 'light' || saved === 'dark') {
+    effectiveTheme = saved;
+  } else {
+    effectiveTheme = getSystemTheme();
+  }
+
+  document.documentElement.setAttribute('data-theme', effectiveTheme);
+  updateThemeUI(effectiveTheme);
+
+  if (window.matchMedia) {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemChange = (e) => {
+      let currentSaved = null;
+      try {
+        currentSaved = localStorage.getItem(THEME_STORAGE_KEY);
+      } catch (err) {}
+
+      if (!currentSaved) {
+        const newTheme = e.matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        updateThemeUI(newTheme);
+        document.dispatchEvent(new CustomEvent('themechange', {
+          detail: { theme: newTheme, isSystem: true }
+        }));
+      }
+    };
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleSystemChange);
+    } else if (mediaQuery.addListener) {
+      mediaQuery.addListener(handleSystemChange);
+    }
+  }
+}
+
+// Ensure theme is initialized immediately on load
+try {
+  initTheme();
+} catch (e) {
+  console.debug('Theme initialization deferred:', e);
+}
+

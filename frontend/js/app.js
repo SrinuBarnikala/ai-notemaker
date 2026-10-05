@@ -17,16 +17,16 @@ async function checkLlmStatus() {
     if (data.llm_provider === 'ollama') {
       if (data.model_available === false) {
         badge.style.display = 'inline-flex';
-        badge.style.background = 'rgba(245, 158, 11, 0.15)';
-        badge.style.borderColor = 'rgba(245, 158, 11, 0.4)';
-        badge.style.color = '#fbbf24';
+        badge.style.background = 'var(--color-amber-tint)';
+        badge.style.borderColor = 'var(--border-amber)';
+        badge.style.color = 'var(--warning-text)';
         badge.textContent = `⚠️ Model '${data.llm_model}' missing`;
         badge.title = data.model_warning || `Model '${data.llm_model}' not pulled. Notes will use deterministic offline fallbacks.`;
       } else if (data.llm_healthy) {
         badge.style.display = 'inline-flex';
-        badge.style.background = 'rgba(16, 185, 129, 0.12)';
-        badge.style.borderColor = 'rgba(16, 185, 129, 0.35)';
-        badge.style.color = '#34d399';
+        badge.style.background = 'var(--accent-tint)';
+        badge.style.borderColor = 'var(--border-accent)';
+        badge.style.color = 'var(--success-text)';
         badge.textContent = `🟢 Ollama: ${data.llm_model}`;
         badge.title = `Connected to local Ollama with model '${data.llm_model}'.`;
       }
@@ -37,6 +37,7 @@ async function checkLlmStatus() {
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
+  if (typeof initTheme === 'function') initTheme();
   // Bootstrap authentication session before initializing application views
   if (typeof bootstrapAuthSession === 'function') {
     await bootstrapAuthSession();

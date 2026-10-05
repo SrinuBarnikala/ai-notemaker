@@ -111,7 +111,7 @@
           }
         }
       } catch (err) {
-        statusMsg.style.color = '#f87171';
+        statusMsg.style.color = 'var(--danger-text)';
         statusMsg.textContent = 'Evolution Error: ' + err.message;
       } finally {
         btn.disabled = false;
@@ -136,13 +136,13 @@
         body.innerHTML = `
           <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
             <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌱</div>
-            <div style="font-weight: 600; color: #cbd5e1;">Version 1 (Initial Generation)</div>
+            <div style="font-weight: 600; color: var(--text-secondary);">Version 1 (Initial Generation)</div>
             <p style="font-size: 0.85rem; margin-top: 0.4rem;">No evolutions yet. Use the "🌱 Evolve section" buttons to expand and refine your living note.</p>
           </div>
         `;
       } else {
         body.innerHTML = `
-          <div style="margin-bottom: 1rem; font-size: 0.85rem; color: #a5b4fc;">
+          <div style="margin-bottom: 1rem; font-size: 0.85rem; color: var(--purple-text);">
             Showing <strong>${revisions.length}</strong> evolution checkpoint(s):
           </div>
           ${revisions.map(r => `

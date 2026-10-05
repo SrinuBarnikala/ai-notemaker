@@ -135,7 +135,7 @@ function renderCopilotWelcome() {
       <div class="copilot-bubble">
         <div class="copilot-msg-header">Agent 9 &bull; Socratic Copilot</div>
         <p>I am your contextual learning copilot for <strong>${escapeHtml(topicName)}</strong>. I adapt to your mental model, address detected knowledge gaps, and can explain any paragraph, diagram, or code block.</p>
-        <p style="margin-top: 0.5rem; font-size: 0.85rem; color: #a5b4fc;">Ask anything or pick a quick starter below:</p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--purple-text);">Ask anything or pick a quick starter below:</p>
         <div class="copilot-followup-chips" style="margin-top: 0.65rem;">
           <button type="button" class="copilot-chip" onclick="handleQuickPrompt('Why is this architecture designed this way instead of common alternatives?')">Why this architecture?</button>
           <button type="button" class="copilot-chip" onclick="handleQuickPrompt('What are the edge-case failure modes and recovery sequence?')">Edge-case failure modes?</button>
@@ -196,7 +196,7 @@ async function sendCopilotMessage() {
         <span class="typing-dot"></span>
         <span class="typing-dot"></span>
         <span class="typing-dot"></span>
-        <span style="margin-left: 0.5rem; font-size: 0.8rem; color: #a5b4fc;">Agent 9 analyzing knowledge profile &amp; note context...</span>
+        <span style="margin-left: 0.5rem; font-size: 0.8rem; color: var(--purple-text);">Agent 9 analyzing knowledge profile &amp; note context...</span>
       </div>
     </div>
   `;
@@ -236,9 +236,9 @@ async function sendCopilotMessage() {
     const errorHtml = `
       <div class="copilot-msg assistant">
         <div class="copilot-avatar">⚠️</div>
-        <div class="copilot-bubble" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.1);">
-          <div style="font-weight: 700; color: #f87171; margin-bottom: 0.3rem;">Copilot Inquire Error</div>
-          <div style="font-size: 0.85rem; color: #cbd5e1;">${escapeHtml(err.message)}</div>
+        <div class="copilot-bubble" style="border-color: var(--border-danger); background: var(--color-danger-tint);">
+          <div style="font-weight: 700; color: var(--danger-text); margin-bottom: 0.3rem;">Copilot Inquire Error</div>
+          <div style="font-size: 0.85rem; color: var(--text-secondary);">${escapeHtml(err.message)}</div>
         </div>
       </div>
     `;
@@ -258,8 +258,8 @@ function formatMarkdownResponse(raw) {
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   
   // Headers (### and ##)
-  html = html.replace(/^### (.*$)/gim, '<h4 style="font-size: 0.95rem; font-weight: 700; color: #c7d2fe; margin: 0.6rem 0 0.25rem;">$1</h4>');
-  html = html.replace(/^## (.*$)/gim, '<h3 style="font-size: 1.05rem; font-weight: 800; color: #e0e7ff; margin: 0.75rem 0 0.3rem;">$1</h3>');
+  html = html.replace(/^### (.*$)/gim, '<h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin: 0.6rem 0 0.25rem;">$1</h4>');
+  html = html.replace(/^## (.*$)/gim, '<h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin: 0.75rem 0 0.3rem;">$1</h3>');
 
   // Code blocks: ```lang ... ```
   html = html.replace(/```([a-zA-Z0-9_\-\+]*)\n([\s\S]*?)```/g, function(match, lang, code) {

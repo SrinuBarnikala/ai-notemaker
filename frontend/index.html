@@ -15,6 +15,21 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
 
+    <!-- Immediate Theme Preloader (Prevents flash of unstyled/wrong theme) -->
+  <script>
+    (function() {
+      try {
+        var key = 'ai_notemaker_theme';
+        var saved = localStorage.getItem(key);
+        var theme = saved;
+        if (!theme || (theme !== 'light' && theme !== 'dark')) {
+          theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+
   <!-- Modular Stylesheets (with cache-busting query params) -->
   <link rel="stylesheet" href="/static/css/main.css?v=20261003.auth2">
   <link rel="stylesheet" href="/static/css/viewer.css?v=20261003.auth2">
@@ -36,7 +51,8 @@
       <div class="brand-icon">N</div>
       <span class="brand-title">Personalized Technical Note Maker</span>
     </div>
-    <div class="header-badges" id="header-authenticated-actions" style="display: none;">
+    <div class="header-right-group" style="display: flex; align-items: center; gap: 0.65rem;">
+      <div class="header-badges" id="header-authenticated-actions" style="display: none;">
       <button type="button" class="header-action-btn" onclick="openSearchModal()" title="Search all notes, concepts, code & assessments (Ctrl+K)">
         <span>🔍 Search</span>
         <span class="kbd-pill">Ctrl+K</span>
@@ -56,7 +72,11 @@
         </button>
       </div>
     </div>
-  </header>
+    <button type="button" class="header-action-btn theme-toggle-btn" id="btn-theme-toggle" onclick="toggleTheme()" aria-label="Switch to light theme" title="Switch to light theme">
+      <span id="theme-toggle-icon" class="theme-toggle-icon" aria-hidden="true">☀️</span>
+    </button>
+  </div>
+</header>
 
   <main id="main-content">
     <!-- Phase 16: Authentication & Login View -->
@@ -345,7 +365,7 @@
 
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
         <span style="font-size: 0.875rem; color: var(--text-muted); font-family: var(--font-mono);" id="disc-step-label">Question 1 of 4</span>
-        <span style="font-size: 0.85rem; font-weight: 600; color: #a5b4fc;" id="disc-topic-label">--</span>
+        <span style="font-size: 0.85rem; font-weight: 600; color: var(--color-blue);" id="disc-topic-label">--</span>
       </div>
 
       <div id="active-question-section">
@@ -387,14 +407,14 @@
       </div>
 
       <div class="profile-summary-box">
-        <div style="font-size: 0.775rem; font-family: var(--font-mono); color: #a5b4fc; text-transform: uppercase; margin-bottom: 0.4rem; letter-spacing: 0.05em;">
+        <div style="font-size: 0.775rem; font-family: var(--font-mono); color: var(--purple-text); text-transform: uppercase; margin-bottom: 0.4rem; letter-spacing: 0.05em;">
           Learner Mental Model Synthesis
         </div>
         <div class="profile-summary-text" id="prof-summary">Synthesizing knowledge profile...</div>
       </div>
 
       <div id="misconceptions-container" style="display: none; margin-bottom: 1.5rem;">
-        <div style="font-size: 0.85rem; font-weight: 700; color: #f87171; margin-bottom: 0.5rem;">
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--danger-text); margin-bottom: 0.5rem;">
           ⚠️ Identified Misconceptions to Address:
         </div>
         <div id="misconceptions-list"></div>
@@ -403,7 +423,7 @@
       <div class="matrix-grid">
         <div class="matrix-col">
           <div class="matrix-col-header">
-            <span class="matrix-col-title" style="color: #34d399;">&check; Known Concepts</span>
+            <span class="matrix-col-title" style="color: var(--success-text);">&check; Known Concepts</span>
             <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);" id="count-known">0</span>
           </div>
           <div id="col-known"></div>
@@ -411,7 +431,7 @@
 
         <div class="matrix-col">
           <div class="matrix-col-header">
-            <span class="matrix-col-title" style="color: #fbbf24;">&bull; Partially Understood</span>
+            <span class="matrix-col-title" style="color: var(--warning-text);">&bull; Partially Understood</span>
             <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);" id="count-partial">0</span>
           </div>
           <div id="col-partial"></div>
@@ -419,7 +439,7 @@
 
         <div class="matrix-col">
           <div class="matrix-col-header">
-            <span class="matrix-col-title" style="color: #c084fc;">&quest; Unknowns & Gaps</span>
+            <span class="matrix-col-title" style="color: var(--purple-text);">&quest; Unknowns & Gaps</span>
             <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);" id="count-gaps">0</span>
           </div>
           <div id="col-gaps"></div>
@@ -661,7 +681,7 @@
             <button type="button" class="chip" onclick="setEvolvePrompt('Explain performance trade-offs and memory implications in high-throughput systems.')">High-Load Tradeoffs</button>
           </div>
 
-          <div id="evolve-status-msg" style="display: none; margin-top: 0.85rem; font-size: 0.85rem; color: #38bdf8;"></div>
+          <div id="evolve-status-msg" style="display: none; margin-top: 0.85rem; font-size: 0.85rem; color: var(--color-blue);"></div>
         </div>
 
         <div class="modal-footer">
@@ -722,7 +742,7 @@
         <div class="modal-body" id="assessment-modal-body">
           <div id="assessment-loading" style="display: none; text-align: center; padding: 3rem;">
             <div style="font-size: 2rem; margin-bottom: 0.75rem;">🤖</div>
-            <div style="font-weight: 700; color: #a5b4fc;">Agent 6 Synthesizing Active Recall Materials...</div>
+            <div style="font-weight: 700; color: var(--purple-text);">Agent 6 Synthesizing Active Recall Materials...</div>
             <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.3rem;">Targeting your living note sections, architecture, and knowledge gaps.</p>
           </div>
 
@@ -730,7 +750,7 @@
           <div id="flashcards-panel">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
               <span style="font-size: 0.85rem; color: var(--text-muted); font-family: var(--font-mono); font-weight: 600;" id="fc-counter">Card 1 of 3</span>
-              <span style="font-size: 0.775rem; color: #a5b4fc; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.35); padding: 0.25rem 0.65rem; border-radius: 9999px;">💡 Click card or press Space to flip</span>
+              <span style="font-size: 0.775rem; color: var(--purple-text); background: var(--color-purple-tint); border: 1px solid var(--border-purple); padding: 0.25rem 0.65rem; border-radius: 9999px;">💡 Click card or press Space to flip</span>
             </div>
 
             <div class="flashcard-stage" onclick="flipFlashcard()">
@@ -748,8 +768,8 @@
                 </div>
                 <div class="card-side back">
                   <div class="card-header-row">
-                    <span class="card-concept-badge" style="color: #34d399; background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3);">Verified Answer</span>
-                    <span style="font-size: 0.75rem; color: #34d399; font-family: var(--font-mono); font-weight: 700;">&check; Technical Invariant</span>
+                    <span class="card-concept-badge" style="color: var(--success-text); background: var(--accent-tint); border-color: var(--border-accent);">Verified Answer</span>
+                    <span style="font-size: 0.75rem; color: var(--success-text); font-family: var(--font-mono); font-weight: 700;">&check; Technical Invariant</span>
                   </div>
                   <div class="card-body-text" id="fc-back-text">Detailed Explanation</div>
                   <div class="card-footer-row">
@@ -764,7 +784,7 @@
               <button type="button" class="tool-btn" id="btn-prev-card" onclick="navigateFlashcard(-1)" style="padding: 0.65rem 1.25rem;">
                 <span>&larr; Previous</span>
               </button>
-              <button type="button" class="tool-btn" onclick="flipFlashcard()" style="background: rgba(99, 102, 241, 0.25); border-color: var(--accent); color: #ffffff; font-weight: 700; padding: 0.65rem 1.4rem; box-shadow: 0 0 14px rgba(99, 102, 241, 0.3);">
+              <button type="button" class="tool-btn" onclick="flipFlashcard()" style="background: var(--accent-primary); border-color: var(--accent-primary); color: var(--accent-btn-text); font-weight: 700; padding: 0.65rem 1.4rem; box-shadow: var(--shadow-sm);">
                 <span>🔄 Flip Card (Space)</span>
               </button>
               <button type="button" class="tool-btn" id="btn-next-card" onclick="navigateFlashcard(1)" style="padding: 0.65rem 1.25rem;">
@@ -790,8 +810,8 @@
               </div>
             </div>
 
-            <div id="quiz-progress-bar-wrap" style="margin-bottom: 1rem; width: 100%; height: 5px; background: rgba(255,255,255,0.06); border-radius: 9999px; overflow: hidden;">
-              <div id="quiz-progress-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #6366f1, #10b981); transition: width 0.3s ease;"></div>
+            <div id="quiz-progress-bar-wrap" style="margin-bottom: 1rem; width: 100%; height: 5px; background: var(--quiz-progress-bg); border-radius: 9999px; overflow: hidden;">
+              <div id="quiz-progress-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--color-purple), var(--accent-primary)); transition: width 0.3s ease;"></div>
             </div>
 
             <div id="quiz-questions-list"></div>
@@ -814,7 +834,7 @@
                 <span id="btn-quiz-text">Submit Quiz &amp; Update Mastery Profile</span>
                 <span id="btn-quiz-spinner" style="display: none;">Evaluating Answers &amp; Promoting Concepts...</span>
               </button>
-              <button type="button" class="tool-btn" id="btn-retake-quiz" onclick="retakeQuiz()" style="display: none; padding: 0.75rem 1.25rem; background: rgba(99, 102, 241, 0.2); border-color: var(--accent); color: #ffffff;">
+              <button type="button" class="tool-btn" id="btn-retake-quiz" onclick="retakeQuiz()" style="display: none; padding: 0.75rem 1.25rem; background: var(--accent-primary); border-color: var(--accent-primary); color: var(--accent-btn-text);">
                 <span>🔄 Retake Quiz</span>
               </button>
             </div>
@@ -851,7 +871,7 @@
             <button type="button" class="modal-close" onclick="closeDiagramModal()" aria-label="Close dialog" title="Close (Esc)">&times;</button>
           </div>
         </div>
-        <div class="modal-body" style="flex: 1; overflow: auto; display: flex; align-items: center; justify-content: center; background: #040711; padding: 2rem; border-radius: 8px; position: relative;" id="diag-modal-viewport">
+        <div class="modal-body" style="flex: 1; overflow: auto; display: flex; align-items: center; justify-content: center; background: var(--bg-diagram-viewport); padding: 2rem; border-radius: 8px; position: relative;" id="diag-modal-viewport">
           <div id="diag-modal-svg-canvas" style="transform-origin: center center; transition: transform 0.15s ease-out; width: 100%; display: flex; justify-content: center;">
             <!-- Rendered SVG injected here -->
           </div>
@@ -1004,7 +1024,7 @@
 
           <div style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.6rem;">
             <input type="checkbox" id="code-include-tests" checked style="accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer;">
-            <label for="code-include-tests" style="font-size: 0.825rem; color: #cbd5e1; cursor: pointer;">
+            <label for="code-include-tests" style="font-size: 0.825rem; color: var(--text-secondary); cursor: pointer;">
               Include executable test runner &amp; sample input assertions in <code>if __name__ == '__main__':</code>
             </label>
           </div>
@@ -1049,7 +1069,7 @@
 
       <div class="copilot-drawer-footer">
         <div id="copilot-selected-quote" style="display: none;">
-          <span style="font-size: 0.72rem; color: #a5b4fc; margin-right: 0.35rem; font-weight: 700;">CONTEXT:</span>
+          <span style="font-size: 0.72rem; color: var(--purple-text); margin-right: 0.35rem; font-weight: 700;">CONTEXT:</span>
           <span id="copilot-quote-text" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
           <button type="button" class="quote-dismiss-btn" onclick="clearCopilotSelectedQuote()" title="Clear excerpt context">✕</button>
         </div>
@@ -1236,7 +1256,7 @@
               <!-- F. Embedded GRAPH ASSISTANT Section -->
               <div class="sidebar-section graph-assistant-section" id="graph-assistant-section">
                 <div class="sidebar-section-header">
-                  <div class="sidebar-section-title" style="color: #c084fc;">GRAPH ASSISTANT</div>
+                  <div class="sidebar-section-title" style="color: var(--purple-text);">GRAPH ASSISTANT</div>
                   <span class="assistant-context-pill" id="graph-assistant-context">📍 Note Context</span>
                 </div>
                 <div class="graph-assistant-box">
@@ -1347,7 +1367,7 @@
         <div class="modal-header">
           <div>
             <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-              <span class="vcard-num-badge" style="background: rgba(245, 158, 11, 0.2); color: #fde68a; border-color: #f59e0b;">🏷️ PHASE 13</span>
+              <span class="vcard-num-badge" style="background: var(--color-amber-tint); color: var(--warning-text); border-color: var(--border-amber);">🏷️ PHASE 13</span>
               <h3 class="modal-title" style="margin: 0;">Living Note Version History &amp; What Changed</h3>
             </div>
             <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">
@@ -1465,7 +1485,7 @@
         <div class="modal-header">
           <div>
             <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-              <span class="vcard-num-badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border-color: #38bdf8;">🧠 PHASE 6 TO 15: SEARCH &amp; KNOWLEDGE MEMORY</span>
+              <span class="vcard-num-badge" style="background: var(--color-blue-tint); color: var(--color-blue); border-color: var(--border-blue);">🧠 PHASE 6 TO 15: SEARCH &amp; KNOWLEDGE MEMORY</span>
               <h3 class="modal-title" style="margin: 0;">Knowledge Memory &amp; Learning History</h3>
             </div>
             <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">
@@ -1542,7 +1562,7 @@
             <span style="font-size: 1.4rem;">🧠</span>
             <div>
               <h3 class="modal-title" id="cprov-title" style="margin: 0;">Concept Provenance</h3>
-              <div style="font-size: 0.75rem; color: #a5b4fc; font-family: var(--font-mono);">Knowledge Evolution Tracker</div>
+              <div style="font-size: 0.75rem; color: var(--purple-text); font-family: var(--font-mono);">Knowledge Evolution Tracker</div>
             </div>
           </div>
           <button type="button" class="modal-close" onclick="closeConceptProvenanceModal()" aria-label="Close modal">&times;</button>
@@ -1555,7 +1575,7 @@
           </div>
 
           <!-- Chronological Journey Evolution Timeline -->
-          <div style="font-size: 0.8rem; font-weight: 700; color: #e2e8f0; text-transform: uppercase; letter-spacing: 0.05em; margin: 1.25rem 0 0.6rem;">
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; margin: 1.25rem 0 0.6rem;">
             Learning Journey Milestones
           </div>
           <div class="cprov-timeline-feed" id="cprov-timeline-feed">
@@ -1563,7 +1583,7 @@
           </div>
 
           <!-- Related Peer Concepts -->
-          <div style="font-size: 0.8rem; font-weight: 700; color: #e2e8f0; text-transform: uppercase; letter-spacing: 0.05em; margin: 1.25rem 0 0.6rem;">
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; margin: 1.25rem 0 0.6rem;">
             Related Technical Concepts
           </div>
           <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;" id="cprov-related-chips">
@@ -1585,7 +1605,7 @@
             <span style="font-size: 1.4rem;">👤</span>
             <div>
               <h3 class="modal-title" style="margin: 0;">Learner Profile &amp; Settings</h3>
-              <div style="font-size: 0.75rem; color: #a5b4fc; font-family: var(--font-mono);">Identity, Pedagogical Defaults &amp; Security</div>
+              <div style="font-size: 0.75rem; color: var(--purple-text); font-family: var(--font-mono);">Identity, Pedagogical Defaults &amp; Security</div>
             </div>
           </div>
           <button type="button" class="modal-close" onclick="closeProfileModal()" aria-label="Close profile modal">&times;</button>
@@ -1654,7 +1674,7 @@
                   type="text"
                   id="profile-email-readonly"
                   class="intake-input"
-                  style="background: rgba(255, 255, 255, 0.03); color: var(--text-muted); cursor: not-allowed;"
+                  style="background: var(--bg-surface-raised); color: var(--text-muted); cursor: not-allowed;"
                   readonly
                 />
               </div>
@@ -1667,7 +1687,7 @@
                   type="text"
                   id="profile-created-readonly"
                   class="intake-input"
-                  style="background: rgba(255, 255, 255, 0.03); color: var(--text-muted); cursor: not-allowed;"
+                  style="background: var(--bg-surface-raised); color: var(--text-muted); cursor: not-allowed;"
                   readonly
                 />
               </div>
@@ -1743,6 +1763,18 @@
               </div>
             </div>
 
+            <div class="intake-group" style="margin-bottom: 1.1rem;">
+              <label class="intake-label" for="profile-theme-select">
+                <span>Theme Appearance</span>
+                <span class="login-label-hint">System preference or lock to Dark / Light</span>
+              </label>
+              <select id="profile-theme-select" class="profile-select" onchange="handleThemeSelectChange(this.value)">
+                <option value="system">System (Follow OS Preference)</option>
+                <option value="dark">Dark Theme (Default Emerald &amp; Black)</option>
+                <option value="light">Light Theme (Clean Crisp Slate)</option>
+              </select>
+            </div>
+
             <div class="intake-group" style="margin-bottom: 1rem;">
               <label class="intake-label" for="profile-target-goals">
                 <span>Learning Goals &amp; Context</span>
@@ -1758,7 +1790,7 @@
             </div>
 
             <!-- Live Knowledge Summary -->
-            <div style="font-size: 0.78rem; font-weight: 700; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1.25rem;">
+            <div style="font-size: 0.78rem; font-weight: 700; color: var(--purple-text); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1.25rem;">
               Live Knowledge Memory Summary
             </div>
             <div class="profile-stats-grid">
@@ -1771,11 +1803,11 @@
                 <div class="profile-stat-lbl">Concepts</div>
               </div>
               <div class="profile-stat-card">
-                <div class="profile-stat-val" style="color: #34d399;" id="pstat-mastered">0</div>
+                <div class="profile-stat-val" style="color: var(--success-text);" id="pstat-mastered">0</div>
                 <div class="profile-stat-lbl">Mastered</div>
               </div>
               <div class="profile-stat-card">
-                <div class="profile-stat-val" style="color: #c084fc;" id="pstat-gaps">0</div>
+                <div class="profile-stat-val" style="color: var(--purple-text);" id="pstat-gaps">0</div>
                 <div class="profile-stat-lbl">Active Gaps</div>
               </div>
             </div>

@@ -87,7 +87,7 @@
   justify-content: space-between;
   gap: 1rem;
   background: var(--color-amber-tint);
-  border: 1px solid rgba(245, 185, 66, 0.4);
+  border: 1px solid var(--border-amber);
   border-radius: var(--radius-md);
   padding: 0.75rem 1.25rem;
   margin-bottom: 1.25rem;
@@ -249,7 +249,7 @@
 
 .font-step-btn.active {
   background: var(--accent-tint);
-  border: 1px solid rgba(53, 208, 160, 0.35);
+  border: 1px solid var(--border-accent);
   color: var(--accent-primary);
 }
 
@@ -354,13 +354,13 @@
 
 .btn-assessment {
   background: var(--color-purple-tint);
-  border: 1px solid rgba(168, 117, 255, 0.35);
+  border: 1px solid var(--border-purple);
   color: var(--color-purple);
 }
 
 .btn-visuals {
   background: var(--color-blue-tint);
-  border: 1px solid rgba(59, 156, 255, 0.35);
+  border: 1px solid var(--border-blue);
   color: var(--color-blue);
 }
 
@@ -415,19 +415,19 @@
 
 .btn-versions {
   background: var(--color-amber-tint);
-  border-color: rgba(245, 185, 66, 0.3);
+  border-color: var(--border-amber);
   color: var(--color-amber);
 }
 
 .btn-graph {
   background: var(--color-purple-tint);
-  border-color: rgba(168, 117, 255, 0.3);
+  border-color: var(--border-purple);
   color: var(--color-purple);
 }
 
 .btn-export-pdf, .btn-export-md {
   background: var(--color-blue-tint);
-  border-color: rgba(59, 156, 255, 0.3);
+  border-color: var(--border-blue);
   color: var(--color-blue);
 }
 
@@ -838,7 +838,7 @@ body.focus-mode main {
   padding: 0.4rem 0.85rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-popover);
 }
 
 body.focus-mode .focus-exit-btn {
@@ -908,7 +908,7 @@ body.focus-mode .focus-exit-btn {
 
 .evolve-chip-copilot {
   color: var(--accent-primary);
-  border-color: rgba(53, 208, 160, 0.35);
+  border-color: var(--border-accent);
   background: var(--accent-tint);
 }
 
@@ -999,7 +999,7 @@ body.focus-mode .focus-exit-btn {
 .evolve-card-grid .evolve-action-btn.btn-submit {
   background: var(--accent-primary) !important;
   border-color: var(--accent-primary) !important;
-  color: #080d12 !important;
+  color: var(--accent-btn-text) !important;
 }
 
 .evolve-card-grid .evolve-action-btn.btn-submit:hover {
@@ -1072,13 +1072,14 @@ body.focus-mode .focus-exit-btn {
 }
 
 @media print {
-  body { background: #fff; color: #000; }
+  body { background: #ffffff !important; color: #000000 !important; }
   header, .hero, #intake-card, #discovery-panel, #profile-panel, #architecture-panel, #history-card, .note-reader-controls, .note-toc-sidebar, footer {
     display: none !important;
   }
-  .note-viewer-layout { grid-template-columns: 1fr; }
-  .card { border: none; box-shadow: none; padding: 0; }
-  .block-code { border: 1px solid #ccc; background: #f8f9fa; }
-  .code-pre { color: #000; }
+  .note-viewer-layout { grid-template-columns: 1fr !important; }
+  .card { border: none !important; box-shadow: none !important; padding: 0 !important; background: transparent !important; color: #000000 !important; }
+  .note-content, .note-content * { color: #000000 !important; }
+  .block-code { border: 1px solid #cccccc !important; background: #f8f9fa !important; }
+  .code-pre { color: #000000 !important; }
 }
 

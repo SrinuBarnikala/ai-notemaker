@@ -56,13 +56,13 @@
 
 .tag-python, .tag-py {
   background: var(--color-blue-tint);
-  border: 1px solid rgba(59, 156, 255, 0.3);
+  border: 1px solid var(--border-blue);
   color: var(--color-blue);
 }
 
 .tag-sql {
   background: var(--color-amber-tint);
-  border: 1px solid rgba(245, 185, 66, 0.3);
+  border: 1px solid var(--border-amber);
   color: var(--color-amber);
 }
 
@@ -74,19 +74,19 @@
 
 .tag-rust, .tag-rs {
   background: var(--color-danger-tint);
-  border: 1px solid rgba(248, 113, 113, 0.3);
+  border: 1px solid var(--border-danger);
   color: var(--color-danger);
 }
 
 .tag-go, .tag-golang {
-  background: rgba(59, 156, 255, 0.12);
-  border: 1px solid rgba(59, 156, 255, 0.3);
-  color: #60a5fa;
+  background: var(--color-blue-tint);
+  border: 1px solid var(--border-blue);
+  color: var(--blue-text);
 }
 
 .tag-typescript, .tag-ts, .tag-javascript, .tag-js {
   background: var(--color-purple-tint);
-  border: 1px solid rgba(168, 117, 255, 0.3);
+  border: 1px solid var(--border-purple);
   color: var(--color-purple);
 }
 
@@ -118,7 +118,7 @@
 .code-btn-run {
   background: var(--accent-primary);
   border: 1px solid var(--accent-primary);
-  color: #060a0e;
+  color: var(--accent-btn-text);
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);
   font-weight: 700;
@@ -129,13 +129,13 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-sm);
   transition: all var(--transition-fast);
 }
 
 .code-btn-run:hover:not(:disabled) {
-  background: #42e8b4;
-  border-color: #42e8b4;
+  background: var(--accent-bright);
+  border-color: var(--accent-bright);
   transform: translateY(-1px);
 }
 
@@ -225,7 +225,7 @@
   border: 1px solid var(--border-default);
   border-radius: var(--radius-input);
   overflow: hidden;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--shadow-inset);
 }
 
 .terminal-header {
@@ -351,7 +351,7 @@
   padding: 0.2rem 0.5rem;
   border-radius: var(--radius-code);
   background: var(--color-blue-tint);
-  border: 1px solid rgba(59, 156, 255, 0.3);
+  border: 1px solid var(--border-blue);
   color: var(--color-blue);
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -569,11 +569,11 @@
 }
 
 .flashcard-stage:hover .flashcard-card:not(.flipped) {
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-modal);
 }
 
 .flashcard-stage:hover .flashcard-card.flipped {
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-modal);
 }
 
 .card-header-row {
@@ -588,7 +588,7 @@
   font-weight: 600;
   color: var(--color-blue);
   background: var(--color-blue-tint);
-  border: 1px solid rgba(59, 156, 255, 0.3);
+  border: 1px solid var(--border-blue);
   padding: 0.2rem 0.55rem;
   border-radius: var(--radius-code);
 }
@@ -611,13 +611,13 @@
 .diff-medium {
   background: var(--color-amber-tint);
   color: var(--color-amber);
-  border: 1px solid rgba(245, 185, 66, 0.3);
+  border: 1px solid var(--border-amber);
 }
 
 .diff-hard {
   background: var(--color-danger-tint);
   color: var(--color-danger);
-  border: 1px solid rgba(248, 113, 113, 0.3);
+  border: 1px solid var(--border-danger);
 }
 
 .card-body-text {
@@ -703,7 +703,7 @@
 .qstep-pill.active {
   background: var(--accent-primary);
   border-color: var(--accent-primary);
-  color: #060a0e;
+  color: var(--accent-btn-text);
   font-weight: 700;
 }
 
@@ -715,7 +715,7 @@
 .qstep-pill.active.answered {
   background: var(--accent-primary);
   border-color: var(--accent-primary);
-  color: #060a0e;
+  color: var(--accent-btn-text);
 }
 
 .qstep-pill.pill-correct {
@@ -727,11 +727,11 @@
 .qstep-pill.pill-correct.active {
   background: var(--accent-primary);
   border-color: var(--accent-primary);
-  color: #060a0e;
+  color: var(--accent-btn-text);
 }
 
 .qstep-pill.pill-incorrect {
-  border-color: rgba(248, 113, 113, 0.4);
+  border-color: var(--border-danger);
   background: var(--color-danger-tint);
   color: var(--color-danger);
 }
@@ -743,7 +743,7 @@
 }
 
 .qstep-pill.pill-unanswered {
-  border-color: rgba(245, 185, 66, 0.4);
+  border-color: var(--border-amber);
   background: var(--color-amber-tint);
   color: var(--color-amber);
 }
@@ -751,7 +751,7 @@
 .qstep-pill.pill-unanswered.active {
   background: var(--color-amber);
   border-color: var(--color-amber);
-  color: #060a0e;
+  color: var(--accent-btn-text);
 }
 
 .qstep-status-icon {
@@ -823,12 +823,12 @@
 }
 
 .quiz-question-card.submitted.result-card-incorrect {
-  border-color: rgba(248, 113, 113, 0.4);
+  border-color: var(--border-danger);
   background: var(--bg-surface);
 }
 
 .quiz-question-card.submitted.result-card-unanswered {
-  border-color: rgba(245, 185, 66, 0.4);
+  border-color: var(--border-amber);
   background: var(--bg-surface);
 }
 
@@ -876,13 +876,13 @@
 
 .quiz-result-badge.badge-incorrect {
   background: var(--color-danger-tint);
-  border: 1px solid rgba(248, 113, 113, 0.4);
+  border: 1px solid var(--border-danger);
   color: var(--color-danger);
 }
 
 .quiz-result-badge.badge-unanswered {
   background: var(--color-amber-tint);
-  border: 1px solid rgba(245, 185, 66, 0.4);
+  border: 1px solid var(--border-amber);
   color: var(--color-amber);
 }
 
@@ -979,12 +979,12 @@
 }
 
 .quiz-opt-btn.selected .opt-radio-dot {
-  background: #060a0e !important;
+  background: var(--bg-surface) !important;
 }
 
 .quiz-opt-btn.selected .opt-letter {
   background: var(--accent-primary) !important;
-  color: #060a0e !important;
+  color: var(--accent-btn-text) !important;
   font-weight: 700;
   border-color: var(--accent-primary) !important;
 }
@@ -1074,12 +1074,12 @@
 }
 
 .quiz-opt-btn.correct .opt-radio-dot {
-  background: #060a0e;
+  background: var(--bg-surface);
 }
 
 .quiz-opt-btn.correct .opt-letter {
   background: var(--accent-primary);
-  color: #060a0e;
+  color: var(--accent-btn-text);
   font-weight: 700;
   border-color: var(--accent-primary);
 }
@@ -1165,7 +1165,7 @@
 .expl-score-tag.tag-score-fail {
   background: var(--color-danger-tint);
   color: var(--color-danger);
-  border: 1px solid rgba(248, 113, 113, 0.4);
+  border: 1px solid var(--border-danger);
 }
 
 .expl-choice-comparison {

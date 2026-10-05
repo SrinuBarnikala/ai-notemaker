@@ -306,7 +306,7 @@
               <h2 class="section-heading">${escapeHtml(s.title)}</h2>
             </div>
             <div class="section-meta-tags">
-              <button type="button" class="tool-btn" onclick="openCopilotDrawer('${s.id}', '${escapeJsString(s.title)}')" title="Ask Agent 9 Socratic Copilot about this section" style="padding: 0.2rem 0.55rem; font-size: 0.75rem; background: rgba(99, 102, 241, 0.18); border-color: var(--accent); color: #c7d2fe;">
+              <button type="button" class="tool-btn" onclick="openCopilotDrawer('${s.id}', '${escapeJsString(s.title)}')" title="Ask Agent 9 Socratic Copilot about this section" style="padding: 0.2rem 0.55rem; font-size: 0.75rem; background: var(--color-purple-tint); border-color: var(--border-purple); color: var(--purple-text);">
                 <span>🤖 Ask AI</span>
               </button>
               <span class="depth-badge depth-${s.depth}">${s.depth}</span>
@@ -338,28 +338,28 @@
             <p class="evolve-card-sub">Technical mastery is an ongoing dialogue. Ask Agent 9 Socratic Copilot for instant clarification, test recall with 3D flashcards, inspect Mermaid diagrams, or execute runnable sandbox code.</p>
           </div>
           <div class="evolve-card-grid">
-            <button type="button" class="tool-btn evolve-action-btn" style="background: rgba(99, 102, 241, 0.25); border-color: var(--accent); color: #ffffff; box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);" onclick="openCopilotDrawer(null, null)">
+            <button type="button" class="tool-btn evolve-action-btn" style="background: var(--color-purple-tint); border-color: var(--border-purple); color: var(--purple-text);" onclick="openCopilotDrawer(null, null)">
               <span>🤖 Consult Copilot</span>
             </button>
-            <button type="button" class="tool-btn evolve-action-btn" style="background: rgba(168, 85, 247, 0.2); border-color: #a855f7; color: #e9d5ff;" onclick="openGraphModal(false)">
+            <button type="button" class="tool-btn evolve-action-btn" style="background: var(--color-purple-tint); border-color: var(--border-purple); color: var(--purple-text);" onclick="openGraphModal(false)">
               <span>🕸️ Knowledge Graph</span>
             </button>
-            <button type="button" class="tool-btn evolve-action-btn" style="background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; color: #fde68a;" onclick="openVersionHistoryModal()">
+            <button type="button" class="tool-btn evolve-action-btn" style="background: var(--color-amber-tint); border-color: var(--border-amber); color: var(--warning-text);" onclick="openVersionHistoryModal()">
               <span>🏷️ Version History &amp; Diff</span>
             </button>
             <button type="button" class="btn-submit evolve-action-btn" onclick="openEvolveModal(null, 'Living Note Exploration', 'add_section')">
               <span>+ Add New Section</span>
             </button>
-            <button type="button" class="tool-btn evolve-action-btn" style="background: rgba(16, 185, 129, 0.18); border-color: var(--success); color: #a7f3d0;" onclick="triggerPlanCode()">
+            <button type="button" class="tool-btn evolve-action-btn" style="background: var(--accent-tint); border-color: var(--border-accent); color: var(--success-text);" onclick="triggerPlanCode()">
               <span>💻 Plan Interactive Code</span>
             </button>
-            <button type="button" class="tool-btn evolve-action-btn" style="background: rgba(99, 102, 241, 0.2); border-color: var(--accent); color: #ffffff;" onclick="openAssessmentModal()">
+            <button type="button" class="tool-btn evolve-action-btn" style="background: var(--color-purple-tint); border-color: var(--border-purple); color: var(--purple-text);" onclick="openAssessmentModal()">
               <span>🧠 Test Mastery &amp; Flashcards</span>
             </button>
-            <button type="button" class="tool-btn evolve-action-btn" style="background: rgba(6, 182, 212, 0.18); border-color: var(--cyan); color: #a5f3fc;" onclick="triggerPlanVisuals()">
+            <button type="button" class="tool-btn evolve-action-btn" style="background: var(--accent-tint); border-color: var(--border-accent); color: var(--success-text);" onclick="triggerPlanVisuals()">
               <span>📊 Plan Visual Architecture</span>
             </button>
-            <button type="button" class="tool-btn evolve-action-btn" style="background: rgba(56, 189, 248, 0.2); border-color: #38bdf8; color: #bae6fd;" onclick="openMemoryModal('history')">
+            <button type="button" class="tool-btn evolve-action-btn" style="background: var(--color-blue-tint); border-color: var(--border-blue); color: var(--blue-text);" onclick="openMemoryModal('history')">
               <span>🧠 Knowledge Memory</span>
             </button>
           </div>
@@ -426,7 +426,7 @@
               { left: '\\(', right: '\\)', display: false }
             ],
             throwOnError: false,
-            errorColor: '#f87171'
+            errorColor: 'var(--color-danger)'
           });
         } catch (err) {
           console.warn('KaTeX auto-render failed, applying fallback:', err);

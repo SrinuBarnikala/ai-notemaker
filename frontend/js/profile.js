@@ -146,6 +146,12 @@ async function openProfileModal(initialTab = 'identity') {
       if (selStyle && learning.learning_style) selStyle.value = learning.learning_style;
       if (txtGoals) txtGoals.value = learning.target_goals || '';
 
+      const selTheme = document.getElementById('profile-theme-select');
+      if (selTheme) {
+        const saved = localStorage.getItem('ai_notemaker_theme');
+        selTheme.value = (saved === 'light' || saved === 'dark') ? saved : 'system';
+      }
+
       const stats = learning.stats || {};
       const sJourneys = document.getElementById('pstat-journeys');
       const sConcepts = document.getElementById('pstat-concepts');

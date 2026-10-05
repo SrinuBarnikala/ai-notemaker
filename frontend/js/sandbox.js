@@ -45,7 +45,7 @@
       }
       if (statusEl) {
         statusEl.textContent = 'Executing...';
-        statusEl.style.color = '#38bdf8';
+        statusEl.style.color = 'var(--color-blue)';
       }
 
       const startTime = performance.now();
@@ -86,7 +86,7 @@ sys.stderr = sys_stderr_backup
         if (executionError) {
           if (statusEl) {
             statusEl.textContent = `Error in ${durationMs}ms`;
-            statusEl.style.color = '#f87171';
+            statusEl.style.color = 'var(--danger-text)';
           }
           if (stdoutEl) {
             stdoutEl.className = 'terminal-body error-output';
@@ -96,7 +96,7 @@ sys.stderr = sys_stderr_backup
         } else {
           if (statusEl) {
             statusEl.textContent = `Success in ${durationMs}ms`;
-            statusEl.style.color = '#34d399';
+            statusEl.style.color = 'var(--success-text)';
           }
           let out = capturedStdout || '';
           if (capturedStderr) out += (out ? '\n' : '') + '[stderr] ' + capturedStderr;
@@ -114,7 +114,7 @@ sys.stderr = sys_stderr_backup
       } catch (loadErr) {
         if (statusEl) {
           statusEl.textContent = 'Failed to load Sandbox';
-          statusEl.style.color = '#f87171';
+          statusEl.style.color = 'var(--danger-text)';
         }
         if (stdoutEl) {
           stdoutEl.className = 'terminal-body error-output';
@@ -247,8 +247,8 @@ sys.stderr = sys_stderr_backup
         closeSectionCodeModal();
       } catch (err) {
         statusEl.style.display = 'block';
-        statusEl.style.background = 'rgba(239, 68, 68, 0.15)';
-        statusEl.style.color = '#fca5a5';
+        statusEl.style.background = 'var(--color-danger-tint)';
+        statusEl.style.color = 'var(--danger-text)';
         statusEl.textContent = `Error: ${err.message}`;
       } finally {
         btn.disabled = false;
