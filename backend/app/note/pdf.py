@@ -13,6 +13,7 @@ Never make PDF the canonical representation."
 import io
 import re
 import html
+from pathlib import Path
 from typing import Optional, List, Dict, Any
 
 from reportlab.pdfgen import canvas
@@ -29,39 +30,91 @@ from reportlab.platypus import (
     KeepTogether,
 )
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
 
 from backend.app.schemas.note import NoteResponse, NoteSectionData, NoteBlock
 
 
 # ==============================================================================
+# FONTS
+# ==============================================================================
+# The PDF uses the same typefaces as the web app: Plus Jakarta Sans for text and
+# JetBrains Mono for code (both SIL OFL, files and licences in ./fonts). If a font
+# file is missing, the built-in Helvetica / Courier faces are used instead.
+FONT_DIR = Path(__file__).parent / "fonts"
+
+SANS, SANS_BOLD, SANS_ITALIC = "Helvetica", "Helvetica-Bold", "Helvetica-Oblique"
+MONO, MONO_BOLD = "Courier", "Courier-Bold"
+
+
+def _register_fonts() -> None:
+    global SANS, SANS_BOLD, SANS_ITALIC, MONO, MONO_BOLD
+    sans_files = {
+        "PlusJakartaSans": "PlusJakartaSans-Regular.ttf",
+        "PlusJakartaSans-Bold": "PlusJakartaSans-Bold.ttf",
+        "PlusJakartaSans-Italic": "PlusJakartaSans-Italic.ttf",
+        "PlusJakartaSans-BoldItalic": "PlusJakartaSans-BoldItalic.ttf",
+    }
+    mono_files = {
+        "JetBrainsMono": "JetBrainsMono-Regular.ttf",
+        "JetBrainsMono-Bold": "JetBrainsMono-Bold.ttf",
+    }
+    try:
+        for name, filename in {**sans_files, **mono_files}.items():
+            pdfmetrics.registerFont(TTFont(name, str(FONT_DIR / filename)))
+        pdfmetrics.registerFontFamily(
+            "PlusJakartaSans",
+            normal="PlusJakartaSans",
+            bold="PlusJakartaSans-Bold",
+            italic="PlusJakartaSans-Italic",
+            boldItalic="PlusJakartaSans-BoldItalic",
+        )
+        pdfmetrics.registerFontFamily(
+            "JetBrainsMono",
+            normal="JetBrainsMono",
+            bold="JetBrainsMono-Bold",
+            italic="JetBrainsMono",
+            boldItalic="JetBrainsMono-Bold",
+        )
+    except Exception:
+        return
+    SANS, SANS_BOLD, SANS_ITALIC = "PlusJakartaSans", "PlusJakartaSans-Bold", "PlusJakartaSans-Italic"
+    MONO, MONO_BOLD = "JetBrainsMono", "JetBrainsMono-Bold"
+
+
+_register_fonts()
+
+
+# ==============================================================================
 # COLOR PALETTE
 # ==============================================================================
-PRIMARY_COLOR = colors.HexColor("#1E1B4B")      # Deep Indigo / Navy 950
-SECONDARY_COLOR = colors.HexColor("#4338CA")    # Indigo 700
-ACCENT_COLOR = colors.HexColor("#4F46E5")       # Indigo 600
-ACCENT_LIGHT = colors.HexColor("#EEF2FF")       # Indigo 50
-TEXT_DARK = colors.HexColor("#0F172A")          # Slate 900
-TEXT_BODY = colors.HexColor("#1E293B")          # Slate 800
-TEXT_MUTED = colors.HexColor("#64748B")         # Slate 500
-BORDER_LIGHT = colors.HexColor("#E2E8F0")       # Slate 200
-BORDER_DARK = colors.HexColor("#334155")        # Slate 700
+PRIMARY_COLOR = colors.HexColor("#2B2217")      # Deep warm brown
+SECONDARY_COLOR = colors.HexColor("#8A5A12")
+ACCENT_COLOR = colors.HexColor("#A8741A")
+ACCENT_LIGHT = colors.HexColor("#F6EFDF")
+TEXT_DARK = colors.HexColor("#1E1C18")
+TEXT_BODY = colors.HexColor("#2D2A25")
+TEXT_MUTED = colors.HexColor("#6B6558")
+BORDER_LIGHT = colors.HexColor("#E4DFD2")
+BORDER_DARK = colors.HexColor("#46423A")
 
 # Callout Colors
-DEF_BORDER = colors.HexColor("#D97706")         # Amber 600
-DEF_BG = colors.HexColor("#FFFBEB")             # Amber 50
-WARN_BORDER = colors.HexColor("#E11D48")        # Rose 600
-WARN_BG = colors.HexColor("#FFF1F2")            # Rose 50
-EX_BORDER = colors.HexColor("#059669")          # Emerald 600
-EX_BG = colors.HexColor("#F0FDF4")              # Emerald 50
-DIAG_BORDER = colors.HexColor("#0284C7")        # Sky 600
-DIAG_BG = colors.HexColor("#F0F9FF")            # Sky 50
+DEF_BORDER = colors.HexColor("#A8741A")
+DEF_BG = colors.HexColor("#FAF3E3")
+WARN_BORDER = colors.HexColor("#A2432C")
+WARN_BG = colors.HexColor("#FBEFEA")
+EX_BORDER = colors.HexColor("#3F6B3A")
+EX_BG = colors.HexColor("#EEF3EA")
+DIAG_BORDER = colors.HexColor("#3B5F7D")
+DIAG_BG = colors.HexColor("#EDF2F6")
 
 # Code Colors
-CODE_BG = colors.HexColor("#0F172A")            # Slate 900
-CODE_HEADER_BG = colors.HexColor("#1E293B")     # Slate 800
-CODE_TEXT = colors.HexColor("#F8FAFC")          # Slate 50
-CODE_BORDER = colors.HexColor("#334155")        # Slate 700
+CODE_BG = colors.HexColor("#1E1C18")
+CODE_HEADER_BG = colors.HexColor("#2D2A25")
+CODE_TEXT = colors.HexColor("#F6F3EC")
+CODE_BORDER = colors.HexColor("#46423A")
 
 
 # ==============================================================================
@@ -97,14 +150,14 @@ class NotePDFCanvas(canvas.Canvas):
 
         # Running Top Header on Page 2+
         if self._pageNumber > 1:
-            self.setFont("Helvetica-Bold", 8)
+            self.setFont(SANS_BOLD, 8)
             self.setFillColor(SECONDARY_COLOR)
             topic_str = self.doc_topic
             if len(topic_str) > 65:
                 topic_str = topic_str[:62] + "..."
             self.drawString(margin, page_h - 32, topic_str.upper())
 
-            self.setFont("Helvetica", 8)
+            self.setFont(SANS, 8)
             self.setFillColor(TEXT_MUTED)
             v_str = f"Living Note • v{self.doc_version}"
             self.drawRightString(page_w - margin, page_h - 32, v_str)
@@ -118,7 +171,7 @@ class NotePDFCanvas(canvas.Canvas):
         self.setLineWidth(0.5)
         self.line(margin, 40, page_w - margin, 40)
 
-        self.setFont("Helvetica", 7.5)
+        self.setFont(SANS, 7.5)
         self.setFillColor(TEXT_MUTED)
         self.drawString(margin, 26, "Personalized Technical Note Maker • Living Structured Document")
 
@@ -160,10 +213,10 @@ def clean_markdown_for_paragraph(text: Optional[str]) -> str:
     # 3. Italic: *text* or _text_ -> <i>text</i>
     s = re.sub(r"(?<!\*)\*([^*]+?)\*(?!\*)", r"<i>\1</i>", s)
 
-    # 4. Inline code: `text` -> Courier font with accent color
+    # 4. Inline code: `text` -> monospace font with accent color
     s = re.sub(
         r"`([^`]+?)`",
-        r'<font face="Courier-Bold" color="#0369A1">\1</font>',
+        '<font face="' + MONO_BOLD + '" color="#3B5F7D">\\1</font>',
         s,
     )
 
@@ -205,7 +258,7 @@ def get_pdf_styles():
     # Document Main Title
     styles.add(ParagraphStyle(
         name="DocTitle",
-        fontName="Helvetica-Bold",
+        fontName=SANS_BOLD,
         fontSize=22,
         leading=26,
         textColor=PRIMARY_COLOR,
@@ -215,7 +268,7 @@ def get_pdf_styles():
     # Document Subtitle / Version Pill
     styles.add(ParagraphStyle(
         name="DocVersionMeta",
-        fontName="Helvetica-Bold",
+        fontName=SANS_BOLD,
         fontSize=9,
         leading=12,
         textColor=ACCENT_COLOR,
@@ -225,7 +278,7 @@ def get_pdf_styles():
     # Summary Callout Text
     styles.add(ParagraphStyle(
         name="DocSummaryText",
-        fontName="Helvetica",
+        fontName=SANS,
         fontSize=10,
         leading=15,
         textColor=TEXT_BODY,
@@ -234,7 +287,7 @@ def get_pdf_styles():
     # Summary Label
     styles.add(ParagraphStyle(
         name="DocSummaryLabel",
-        fontName="Helvetica-Bold",
+        fontName=SANS_BOLD,
         fontSize=9,
         leading=13,
         textColor=ACCENT_COLOR,
@@ -244,7 +297,7 @@ def get_pdf_styles():
     # Section Heading (H2)
     styles.add(ParagraphStyle(
         name="SectionHeading",
-        fontName="Helvetica-Bold",
+        fontName=SANS_BOLD,
         fontSize=15,
         leading=19,
         textColor=PRIMARY_COLOR,
@@ -256,7 +309,7 @@ def get_pdf_styles():
     # Section Sub-meta (Depth & Type)
     styles.add(ParagraphStyle(
         name="SectionSubMeta",
-        fontName="Helvetica-Bold",
+        fontName=SANS_BOLD,
         fontSize=8.5,
         leading=11,
         textColor=TEXT_MUTED,
@@ -267,7 +320,7 @@ def get_pdf_styles():
     # Body Paragraph
     styles.add(ParagraphStyle(
         name="NoteBody",
-        fontName="Helvetica",
+        fontName=SANS,
         fontSize=9.5,
         leading=14.5,
         textColor=TEXT_BODY,
@@ -278,7 +331,7 @@ def get_pdf_styles():
     # Callout Content
     styles.add(ParagraphStyle(
         name="CalloutContent",
-        fontName="Helvetica",
+        fontName=SANS,
         fontSize=9,
         leading=13.5,
         textColor=TEXT_BODY,
@@ -287,26 +340,26 @@ def get_pdf_styles():
     # Code Header Left
     styles.add(ParagraphStyle(
         name="CodeHeaderLeft",
-        fontName="Helvetica-Bold",
+        fontName=SANS_BOLD,
         fontSize=8.5,
         leading=11,
-        textColor=colors.HexColor("#F8FAFC"),
+        textColor=colors.HexColor("#F6F3EC"),
     ))
 
     # Code Header Right (Complexity Badge)
     styles.add(ParagraphStyle(
         name="CodeHeaderRight",
-        fontName="Courier-Bold",
+        fontName=MONO_BOLD,
         fontSize=8,
         leading=11,
-        textColor=colors.HexColor("#38BDF8"),
+        textColor=colors.HexColor("#E6B85A"),
         alignment=TA_RIGHT,
     ))
 
     # Code Preformatted Body
     styles.add(ParagraphStyle(
         name="CodePreformatted",
-        fontName="Courier",
+        fontName=MONO,
         fontSize=7.5,
         leading=10.5,
         textColor=CODE_TEXT,
@@ -315,7 +368,7 @@ def get_pdf_styles():
     # Diagram Preformatted Body
     styles.add(ParagraphStyle(
         name="DiagramPreformatted",
-        fontName="Courier",
+        fontName=MONO,
         fontSize=7.5,
         leading=10.5,
         textColor=TEXT_DARK,
@@ -324,7 +377,7 @@ def get_pdf_styles():
     # Caption / Footnote
     styles.add(ParagraphStyle(
         name="NoteCaption",
-        fontName="Helvetica-Oblique",
+        fontName=SANS_ITALIC,
         fontSize=8,
         leading=11,
         textColor=TEXT_MUTED,
@@ -335,7 +388,7 @@ def get_pdf_styles():
     # Table Cell Normal
     styles.add(ParagraphStyle(
         name="TableCellText",
-        fontName="Helvetica",
+        fontName=SANS,
         fontSize=8.5,
         leading=12,
         textColor=TEXT_BODY,
@@ -344,7 +397,7 @@ def get_pdf_styles():
     # Table Cell Header
     styles.add(ParagraphStyle(
         name="TableCellHeader",
-        fontName="Helvetica-Bold",
+        fontName=SANS_BOLD,
         fontSize=8.5,
         leading=12,
         textColor=colors.white,
@@ -361,13 +414,13 @@ USABLE_WIDTH = 525.6  # 612 - 2 * 43.2 pt
 
 def _render_definition_block(block: NoteBlock, styles) -> KeepTogether:
     term_text = block.term or "Definition"
-    content_html = f"<b>📖 {clean_markdown_for_paragraph(term_text)}</b><br/>{clean_markdown_for_paragraph(block.content)}"
+    content_html = f"<b>{clean_markdown_for_paragraph(term_text)}</b><br/>{clean_markdown_for_paragraph(block.content)}"
     p = Paragraph(content_html, styles["CalloutContent"])
 
     t = Table([[p]], colWidths=[USABLE_WIDTH])
     t.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), DEF_BG),
-        ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#FDE68A")),
+        ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#E8D5A6")),
         ("LINELEFT", (0, 0), (0, -1), 3.5, DEF_BORDER),
         ("TOPPADDING", (0, 0), (-1, -1), 6),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
@@ -379,13 +432,13 @@ def _render_definition_block(block: NoteBlock, styles) -> KeepTogether:
 
 def _render_warning_block(block: NoteBlock, styles) -> KeepTogether:
     title_text = block.title or "Warning / Pitfall"
-    content_html = f"<b>⚠️ {clean_markdown_for_paragraph(title_text)}</b><br/>{clean_markdown_for_paragraph(block.content)}"
+    content_html = f"<b>{clean_markdown_for_paragraph(title_text)}</b><br/>{clean_markdown_for_paragraph(block.content)}"
     p = Paragraph(content_html, styles["CalloutContent"])
 
     t = Table([[p]], colWidths=[USABLE_WIDTH])
     t.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), WARN_BG),
-        ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#FECDD3")),
+        ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#EBC7BC")),
         ("LINELEFT", (0, 0), (0, -1), 3.5, WARN_BORDER),
         ("TOPPADDING", (0, 0), (-1, -1), 6),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
@@ -397,13 +450,13 @@ def _render_warning_block(block: NoteBlock, styles) -> KeepTogether:
 
 def _render_example_block(block: NoteBlock, styles) -> KeepTogether:
     title_text = block.title or "Practical Example"
-    content_html = f"<b>💡 EXAMPLE: {clean_markdown_for_paragraph(title_text)}</b><br/>{clean_markdown_for_paragraph(block.content)}"
+    content_html = f"<b>Example: {clean_markdown_for_paragraph(title_text)}</b><br/>{clean_markdown_for_paragraph(block.content)}"
     p = Paragraph(content_html, styles["CalloutContent"])
 
     t = Table([[p]], colWidths=[USABLE_WIDTH])
     t.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), EX_BG),
-        ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#A7F3D0")),
+        ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#C6D8C0")),
         ("LINELEFT", (0, 0), (0, -1), 3.5, EX_BORDER),
         ("TOPPADDING", (0, 0), (-1, -1), 6),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
@@ -417,7 +470,7 @@ def _render_code_block(block: NoteBlock, styles) -> KeepTogether:
     flowables = []
     lang_str = (block.language or "CODE").upper()
     title_str = block.title or f"{lang_str} Implementation"
-    left_p = Paragraph(f"💻 <b>{clean_markdown_for_paragraph(title_str)}</b>", styles["CodeHeaderLeft"])
+    left_p = Paragraph(f"<b>{clean_markdown_for_paragraph(title_str)}</b>", styles["CodeHeaderLeft"])
 
     right_text = ""
     if block.complexity:
@@ -454,12 +507,12 @@ def _render_code_block(block: NoteBlock, styles) -> KeepTogether:
 
     # Expected output if available
     if block.expected_output:
-        out_html = f"<b>Output:</b> <font face='Courier'>{clean_markdown_for_paragraph(block.expected_output)}</font>"
+        out_html = f"<b>Output:</b> <font face='{MONO}'>{clean_markdown_for_paragraph(block.expected_output)}</font>"
         out_p = Paragraph(out_html, styles["CalloutContent"])
         out_table = Table([[out_p]], colWidths=[USABLE_WIDTH])
         out_table.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F1F5F9")),
-            ("LINELEFT", (0, 0), (0, -1), 2.5, colors.HexColor("#64748B")),
+            ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#EFEBE1")),
+            ("LINELEFT", (0, 0), (0, -1), 2.5, colors.HexColor("#6B6558")),
             ("TOPPADDING", (0, 0), (-1, -1), 4),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
             ("LEFTPADDING", (0, 0), (-1, -1), 8),
@@ -475,13 +528,13 @@ def _render_diagram_block(block: NoteBlock, styles) -> KeepTogether:
     flowables = []
     title_str = block.title or "Architecture Diagram"
     type_badge = (block.diagram_type or "Diagram").upper()
-    left_p = Paragraph(f"📊 <b>{clean_markdown_for_paragraph(title_str)}</b>", styles["CodeHeaderLeft"])
+    left_p = Paragraph(f"<b>{clean_markdown_for_paragraph(title_str)}</b>", styles["CodeHeaderLeft"])
     right_p = Paragraph(f"<b>{type_badge}</b>", styles["CodeHeaderRight"])
 
     # Header bar
     header_table = Table([[left_p, right_p]], colWidths=[USABLE_WIDTH * 0.75, USABLE_WIDTH * 0.25])
     header_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#0284C7")),
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#3B5F7D")),
         ("TOPPADDING", (0, 0), (-1, -1), 4),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
         ("LEFTPADDING", (0, 0), (-1, -1), 8),
@@ -510,8 +563,8 @@ def _render_diagram_block(block: NoteBlock, styles) -> KeepTogether:
 
     spec_table = Table([[pre]], colWidths=[USABLE_WIDTH])
     spec_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F8FAFC")),
-        ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E1")),
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F6F3EC")),
+        ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#D3CCBB")),
         ("TOPPADDING", (0, 0), (-1, -1), 6),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
         ("LEFTPADDING", (0, 0), (-1, -1), 8),
@@ -531,7 +584,7 @@ def _render_diagram_block(block: NoteBlock, styles) -> KeepTogether:
 def _render_comparison_block(block: NoteBlock, styles) -> KeepTogether:
     flowables = []
     if block.title:
-        title_p = Paragraph(f"<b>⚖️ {clean_markdown_for_paragraph(block.title)}</b>", styles["SectionHeading"])
+        title_p = Paragraph(f"<b>{clean_markdown_for_paragraph(block.title)}</b>", styles["SectionHeading"])
         flowables.append(title_p)
 
     if block.content:
@@ -561,9 +614,9 @@ def _render_comparison_block(block: NoteBlock, styles) -> KeepTogether:
 
         comp_table = Table(table_data, colWidths=[col_w] * len(keys))
         comp_style = [
-            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#334155")),
-            ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E1")),
-            ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#E2E8F0")),
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#46423A")),
+            ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#D3CCBB")),
+            ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#E4DFD2")),
             ("TOPPADDING", (0, 0), (-1, -1), 4),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
             ("LEFTPADDING", (0, 0), (-1, -1), 6),
@@ -571,7 +624,7 @@ def _render_comparison_block(block: NoteBlock, styles) -> KeepTogether:
         ]
         for row_idx in range(1, len(table_data)):
             if row_idx % 2 == 0:
-                comp_style.append(("BACKGROUND", (0, row_idx), (-1, row_idx), colors.HexColor("#F8FAFC")))
+                comp_style.append(("BACKGROUND", (0, row_idx), (-1, row_idx), colors.HexColor("#F6F3EC")))
             else:
                 comp_style.append(("BACKGROUND", (0, row_idx), (-1, row_idx), colors.white))
 
@@ -627,8 +680,8 @@ def generate_note_pdf(note_data: NoteResponse) -> bytes:
     summary_text = Paragraph(clean_markdown_for_paragraph(note_data.summary), styles["DocSummaryText"])
     summary_table = Table([[summary_label], [summary_text]], colWidths=[USABLE_WIDTH])
     summary_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F8FAFC")),
-        ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E1")),
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F6F3EC")),
+        ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#D3CCBB")),
         ("LINELEFT", (0, 0), (0, -1), 3.5, ACCENT_COLOR),
         ("TOPPADDING", (0, 0), (-1, -1), 5),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
@@ -661,8 +714,8 @@ def generate_note_pdf(note_data: NoteResponse) -> bytes:
     if toc_data:
         toc_table = Table(toc_data, colWidths=[USABLE_WIDTH * 0.65, USABLE_WIDTH * 0.17, USABLE_WIDTH * 0.18])
         toc_table.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#FAFAFA")),
-            ("LINEBELOW", (0, 0), (-1, -1), 0.5, colors.HexColor("#F1F5F9")),
+            ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#FAF8F3")),
+            ("LINEBELOW", (0, 0), (-1, -1), 0.5, colors.HexColor("#EFEBE1")),
             ("TOPPADDING", (0, 0), (-1, -1), 3),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
             ("LEFTPADDING", (0, 0), (-1, -1), 6),
@@ -708,7 +761,7 @@ def generate_note_pdf(note_data: NoteResponse) -> bytes:
         story.append(Spacer(1, 8))
 
     # 4. Closing Note
-    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#CBD5E1"), spaceBefore=10, spaceAfter=8))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#D3CCBB"), spaceBefore=10, spaceAfter=8))
     closing_p = Paragraph(
         "<i>Living note created and maintained by Personalized Technical Note Maker. Source of truth: Structured Note.</i>",
         styles["NoteCaption"],

@@ -11,8 +11,8 @@ def test_viewer_html_contains_reader_components(client):
     assert res.status_code == 200
     html = res.text
     
-    # Check for Phase 6 elements
-    assert "PHASE 6" in html
+    # Check for the note viewer panel and its reader components
+    assert "5. Living Technical Note" in html
     assert "reading-progress-bar" in html
     assert "note-toc" in html or "note-viewer-toc" in html
     assert "note-reader-controls" in html or "reader-toolbar" in html

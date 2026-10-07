@@ -12,10 +12,10 @@ function showLoginAlert(message, isSuccess = false) {
     alertText.textContent = message;
     if (isSuccess) {
       alertBox.classList.add('login-alert-success');
-      if (alertIcon) alertIcon.textContent = '✓';
+      if (alertIcon) alertIcon.innerHTML = uiIcon('check');
     } else {
       alertBox.classList.remove('login-alert-success');
-      if (alertIcon) alertIcon.textContent = '⚠️';
+      if (alertIcon) alertIcon.innerHTML = uiIcon('triangle-alert');
     }
     alertBox.style.display = 'flex';
   }
@@ -39,7 +39,7 @@ function showRegisterAlert(message, htmlContent = null) {
     } else {
       alertText.textContent = message;
     }
-    if (alertIcon) alertIcon.textContent = '⚠️';
+    if (alertIcon) alertIcon.innerHTML = uiIcon('triangle-alert');
     alertBox.style.display = 'flex';
   }
 }
@@ -110,14 +110,14 @@ function togglePasswordVisibility() {
 
   if (input.type === 'password') {
     input.type = 'text';
-    if (icon) icon.textContent = '🔒';
+    if (icon) icon.innerHTML = uiIcon('eye-off');
     if (btn) {
       btn.setAttribute('aria-label', 'Hide password');
       btn.title = 'Hide password';
     }
   } else {
     input.type = 'password';
-    if (icon) icon.textContent = '👁';
+    if (icon) icon.innerHTML = uiIcon('eye');
     if (btn) {
       btn.setAttribute('aria-label', 'Show password');
       btn.title = 'Show password';
@@ -133,14 +133,14 @@ function toggleRegisterPasswordVisibility() {
 
   if (input.type === 'password') {
     input.type = 'text';
-    if (icon) icon.textContent = '🔒';
+    if (icon) icon.innerHTML = uiIcon('eye-off');
     if (btn) {
       btn.setAttribute('aria-label', 'Hide password');
       btn.title = 'Hide password';
     }
   } else {
     input.type = 'password';
-    if (icon) icon.textContent = '👁';
+    if (icon) icon.innerHTML = uiIcon('eye');
     if (btn) {
       btn.setAttribute('aria-label', 'Show password');
       btn.title = 'Show password';
@@ -156,14 +156,14 @@ function toggleRegisterConfirmPasswordVisibility() {
 
   if (input.type === 'password') {
     input.type = 'text';
-    if (icon) icon.textContent = '🔒';
+    if (icon) icon.innerHTML = uiIcon('eye-off');
     if (btn) {
       btn.setAttribute('aria-label', 'Hide confirm password');
       btn.title = 'Hide confirm password';
     }
   } else {
     input.type = 'password';
-    if (icon) icon.textContent = '👁';
+    if (icon) icon.innerHTML = uiIcon('eye');
     if (btn) {
       btn.setAttribute('aria-label', 'Show confirm password');
       btn.title = 'Show confirm password';

@@ -82,7 +82,7 @@
       btnText.style.display = 'none';
       btnSpinner.style.display = 'inline';
       statusMsg.style.display = 'block';
-      statusMsg.textContent = 'Agent 5 synthesizing evolution updates and blocks...';
+      statusMsg.textContent = 'Updating your note…';
 
       const payload = {
         evolution_type: activeEvolveType,
@@ -135,14 +135,14 @@
       if (revisions.length === 0) {
         body.innerHTML = `
           <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌱</div>
-            <div style="font-weight: 600; color: var(--text-secondary);">Version 1 (Initial Generation)</div>
-            <p style="font-size: 0.85rem; margin-top: 0.4rem;">No evolutions yet. Use the "🌱 Evolve section" buttons to expand and refine your living note.</p>
+            <div class="text-icon-lg" style="margin-bottom: 0.5rem;">${uiIcon('sprout')}</div>
+            <div class="fw-semibold" style="color: var(--text-secondary);">Version 1 (Initial Generation)</div>
+            <p class="text-sm" style="margin-top: 0.4rem;">No evolutions yet. Use the "${uiIcon('sprout')} Evolve section" buttons to expand and refine your living note.</p>
           </div>
         `;
       } else {
         body.innerHTML = `
-          <div style="margin-bottom: 1rem; font-size: 0.85rem; color: var(--purple-text);">
+          <div class="text-sm" style="margin-bottom: 1rem; color: var(--purple-text);">
             Showing <strong>${revisions.length}</strong> evolution checkpoint(s):
           </div>
           ${revisions.map(r => `
@@ -152,7 +152,7 @@
                 <span class="rev-time">${new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
               <div class="rev-type-tag">
-                🎯 ${r.evolution_type.replace('_', ' ').toUpperCase()} ${r.section_title ? `&bull; "${escapeHtml(r.section_title)}"` : ''}
+                ${uiIcon('target')} ${r.evolution_type.replace(/_/g, ' ').toUpperCase()} ${r.section_title ? `&bull; "${escapeHtml(r.section_title)}"` : ''}
               </div>
               <div class="rev-prompt">"${escapeHtml(r.user_prompt)}"</div>
             </div>

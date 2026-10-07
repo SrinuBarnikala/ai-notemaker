@@ -67,7 +67,7 @@ async function refreshNoteVersionsList() {
   } catch (err) {
     console.error('Failed to load note versions:', err);
     if (timelineContainer) {
-      timelineContainer.innerHTML = `<div style="padding: 2rem; text-align: center; color: var(--danger-text);">⚠️ Error loading versions: ${escapeHtml(err.message)}</div>`;
+      timelineContainer.innerHTML = `<div style="padding: 2rem; text-align: center; color: var(--danger-text);">${uiIcon('triangle-alert')} Error loading versions: ${escapeHtml(err.message)}</div>`;
     }
   }
 }
@@ -120,27 +120,27 @@ function renderVersionsTimeline(versions, currentVersion) {
           </div>
           <div class="vcard-meta">
             <span class="vcard-date">${formatDateTime(v.created_at)}</span>
-            <span class="vcard-sections-count">📚 ${v.total_sections} Sections</span>
+            <span class="vcard-sections-count">${uiIcon('library')} ${v.total_sections} Sections</span>
           </div>
         </div>
 
         <div class="vcard-body">
-          <div class="vcard-summary">${escapeHtml(v.change_summary || v.user_prompt || 'Living note snapshot.')}</div>
-          ${v.section_title ? `<div class="vcard-target-section">🎯 Affected Section: <strong>${escapeHtml(v.section_title)}</strong></div>` : ''}
+          <div class="vcard-summary">${escapeHtml(cleanChangeSummary(v.change_summary) || v.user_prompt || 'Living note snapshot.')}</div>
+          ${v.section_title ? `<div class="vcard-target-section">${uiIcon('target')} Affected Section: <strong>${escapeHtml(v.section_title)}</strong></div>` : ''}
           ${v.user_prompt && !isInitial ? `<div class="vcard-prompt-quote">“${escapeHtml(v.user_prompt)}”</div>` : ''}
         </div>
 
         <div class="vcard-actions">
           <button type="button" class="tool-btn" onclick="viewHistoricalSnapshot(${v.version})" title="Read note as it existed at version ${v.version}">
-            <span>👁️ Read Snapshot</span>
+            <span>${uiIcon('eye')} Read Snapshot</span>
           </button>
           ${!isInitial ? `
             <button type="button" class="tool-btn" onclick="openDiffBetween(${Math.max(1, v.version - 1)}, ${v.version})" title="Compare what changed from v${v.version - 1} to v${v.version}">
-              <span>🔀 Inspect Diff vs v${v.version - 1}</span>
+              <span>${uiIcon('shuffle')} Inspect Diff vs v${v.version - 1}</span>
             </button>
           ` : `
             <button type="button" class="tool-btn" onclick="openDiffBetween(1, ${currentVersion})" title="Compare Initial v1 against Latest">
-              <span>🔀 Compare vs Latest</span>
+              <span>${uiIcon('shuffle')} Compare vs Latest</span>
             </button>
           `}
           ${!isCurrent ? `
@@ -169,14 +169,14 @@ function getEvolutionBadgeClass(type) {
 
 function formatEvolutionType(type) {
   switch (type) {
-    case 'initial_generation': return '🌱 Initial Blueprint';
-    case 'add_code': return '💻 Code Enhancement';
-    case 'expand_section': return '🔍 Deep Dive Expansion';
-    case 'add_section': return '➕ New Chapter';
-    case 'clarify': return '💡 Conceptual Clarification';
-    case 'copilot_pin': return '🤖 Copilot Pin';
+    case 'initial_generation': return uiIcon('sprout') + ' Initial Blueprint';
+    case 'add_code': return uiIcon('code-xml') + ' Code Enhancement';
+    case 'expand_section': return uiIcon('search') + ' Deep Dive Expansion';
+    case 'add_section': return uiIcon('plus') + ' New Chapter';
+    case 'clarify': return uiIcon('lightbulb') + ' Conceptual Clarification';
+    case 'copilot_pin': return uiIcon('bot') + ' Copilot Pin';
     case 'restore_version': return '↺ Version Rollback';
-    default: return type ? type.replace('_', ' ') : 'Update';
+    default: return type ? type.replace(/_/g, ' ') : 'Update';
   }
 }
 
@@ -229,7 +229,7 @@ async function executeDiffComparison(fromVer, toVer) {
   const statsBox = document.getElementById('diff-stats-bar');
 
   if (container) {
-    container.innerHTML = '<div style="padding: 3rem; text-align: center; color: var(--text-muted);">⚡ Analyzing semantic differences between Version ' + fromVer + ' and Version ' + toVer + '...</div>';
+    container.innerHTML = '<div style="padding: 3rem; text-align: center; color: var(--text-muted);">' + uiIcon('zap') + ' Analyzing semantic differences between Version ' + fromVer + ' and Version ' + toVer + '...</div>';
   }
 
   try {
@@ -240,7 +240,7 @@ async function executeDiffComparison(fromVer, toVer) {
   } catch (err) {
     console.error('Failed to compute diff:', err);
     if (container) {
-      container.innerHTML = `<div style="padding: 2rem; text-align: center; color: var(--danger-text);">⚠️ Failed to compute diff: ${escapeHtml(err.message)}</div>`;
+      container.innerHTML = `<div style="padding: 2rem; text-align: center; color: var(--danger-text);">${uiIcon('triangle-alert')} Failed to compute diff: ${escapeHtml(err.message)}</div>`;
     }
   }
 }
@@ -252,7 +252,7 @@ function renderDiffView(diff) {
 
   if (summaryBox) {
     summaryBox.innerHTML = `
-      <div class="diff-summary-title">🔀 Comparing Version ${diff.from_version} &rarr; Version ${diff.to_version}</div>
+      <div class="diff-summary-title">${uiIcon('shuffle')} Comparing Version ${diff.from_version} &rarr; Version ${diff.to_version}</div>
       <div class="diff-summary-text">${escapeHtml(diff.summary)}</div>
     `;
   }
@@ -395,7 +395,7 @@ This will restore all sections and blocks back to Version ${targetVer} and creat
     renderNote(res.note);
     await refreshNoteVersionsList();
 
-    alert(`✓ ${res.message}`);
+    alert(res.message);
   } catch (err) {
     alert(`Restore failed: ${err.message}`);
   }

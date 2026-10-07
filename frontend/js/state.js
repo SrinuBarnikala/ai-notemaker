@@ -41,6 +41,18 @@ let activeCopilotSelectedText = null;
 let copilotHistory = [];
 let lastPinCandidate = null;
 
+// Inline SVG icon from /static/icons.svg (Lucide, ISC licence). Takes the surrounding text colour.
+function uiIcon(name, extraClass = '') {
+  return `<svg class="icon${extraClass ? ' ' + extraClass : ''}" aria-hidden="true"><use href="/static/icons.svg#${name}"></use></svg>`;
+}
+
+// Sets "[icon] text" on an element; the text is never interpreted as HTML.
+function setIconLabel(el, name, text) {
+  if (!el) return;
+  el.innerHTML = uiIcon(name);
+  el.appendChild(document.createTextNode(' ' + text));
+}
+
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str || '';
@@ -89,7 +101,7 @@ function formatInlineMarkdown(text) {
   let safe = escapeHtml(str);
   safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   safe = safe.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
-  safe = safe.replace(/`([^`]+)`/g, '<code style="font-family: var(--font-mono); background: var(--color-purple-tint); border: 1px solid var(--border-purple); padding: 0.15rem 0.4rem; border-radius: 4px; color: var(--purple-text); font-size: 0.9em;">$1</code>');
+  safe = safe.replace(/`([^`]+)`/g, '<code class="md-inline-code">$1</code>');
   return safe;
 }
 
@@ -263,9 +275,41 @@ function applyMathFallbackFormatting(container) {
   });
 }
 
+function sentenceCase(text) {
+  const spaced = String(text || '').replace(/_/g, ' ').trim().toLowerCase();
+  return spaced ? spaced.charAt(0).toUpperCase() + spaced.slice(1) : '';
+}
+
+// Journey status shown on cards and in history, e.g. note_generated -> "Note ready".
+const JOURNEY_STATUS_LABELS = {
+  created: 'Started',
+  probing: 'Discovery',
+  profile_ready: 'Profile ready',
+  architecture_ready: 'Blueprint ready',
+  note_generated: 'Note ready',
+};
+
 function formatStatus(status) {
-  if (!status) return 'In Progress';
-  return status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  if (!status) return 'In progress';
+  return JOURNEY_STATUS_LABELS[status] || sentenceCase(status);
+}
+
+// Concept status shown in the graph and memory views. Matches the graph legend wording.
+const CONCEPT_STATUS_LABELS = {
+  known: 'Mastered',
+  partial: 'In progress',
+  gap: 'Gap',
+  misconception: 'Pitfall',
+};
+
+function conceptStatusLabel(status) {
+  if (!status) return '';
+  return CONCEPT_STATUS_LABELS[status] || sentenceCase(status);
+}
+
+// Older version summaries end with the internal generation status, e.g. "(llm_fallback)".
+function cleanChangeSummary(summary) {
+  return String(summary || '').replace(/\s*\(llm_[a-z_]+\)/g, '').trim();
 }
 
 /* ==========================================================================
@@ -292,11 +336,11 @@ function updateThemeUI(activeTheme) {
   const toggleIcon = document.getElementById('theme-toggle-icon');
   if (toggleBtn && toggleIcon) {
     if (activeTheme === 'light') {
-      toggleIcon.textContent = '🌙';
+      toggleIcon.innerHTML = uiIcon('moon');
       toggleBtn.setAttribute('aria-label', 'Switch to dark theme');
       toggleBtn.setAttribute('title', 'Switch to dark theme');
     } else {
-      toggleIcon.textContent = '☀️';
+      toggleIcon.innerHTML = uiIcon('sun');
       toggleBtn.setAttribute('aria-label', 'Switch to light theme');
       toggleBtn.setAttribute('title', 'Switch to light theme');
     }

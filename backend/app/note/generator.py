@@ -274,7 +274,13 @@ async def generate_structured_note(
         evolution_type="initial_generation" if note.version == 1 else "regeneration",
         section_title=None,
         user_prompt="Initial living note generation based on personalized architecture.",
-        change_summary=f"Initial living note created with {len(sec_records)} structured sections ({note.generation_status}).",
+        change_summary=(
+            f"Initial living note created with {len(sec_records)} structured sections"
+            + {
+                "llm_fallback": " (offline draft).",
+                "llm_partial_fallback": " (some sections are offline drafts).",
+            }.get(note.generation_status, ".")
+        ),
 
         snapshot=v1_snapshot,
     )

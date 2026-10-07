@@ -67,7 +67,7 @@
 
       document.getElementById('disc-topic-label').textContent = topic;
       document.getElementById('disc-question-text').textContent = 'Consulting Knowledge Discovery Agent...';
-      document.getElementById('disc-concept').textContent = '🎯 Probing baseline...';
+      setIconLabel(document.getElementById('disc-concept'), 'target', 'Probing baseline...');
       document.getElementById('disc-step-label').textContent = 'Question 1 of 4';
       document.getElementById('disc-progress').style.width = '25%';
       document.getElementById('active-question-section').style.display = 'block';
@@ -90,7 +90,7 @@
         document.getElementById('active-question-section').style.display = 'none';
         document.getElementById('disc-progress').style.width = '100%';
         document.getElementById('disc-step-label').textContent = 'Discovery Concluded';
-        document.getElementById('disc-concept').textContent = '🎯 Complete';
+        setIconLabel(document.getElementById('disc-concept'), 'target', 'Complete');
         triggerProfileGeneration(currentJourneyId);
         return;
       }
@@ -98,7 +98,7 @@
       const maxQ = data.max_questions || 4;
       document.getElementById('disc-step-label').textContent = `Question ${data.question_index} of ${maxQ}`;
       document.getElementById('disc-question-text').textContent = data.question_text;
-      document.getElementById('disc-concept').textContent = `🎯 ${data.concept_target}`;
+      setIconLabel(document.getElementById('disc-concept'), 'target', data.concept_target);
       document.getElementById('disc-progress').style.width = `${Math.min((data.question_index / maxQ) * 100, 100)}%`;
       document.getElementById('disc-answer-input').value = '';
       document.getElementById('disc-answer-input').focus();
@@ -153,7 +153,7 @@
           <div class="qa-card">
             <div class="qa-q">Q${item.question_index} (${item.concept_target}): ${escapeHtml(item.question_text)}</div>
             <div class="qa-a">${escapeHtml(item.learner_answer)}</div>
-            ${item.quick_assessment ? `<div class="qa-assessment">💡 Insight: ${escapeHtml(item.quick_assessment)}</div>` : ''}
+            ${item.quick_assessment ? `<div class="qa-assessment">${uiIcon('lightbulb')} Insight: ${escapeHtml(item.quick_assessment)}</div>` : ''}
           </div>
         `).join('');
       } catch (e) {
@@ -166,7 +166,7 @@
       profilePanel.style.display = 'block';
       profilePanel.scrollIntoView({ behavior: 'smooth' });
 
-      document.getElementById('prof-summary').textContent = '🤖 Agent 2 analyzing discovery data to build mental model...';
+      document.getElementById('prof-summary').textContent = 'Building your mental model from your answers…';
 
       try {
         const profile = await API.request(`/journeys/${journeyId}/knowledge-profile`, { method: 'POST' }, 'Failed to synthesize profile');
@@ -187,7 +187,7 @@
       const misList = document.getElementById('misconceptions-list');
       if (profile.misconceptions && profile.misconceptions.length > 0) {
         misList.innerHTML = profile.misconceptions.map(m => `
-          <div class="misconception-card"><span>⚠️</span><span>${escapeHtml(m)}</span></div>
+          <div class="misconception-card"><span>${uiIcon('triangle-alert')}</span><span>${escapeHtml(m)}</span></div>
         `).join('');
         misContainer.style.display = 'block';
       } else {
@@ -206,17 +206,17 @@
       document.getElementById('count-partial').textContent = partialConcepts.length;
       document.getElementById('count-gaps').textContent = (unknownConcepts.length + (profile.gaps ? profile.gaps.length : 0));
 
-      colKnown.innerHTML = knownConcepts.length ? knownConcepts.map(renderConceptCard).join('') : '<div style="font-size: 0.8rem; color: var(--text-muted);">None identified yet.</div>';
-      colPartial.innerHTML = partialConcepts.length ? partialConcepts.map(renderConceptCard).join('') : '<div style="font-size: 0.8rem; color: var(--text-muted);">None identified yet.</div>';
+      colKnown.innerHTML = knownConcepts.length ? knownConcepts.map(renderConceptCard).join('') : '<div class="text-sm" style="color: var(--text-muted);">None identified yet.</div>';
+      colPartial.innerHTML = partialConcepts.length ? partialConcepts.map(renderConceptCard).join('') : '<div class="text-sm" style="color: var(--text-muted);">None identified yet.</div>';
 
       let gapsHtml = unknownConcepts.map(renderConceptCard).join('');
       if (profile.gaps && profile.gaps.length > 0) {
-        gapsHtml += '<div style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono); margin: 0.75rem 0 0.4rem 0;">IDENTIFIED GAPS:</div>';
+        gapsHtml += '<div class="text-xs" style="color: var(--text-muted); margin: 0.75rem 0 0.4rem 0;">IDENTIFIED GAPS:</div>';
         gapsHtml += profile.gaps.map(g => `
           <div class="gap-badge"><span>&bull;</span><span>${escapeHtml(g)}</span></div>
         `).join('');
       }
-      colGaps.innerHTML = gapsHtml || '<div style="font-size: 0.8rem; color: var(--text-muted);">None identified yet.</div>';
+      colGaps.innerHTML = gapsHtml || '<div class="text-sm" style="color: var(--text-muted);">None identified yet.</div>';
     }
 
     function renderConceptCard(c) {
@@ -242,7 +242,7 @@
       archPanel.style.display = 'block';
       archPanel.scrollIntoView({ behavior: 'smooth' });
 
-      document.getElementById('arch-rationale').textContent = '🤖 Agent 3 designing personalized section blueprint around your gaps...';
+      document.getElementById('arch-rationale').textContent = 'Designing a section blueprint around your gaps…';
       const bList = document.getElementById('blueprint-list');
       bList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Designing sections...</div>';
 
@@ -277,12 +277,12 @@
             <strong>Why for you:</strong> ${escapeHtml(s.rationale)}
           </div>
           <div class="blueprint-footer">
-            <div style="font-size: 0.775rem; color: var(--text-muted); font-family: var(--font-mono);">
+            <div class="text-xs" style="color: var(--text-muted);">
               Targets: ${s.target_concepts.map(tc => escapeHtml(tc)).join(', ')}
             </div>
             <div class="blueprint-features">
-              ${s.needs_code ? '<span class="feature-pill active">💻 Code Required</span>' : ''}
-              ${s.needs_visual ? `<span class="feature-pill active">📊 ${escapeHtml(s.visual_type || 'Diagram')}</span>` : ''}
+              ${s.needs_code ? '<span class="feature-pill active">' + uiIcon('code-xml') + ' Code Required</span>' : ''}
+              ${s.needs_visual ? `<span class="feature-pill active">${uiIcon('chart-column')} ${escapeHtml(s.visual_type || 'Diagram')}</span>` : ''}
             </div>
           </div>
         </div>
@@ -296,7 +296,7 @@
       try {
         const data = await API.requestOrNull('/journeys?limit=6');
         if (!data || !data.journeys || data.journeys.length === 0) {
-          listEl.innerHTML = '<div style="color: var(--text-muted); font-size: 0.875rem; text-align: center; padding: 1rem;">No journeys yet.</div>';
+          listEl.innerHTML = '<div class="text-sm" style="color: var(--text-muted); text-align: center; padding: 1rem;">No journeys yet.</div>';
           return;
         }
 
@@ -304,25 +304,17 @@
           <div class="history-item" onclick="resumeJourney('${j.id}', '${escapeHtml(j.topic)}', '${j.status}')">
             <div>
               <div class="history-topic">${escapeHtml(j.topic)}</div>
-              <div style="font-size: 0.775rem; color: var(--text-muted); font-family: var(--font-mono); margin-top: 0.2rem;">ID: ${j.id.slice(0, 8)}...</div>
+              <div class="text-xs" style="color: var(--text-muted); margin-top: 0.2rem;">ID: ${j.id.slice(0, 8)}...</div>
             </div>
             <div style="display: flex; align-items: center; gap: 0.75rem;">
               <span class="phase-badge">${formatStatus(j.status)}</span>
-              <span style="font-size: 0.85rem; color: var(--purple-text);">&rarr;</span>
+              <span class="text-sm" style="color: var(--purple-text);">&rarr;</span>
             </div>
           </div>
         `).join('');
       } catch (e) {
         console.error("Failed to load journeys", e);
       }
-    }
-
-    function formatStatus(status) {
-      if (status === 'note_generated') return 'NOTE READY';
-      if (status === 'architecture_ready') return 'ARCH READY';
-      if (status === 'profile_ready') return 'PROFILE READY';
-      if (status === 'probing') return 'DISCOVERY';
-      return status.toUpperCase();
     }
 
     async function resumeJourney(journeyId, topic, status) {

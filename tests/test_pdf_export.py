@@ -4,7 +4,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from backend.app.schemas.note import NoteResponse, NoteSectionData, NoteBlock
-from backend.app.note.pdf import generate_note_pdf, clean_markdown_for_paragraph, wrap_preformatted
+from backend.app.note.pdf import generate_note_pdf, clean_markdown_for_paragraph, wrap_preformatted, MONO_BOLD
 
 
 def create_sample_journey_for_pdf(client: TestClient) -> dict:
@@ -51,7 +51,7 @@ def test_clean_markdown_for_paragraph():
     assert "&amp;" in cleaned
     assert "<b>bold</b>" in cleaned
     assert "<i>italic</i>" in cleaned
-    assert "Courier-Bold" in cleaned
+    assert MONO_BOLD in cleaned
 
 
 def test_wrap_preformatted():

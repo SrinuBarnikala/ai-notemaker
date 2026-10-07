@@ -23,8 +23,8 @@
       if (focusBtn) {
         focusBtn.classList.toggle('active', isFocus);
         focusBtn.innerHTML = isFocus
-          ? '<span class="btn-icon">✕</span><span class="btn-label">Exit Focus</span>'
-          : '<span class="btn-icon">📖</span><span class="btn-label">Focus Mode</span>';
+          ? '<span class="btn-icon">' + uiIcon('x') + '</span><span class="btn-label">Exit Focus</span>'
+          : '<span class="btn-icon">' + uiIcon('book-open') + '</span><span class="btn-label">Focus Mode</span>';
       }
       if (isFocus) {
         document.getElementById('note-panel').scrollIntoView({ behavior: 'smooth' });
@@ -43,7 +43,7 @@
       navigator.clipboard.writeText(url.toString()).then(() => {
         const btnLinkText = document.getElementById('btn-link-text');
         const orig = btnLinkText.textContent;
-        btnLinkText.textContent = '✓ Copied URL!';
+        setIconLabel(btnLinkText, 'check', 'Copied URL!');
         setTimeout(() => { btnLinkText.textContent = orig; }, 2000);
       });
     }
@@ -52,7 +52,7 @@
       navigator.clipboard.writeText(codeText).then(() => {
         const orig = btn.innerHTML;
         btn.classList.add('copied');
-        btn.innerHTML = '<span>✓ Copied!</span>';
+        btn.innerHTML = '<span>' + uiIcon('check') + ' Copied!</span>';
         setTimeout(() => {
           btn.classList.remove('copied');
           btn.innerHTML = orig;
@@ -283,7 +283,7 @@
         });
       });
       const readMins = Math.max(1, Math.ceil(totalWords / 180));
-      document.getElementById('note-readtime-badge').textContent = `⏱️ ~${readMins} min read`;
+      setIconLabel(document.getElementById('note-readtime-badge'), 'timer', `~${readMins} min read`);
 
       // Render Sticky Table of Contents (TOC)
       const tocList = document.getElementById('toc-list');
@@ -306,25 +306,25 @@
               <h2 class="section-heading">${escapeHtml(s.title)}</h2>
             </div>
             <div class="section-meta-tags">
-              <button type="button" class="tool-btn" onclick="openCopilotDrawer('${s.id}', '${escapeJsString(s.title)}')" title="Ask Agent 9 Socratic Copilot about this section" style="padding: 0.2rem 0.55rem; font-size: 0.75rem; background: var(--color-purple-tint); border-color: var(--border-purple); color: var(--purple-text);">
-                <span>🤖 Ask AI</span>
+              <button type="button" class="tool-btn text-xs" onclick="openCopilotDrawer('${s.id}', '${escapeJsString(s.title)}')" title="Ask the copilot about this section" style="padding: 0.2rem 0.55rem; background: var(--accent-tint); border-color: var(--border-accent); color: var(--accent-primary);">
+                <span>${uiIcon('bot')} Ask AI</span>
               </button>
               <span class="depth-badge depth-${s.depth}">${s.depth}</span>
-              <span class="section-type-pill">${escapeHtml(s.section_type)}</span>
+              <span class="section-type-pill">${escapeHtml(sentenceCase(s.section_type))}</span>
             </div>
           </div>
           <div class="section-blocks-feed">
             ${s.blocks.map(b => renderNoteBlock(b, s.id)).join('')}
           </div>
           <div class="section-evolve-bar">
-            <span class="evolve-label">🌱 Evolve section:</span>
+            <span class="evolve-label">${uiIcon('sprout')} Evolve section:</span>
             <div class="evolve-actions">
-              <button type="button" class="evolve-chip evolve-chip-copilot" onclick="openCopilotDrawer('${s.id}', '${escapeJsString(s.title)}')">🤖 Ask Copilot</button>
-              <button type="button" class="evolve-chip" onclick="openSectionCodeModal('${s.id}', '${escapeJsString(s.title)}')">💻 + Code Implementation</button>
-              <button type="button" class="evolve-chip" onclick="openSectionVisualModal('${s.id}', '${escapeJsString(s.title)}')">🎨 Add Visual Flow</button>
-              <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'expand_section')">🔍 Deepen Detail</button>
-              <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'clarify')">💡 Clarify Concept</button>
-              <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'custom_prompt')">💬 Ask Question...</button>
+              <button type="button" class="evolve-chip evolve-chip-copilot" onclick="openCopilotDrawer('${s.id}', '${escapeJsString(s.title)}')">${uiIcon('bot')} Ask Copilot</button>
+              <button type="button" class="evolve-chip" onclick="openSectionCodeModal('${s.id}', '${escapeJsString(s.title)}')">${uiIcon('code-xml')} + Code Implementation</button>
+              <button type="button" class="evolve-chip" onclick="openSectionVisualModal('${s.id}', '${escapeJsString(s.title)}')">${uiIcon('palette')} Add Visual Flow</button>
+              <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'expand_section')">${uiIcon('search')} Deepen Detail</button>
+              <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'clarify')">${uiIcon('lightbulb')} Clarify Concept</button>
+              <button type="button" class="evolve-chip" onclick="openEvolveModal('${s.id}', '${escapeJsString(s.title)}', 'custom_prompt')">${uiIcon('message-square')} Ask Question...</button>
             </div>
           </div>
         </section>
@@ -334,33 +334,33 @@
       const globalEvolveCard = `
         <div class="note-global-evolve-card">
           <div class="evolve-card-left">
-            <div class="evolve-card-title">🌱 Expand &amp; Verify Your Technical Mastery</div>
-            <p class="evolve-card-sub">Technical mastery is an ongoing dialogue. Ask Agent 9 Socratic Copilot for instant clarification, test recall with 3D flashcards, inspect Mermaid diagrams, or execute runnable sandbox code.</p>
+            <div class="evolve-card-title">${uiIcon('sprout')} Expand &amp; Verify Your Technical Mastery</div>
+            <p class="evolve-card-sub">Technical mastery is an ongoing dialogue. Ask the Socratic copilot for instant clarification, test recall with 3D flashcards, inspect Mermaid diagrams, or execute runnable sandbox code.</p>
           </div>
           <div class="evolve-card-grid">
-            <button type="button" class="tool-btn evolve-action-btn" style="background: var(--color-purple-tint); border-color: var(--border-purple); color: var(--purple-text);" onclick="openCopilotDrawer(null, null)">
-              <span>🤖 Consult Copilot</span>
+            <button type="button" class="tool-btn evolve-action-btn" onclick="openCopilotDrawer(null, null)">
+              <span>${uiIcon('bot')} Consult Copilot</span>
             </button>
-            <button type="button" class="tool-btn evolve-action-btn" style="background: var(--color-purple-tint); border-color: var(--border-purple); color: var(--purple-text);" onclick="openGraphModal(false)">
-              <span>🕸️ Knowledge Graph</span>
+            <button type="button" class="tool-btn evolve-action-btn" onclick="openGraphModal(false)">
+              <span>${uiIcon('network')} Knowledge Graph</span>
             </button>
-            <button type="button" class="tool-btn evolve-action-btn" style="background: var(--color-amber-tint); border-color: var(--border-amber); color: var(--warning-text);" onclick="openVersionHistoryModal()">
-              <span>🏷️ Version History &amp; Diff</span>
+            <button type="button" class="tool-btn evolve-action-btn" onclick="openVersionHistoryModal()">
+              <span>${uiIcon('tag')} Version History &amp; Diff</span>
             </button>
             <button type="button" class="btn-submit evolve-action-btn" onclick="openEvolveModal(null, 'Living Note Exploration', 'add_section')">
               <span>+ Add New Section</span>
             </button>
-            <button type="button" class="tool-btn evolve-action-btn" style="background: var(--accent-tint); border-color: var(--border-accent); color: var(--success-text);" onclick="triggerPlanCode()">
-              <span>💻 Plan Interactive Code</span>
+            <button type="button" class="tool-btn evolve-action-btn" onclick="triggerPlanCode()">
+              <span>${uiIcon('code-xml')} Plan Interactive Code</span>
             </button>
-            <button type="button" class="tool-btn evolve-action-btn" style="background: var(--color-purple-tint); border-color: var(--border-purple); color: var(--purple-text);" onclick="openAssessmentModal()">
-              <span>🧠 Test Mastery &amp; Flashcards</span>
+            <button type="button" class="tool-btn evolve-action-btn" onclick="openAssessmentModal()">
+              <span>${uiIcon('brain')} Test Mastery &amp; Flashcards</span>
             </button>
-            <button type="button" class="tool-btn evolve-action-btn" style="background: var(--accent-tint); border-color: var(--border-accent); color: var(--success-text);" onclick="triggerPlanVisuals()">
-              <span>📊 Plan Visual Architecture</span>
+            <button type="button" class="tool-btn evolve-action-btn" onclick="triggerPlanVisuals()">
+              <span>${uiIcon('chart-column')} Plan Visual Architecture</span>
             </button>
-            <button type="button" class="tool-btn evolve-action-btn" style="background: var(--color-blue-tint); border-color: var(--border-blue); color: var(--blue-text);" onclick="openMemoryModal('history')">
-              <span>🧠 Knowledge Memory</span>
+            <button type="button" class="tool-btn evolve-action-btn" onclick="openMemoryModal('history')">
+              <span>${uiIcon('brain')} Knowledge Memory</span>
             </button>
           </div>
         </div>
@@ -446,7 +446,7 @@
       if (b.type === 'definition') {
         return `
           <div class="block-definition">
-            <div class="def-term"><span>📖</span><span>${escapeHtml(b.term || 'Definition')}</span></div>
+            <div class="def-term"><span>${uiIcon('book-open')}</span><span>${escapeHtml(b.term || 'Definition')}</span></div>
             <div class="def-content">${renderMarkdownText(b.content || '')}</div>
           </div>
         `;
@@ -454,7 +454,7 @@
       if (b.type === 'warning') {
         return `
           <div class="block-warning">
-            <div class="warning-title"><span>⚠️</span><span>${escapeHtml(b.title || 'Important Note / Misconception')}</span></div>
+            <div class="warning-title"><span>${uiIcon('triangle-alert')}</span><span>${escapeHtml(b.title || 'Important Note / Misconception')}</span></div>
             <div class="warning-content">${renderMarkdownText(b.content || '')}</div>
           </div>
         `;
@@ -462,7 +462,7 @@
       if (b.type === 'example') {
         return `
           <div class="block-example">
-            <div class="example-title"><span>💡</span><span>${escapeHtml(b.title || 'Example Walkthrough')}</span></div>
+            <div class="example-title"><span>${uiIcon('lightbulb')}</span><span>${escapeHtml(b.title || 'Example Walkthrough')}</span></div>
             <div class="example-content">${renderMarkdownText(b.content || '')}</div>
           </div>
         `;
@@ -474,25 +474,7 @@
         const isPython = lang === 'python' || lang === 'py';
         const isRunnable = b.runnable !== undefined ? Boolean(b.runnable) : isPython;
         const codeTitle = b.title || (isPython ? 'Python Implementation' : `${lang.toUpperCase()} Implementation`);
-        const langIcons = {
-          python: '🐍',
-          py: '🐍',
-          cpp: '⚙️',
-          'c++': '⚙️',
-          c: '⚙️',
-          go: '🐹',
-          golang: '🐹',
-          rust: '🦀',
-          rs: '🦀',
-          typescript: '⚡',
-          ts: '⚡',
-          javascript: '🟨',
-          js: '🟨',
-          sql: '💾',
-          bash: '⚡',
-          sh: '⚡'
-        };
-        const langIcon = langIcons[lang] || '💻';
+        const langIcon = uiIcon('code-xml');
 
         return `
           <div class="block-code" id="card-${codeId}">
@@ -500,20 +482,20 @@
               <div class="code-header-left">
                 <span class="code-lang-tag tag-${lang}">${langIcon} ${lang.toUpperCase()}</span>
                 <span class="code-title-text">${escapeHtml(codeTitle)}</span>
-                ${b.complexity ? `<span class="code-complexity-pill" title="Algorithmic Complexity">⚡ ${escapeHtml(b.complexity)}</span>` : ''}
+                ${b.complexity ? `<span class="code-complexity-pill" title="Algorithmic Complexity">${uiIcon('zap')} ${escapeHtml(b.complexity)}</span>` : ''}
               </div>
               <div class="code-actions">
                 ${isRunnable ? `
                 <button type="button" class="code-btn-run" id="btn-run-${codeId}" onclick="runCodeInSandbox('${codeId}')" title="Execute Python in browser WebAssembly sandbox">
                   <span id="run-text-${codeId}">▶ Run Code</span>
-                  <span id="run-spinner-${codeId}" style="display:none;">⏳ Executing...</span>
+                  <span id="run-spinner-${codeId}" style="display:none;">${uiIcon('loader-circle', 'icon-spin')} Executing...</span>
                 </button>` : ''}
                 <button type="button" class="code-btn-copy" onclick="copyCodeFromBlock(this, '${codeId}')" title="Copy code">
-                  <span>📋 Copy</span>
+                  <span>${uiIcon('clipboard-copy')} Copy</span>
                 </button>
                 ${sectionId ? `
-                <button type="button" class="code-btn-refine" onclick="openSectionCodeModal('${sectionId}', '${escapeJsString(codeTitle)}')" title="Regenerate or customize with Agent 8">
-                  <span>🔄 Refine</span>
+                <button type="button" class="code-btn-refine" onclick="openSectionCodeModal('${sectionId}', '${escapeJsString(codeTitle)}')" title="Regenerate or customize this code">
+                  <span>${uiIcon('refresh-cw')} Refine</span>
                 </button>` : ''}
               </div>
             </div>
@@ -521,7 +503,7 @@
             ${b.expected_output ? `
             <div class="code-expected-wrap">
               <details class="code-expected-details">
-                <summary>📋 Expected Output</summary>
+                <summary>${uiIcon('clipboard-copy')} Expected Output</summary>
                 <pre class="expected-stdout">${escapeHtml(b.expected_output)}</pre>
               </details>
             </div>` : ''}
@@ -553,28 +535,28 @@
           <div class="block-diagram" id="card-${diagId}">
             <div class="diagram-header">
               <div class="diagram-title-wrap">
-                <span class="diagram-badge">⚡ ${escapeHtml(diagType)}</span>
+                <span class="diagram-badge">${uiIcon('zap')} ${escapeHtml(diagType)}</span>
                 <span class="diagram-title">${escapeHtml(diagTitle)}</span>
               </div>
               <div class="diagram-actions">
                 <button type="button" class="diag-action-btn" title="Inspect Fullscreen & Zoom" onclick="openDiagramFullscreen('${diagId}', '${escapeJsString(diagTitle)}', '${escapeJsString(diagType)}')">
-                  <span>🔍 Inspect</span>
+                  <span>${uiIcon('search')} Inspect</span>
                 </button>
                 <button type="button" class="diag-action-btn" title="Copy Mermaid Specification" onclick="copyDiagramSpec(this, '${diagId}')">
-                  <span>📋 Copy Spec</span>
+                  <span>${uiIcon('clipboard-copy')} Copy Spec</span>
                 </button>
                 <button type="button" class="diag-action-btn" title="Download SVG Vector Image" onclick="downloadDiagramSvg('${diagId}', '${escapeJsString(diagTitle)}')">
-                  <span>💾 SVG</span>
+                  <span>${uiIcon('download')} SVG</span>
                 </button>
                 ${sectionId ? `
-                <button type="button" class="diag-action-btn diag-btn-regen" title="Regenerate / Redesign with Agent 7" onclick="openSectionVisualModal('${sectionId}', '${escapeJsString(diagTitle)}')">
-                  <span>🔄 Redesign</span>
+                <button type="button" class="diag-action-btn diag-btn-regen" title="Regenerate or redesign this diagram" onclick="openSectionVisualModal('${sectionId}', '${escapeJsString(diagTitle)}')">
+                  <span>${uiIcon('refresh-cw')} Redesign</span>
                 </button>` : ''}
               </div>
             </div>
             <div class="diagram-canvas-container" id="container-${diagId}">
               <div class="mermaid-block" id="${diagId}">
-                <div class="diagram-skeleton">⚡ Rendering architecture flow...</div>
+                <div class="diagram-skeleton">${uiIcon('zap')} Rendering architecture flow...</div>
               </div>
             </div>
             ${b.caption ? `<div class="diagram-caption"><strong>Figure:</strong> ${escapeHtml(b.caption)}</div>` : ''}
@@ -607,7 +589,7 @@
         return `
           <div class="block-comparison">
             <div class="comparison-title">${escapeHtml(b.title || 'Conceptual Comparison')}</div>
-            ${tableHtml ? `${contentHtml ? `<div style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 0.75rem;">${contentHtml}</div>` : ''}${tableHtml}` : `${contentHtml}`}
+            ${tableHtml ? `${contentHtml ? `<div class="text-md" style="color: var(--text-secondary); margin-bottom: 0.75rem;">${contentHtml}</div>` : ''}${tableHtml}` : `${contentHtml}`}
           </div>
         `;
       }
@@ -626,7 +608,7 @@
       const btn = isPdf ? document.getElementById('btn-export-pdf') : null;
       const originalHtml = btn ? btn.innerHTML : '';
       if (btn) {
-        btn.innerHTML = '<span class="btn-icon">⏳</span><span class="btn-label">Compiling...</span>';
+        btn.innerHTML = '<span class="btn-icon">' + uiIcon('loader-circle', 'icon-spin') + '</span><span class="btn-label">Compiling...</span>';
         btn.disabled = true;
       }
 
