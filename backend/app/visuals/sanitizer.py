@@ -161,8 +161,8 @@ def generate_fallback_mermaid(visual_type: str = "flowchart", title: str = "Tech
         Execution <--> StateStore[("State Store / Cache")]
     end
 
-    classDef primary fill:#1e1b4b,stroke:#6366f1,stroke-width:2px,color:#f8fafc;
-    classDef secondary fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#f8fafc;
+    classDef primary fill:#3a2f1a,stroke:#d9a441,stroke-width:2px,color:#ece8df;
+    classDef secondary fill:#2f4a2a,stroke:#7fa37a,stroke-width:2px,color:#ece8df;
     class ClientApp,Dispatcher,Controller,Execution primary;
     class StateStore secondary;"""
 
@@ -174,9 +174,9 @@ def generate_fallback_mermaid(visual_type: str = "flowchart", title: str = "Tech
     EvalNode -- Yes --> ResultNode["Optimized Output State"]
     EvalNode -- No --> FallbackNode["Compensate & Handle Edge Case"]
 
-    classDef accent fill:#312e81,stroke:#818cf8,stroke-width:2px,color:#f8fafc;
-    classDef success fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc;
-    classDef warn fill:#78350f,stroke:#f59e0b,stroke-width:2px,color:#f8fafc;
+    classDef accent fill:#4a3a1c,stroke:#d9a441,stroke-width:2px,color:#ece8df;
+    classDef success fill:#2f4a2a,stroke:#7fa37a,stroke-width:2px,color:#ece8df;
+    classDef warn fill:#6b2f20,stroke:#c4684f,stroke-width:2px,color:#ece8df;
     class PrepNode,ExecNode accent;
     class ResultNode success;
     class FallbackNode warn;"""
