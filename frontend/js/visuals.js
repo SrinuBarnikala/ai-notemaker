@@ -1,28 +1,54 @@
 /* visuals.js — Agent 7 Visual Planner & Mermaid Architecture Diagrams */
 
+    // Stored notes carry the old indigo/emerald classDef colors from the Mermaid fallback templates;
+    // remap them to the current palette at render time so they match both themes.
+    const LEGACY_MERMAID_COLORS = {
+      '#1e1b4b': '#3a2f1a',
+      '#312e81': '#4a3a1c',
+      '#6366f1': '#d9a441',
+      '#818cf8': '#d9a441',
+      '#064e3b': '#2f4a2a',
+      '#10b981': '#7fa37a',
+      '#34d399': '#7fa37a',
+      '#78350f': '#6b2f20',
+      '#f59e0b': '#c4684f',
+      '#f8fafc': '#ece8df'
+    };
+
+    function themeMermaidSpec(spec) {
+      if (!spec) return spec;
+      return spec.replace(/#[0-9a-fA-F]{6}\b/g, (hex) => LEGACY_MERMAID_COLORS[hex.toLowerCase()] || hex);
+    }
+
     function getMermaidConfig(theme) {
       const isLight = (theme === 'light');
       if (isLight) {
         return {
           startOnLoad: false,
-          theme: 'default',
+          theme: 'base',
           themeVariables: {
             darkMode: false,
-            background: '#ffffff',
-            primaryColor: '#e0e7ff',
-            primaryTextColor: '#0f172a',
-            primaryBorderColor: '#6366f1',
-            lineColor: '#4f46e5',
-            secondaryColor: '#d1fae5',
-            secondaryTextColor: '#064e3b',
-            secondaryBorderColor: '#059669',
-            tertiaryColor: '#f1f5f9',
-            tertiaryTextColor: '#1e293b',
-            tertiaryBorderColor: '#cbd5e1',
-            noteBkgColor: '#fef3c7',
-            noteTextColor: '#78350f',
-            noteBorderColor: '#f59e0b',
-            fontFamily: "'JetBrains Mono', monospace",
+            background: '#fffdf8',
+            primaryColor: '#efebe1',
+            primaryTextColor: '#1f1d19',
+            primaryBorderColor: '#a79f8c',
+            textColor: '#1f1d19',
+            mainBkg: '#efebe1',
+            nodeBorder: '#a79f8c',
+            clusterBkg: '#f6f3ec',
+            clusterBorder: '#d3ccbb',
+            edgeLabelBackground: '#fffdf8',
+            lineColor: '#6b6558',
+            secondaryColor: '#dde8d9',
+            secondaryTextColor: '#27441f',
+            secondaryBorderColor: '#3f6b3a',
+            tertiaryColor: '#efebe1',
+            tertiaryTextColor: '#433f37',
+            tertiaryBorderColor: '#d3ccbb',
+            noteBkgColor: '#f4ead2',
+            noteTextColor: '#5c3b08',
+            noteBorderColor: '#a8741a',
+            fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
             fontSize: '13px',
           },
           flowchart: { curve: 'basis', htmlLabels: true },
@@ -32,24 +58,30 @@
       }
       return {
         startOnLoad: false,
-        theme: 'dark',
+        theme: 'base',
         themeVariables: {
           darkMode: true,
-          background: '#070b12',
-          primaryColor: '#312e81',
-          primaryTextColor: '#f8fafc',
-          primaryBorderColor: '#6366f1',
-          lineColor: '#818cf8',
-          secondaryColor: '#064e3b',
-          secondaryTextColor: '#a7f3d0',
-          secondaryBorderColor: '#10b981',
-          tertiaryColor: '#1e1b4b',
-          tertiaryTextColor: '#e0e7ff',
-          tertiaryBorderColor: '#4338ca',
-          noteBkgColor: '#2d2006',
-          noteTextColor: '#fde68a',
-          noteBorderColor: '#b45309',
-          fontFamily: "'JetBrains Mono', monospace",
+          background: '#100f0d',
+          primaryColor: '#24221f',
+          primaryTextColor: '#ece8df',
+          primaryBorderColor: '#6b6558',
+          textColor: '#ece8df',
+          mainBkg: '#24221f',
+          nodeBorder: '#6b6558',
+          clusterBkg: '#1c1b18',
+          clusterBorder: '#504c44',
+          edgeLabelBackground: '#1c1b18',
+          lineColor: '#b3aa97',
+          secondaryColor: '#26331f',
+          secondaryTextColor: '#cfe3cb',
+          secondaryBorderColor: '#7fa37a',
+          tertiaryColor: '#24221f',
+          tertiaryTextColor: '#c9c3b6',
+          tertiaryBorderColor: '#504c44',
+          noteBkgColor: '#33281a',
+          noteTextColor: '#f1d9a0',
+          noteBorderColor: '#b8862f',
+          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
           fontSize: '13px',
         },
         flowchart: { curve: 'basis', htmlLabels: true },
@@ -58,11 +90,26 @@
       };
     }
 
+    // Mermaid sizes node boxes from measured text. If the web font has not loaded yet it measures
+    // with the fallback font and the labels get clipped once Plus Jakarta Sans swaps in.
+    async function waitForUiFonts() {
+      if (!document.fonts || !document.fonts.load) return;
+      try {
+        await Promise.all([
+          document.fonts.load("400 13px 'Plus Jakarta Sans'"),
+          document.fonts.load("600 13px 'Plus Jakarta Sans'"),
+        ]);
+      } catch (err) {
+        console.debug("UI font preload skipped:", err);
+      }
+    }
+
     async function ensureMermaidLoaded(maxWaitMs = 6000) {
       const start = Date.now();
       while (!window.mermaid && (Date.now() - start) < maxWaitMs) {
         await new Promise(r => setTimeout(r, 100));
       }
+      await waitForUiFonts();
       if (window.mermaid) {
         const activeTheme = (typeof getTheme === 'function') ? getTheme() : (document.documentElement.getAttribute('data-theme') || 'dark');
         if (!window._mermaidInitialized || window._mermaidCurrentTheme !== activeTheme) {
@@ -95,14 +142,14 @@
         try {
           const cleanId = id.replace(/[^a-zA-Z0-9]/g, '');
           const svgId = 'svg-' + cleanId + '-' + Math.random().toString(36).substring(2, 7);
-          const { svg } = await mermaid.render(svgId, cleanSpec);
+          const { svg } = await mermaid.render(svgId, themeMermaidSpec(cleanSpec));
           el.innerHTML = svg;
           el.classList.add('rendered');
         } catch (err) {
           console.warn('Mermaid rendering fallback for', id, err);
           el.innerHTML = `
             <div class="diagram-render-fallback">
-              <div class="fallback-note">⚡ Visual Architecture Specification:</div>
+              <div class="fallback-note">${uiIcon('zap')} Visual Architecture Specification:</div>
               <pre class="diagram-spec-pre">${escapeHtml(cleanSpec)}</pre>
             </div>
           `;
@@ -133,7 +180,7 @@
           if (canvas && modalSpec) {
             try {
               const modalSvgId = 'modal-svg-' + Math.random().toString(36).substring(2, 7);
-              const { svg } = await mermaid.render(modalSvgId, modalSpec);
+              const { svg } = await mermaid.render(modalSvgId, themeMermaidSpec(modalSpec));
               canvas.innerHTML = svg;
               const newSvg = canvas.querySelector('svg');
               if (newSvg) {
@@ -155,7 +202,7 @@
       if (!spec) return;
       navigator.clipboard.writeText(spec).then(() => {
         const orig = btn.innerHTML;
-        btn.innerHTML = '<span>✅ Copied!</span>';
+        btn.innerHTML = '<span>' + uiIcon('circle-check') + ' Copied!</span>';
         setTimeout(() => { btn.innerHTML = orig; }, 1800);
       });
     }
@@ -175,7 +222,7 @@
         if (spec) {
           try {
             const tempId = 'dl-svg-' + Math.random().toString(36).substring(2, 7);
-            const res = await mermaid.render(tempId, spec);
+            const res = await mermaid.render(tempId, themeMermaidSpec(spec));
             if (res && res.svg) {
               triggerSvgDownload(res.svg, title);
               return;
@@ -217,7 +264,7 @@
       const zoomPill = document.getElementById('diag-modal-zoom-pill');
 
       if (modalTitle) modalTitle.textContent = title || 'System Architecture Diagram';
-      if (modalBadge) modalBadge.textContent = '⚡ ' + (diagType || 'ARCHITECTURE').toUpperCase();
+      if (modalBadge) setIconLabel(modalBadge, 'zap', (diagType || 'ARCHITECTURE').toUpperCase());
       if (zoomPill) zoomPill.textContent = '100%';
 
       const sourceContainer = document.getElementById(diagId);
@@ -238,7 +285,7 @@
         if (window.mermaid && spec) {
           try {
             const modalSvgId = 'modal-svg-' + Math.random().toString(36).substring(2, 7);
-            const { svg } = await mermaid.render(modalSvgId, spec);
+            const { svg } = await mermaid.render(modalSvgId, themeMermaidSpec(spec));
             canvas.innerHTML = svg;
             const newSvg = canvas.querySelector('svg');
             if (newSvg) {
@@ -252,7 +299,7 @@
           }
         }
         if (!rendered) {
-          canvas.innerHTML = `<pre class="diagram-spec-pre" style="font-size: 1rem; padding: 2rem;">${escapeHtml(spec)}</pre>`;
+          canvas.innerHTML = `<pre class="diagram-spec-pre text-md" style="padding: 2rem;">${escapeHtml(spec)}</pre>`;
         }
       }
 
@@ -385,7 +432,7 @@
       const origHtml = btn ? btn.innerHTML : '';
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<span>⏳ Planning Visuals...</span>';
+        btn.innerHTML = '<span>' + uiIcon('loader-circle', 'icon-spin') + ' Planning Visuals...</span>';
       }
 
       try {
@@ -399,7 +446,7 @@
           renderNote(updatedNote);
         }
 
-        alert(`Agent 7 successfully synthesized & planned ${plan.total_diagrams} architecture diagram(s) across your note!`);
+        alert(`Planned ${plan.total_diagrams} architecture diagram(s) across your note.`);
       } catch (err) {
         alert(`Visual Planner error: ${err.message}`);
       } finally {

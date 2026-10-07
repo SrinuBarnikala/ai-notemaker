@@ -20,14 +20,14 @@ async function checkLlmStatus() {
         badge.style.background = 'var(--color-amber-tint)';
         badge.style.borderColor = 'var(--border-amber)';
         badge.style.color = 'var(--warning-text)';
-        badge.textContent = `⚠️ Model '${data.llm_model}' missing`;
+        setIconLabel(badge, 'triangle-alert', `Model '${data.llm_model}' missing`);
         badge.title = data.model_warning || `Model '${data.llm_model}' not pulled. Notes will use deterministic offline fallbacks.`;
       } else if (data.llm_healthy) {
         badge.style.display = 'inline-flex';
         badge.style.background = 'var(--accent-tint)';
         badge.style.borderColor = 'var(--border-accent)';
         badge.style.color = 'var(--success-text)';
-        badge.textContent = `🟢 Ollama: ${data.llm_model}`;
+        setIconLabel(badge, 'circle-check', `Ollama: ${data.llm_model}`);
         badge.title = `Connected to local Ollama with model '${data.llm_model}'.`;
       }
     }

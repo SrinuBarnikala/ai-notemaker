@@ -289,7 +289,6 @@ def test_frontend_has_search_and_memory_elements(client: TestClient):
     # Verify header and toolbar search & memory triggers
     assert 'openSearchModal()' in html
     assert 'openMemoryModal(' in html
-    assert 'SEARCH &amp; KNOWLEDGE MEMORY' in html
-    assert 'PHASE 6' in html
+    assert 'Knowledge Memory &amp; Learning History' in html
 
 

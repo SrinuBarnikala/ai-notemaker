@@ -97,9 +97,9 @@ function renderInitialSearchState() {
   if (!container) return;
   container.innerHTML = `
     <div class="search-empty-state">
-      <div style="font-size: 2.2rem; margin-bottom: 0.6rem;">🔍</div>
-      <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.3rem;">Instant Universal Technical Search</div>
-      <div style="font-size: 0.82rem; color: var(--text-muted); max-width: 440px; margin: 0 auto;">
+      <div class="text-icon-lg" style="margin-bottom: 0.6rem;">${uiIcon('search')}</div>
+      <div class="fw-semibold" style="color: var(--text-primary); margin-bottom: 0.3rem;">Instant Universal Technical Search</div>
+      <div class="text-sm" style="color: var(--text-muted); max-width: 440px; margin: 0 auto;">
         Type any concept, code keyword, section title, or flashcard term. Press <kbd>↑</kbd> <kbd>↓</kbd> to navigate and <kbd>Enter</kbd> to jump.
       </div>
     </div>
@@ -116,8 +116,8 @@ async function triggerSearch() {
   }
 
   container.innerHTML = `
-    <div style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
-      <span class="spinner-pulse">⏳</span> Searching notes, concepts, code & assessments...
+    <div class="text-sm" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+      <span class="spinner-pulse">${uiIcon('loader-circle', 'icon-spin')}</span> Searching notes, concepts, code & assessments...
     </div>
   `;
 
@@ -127,7 +127,7 @@ async function triggerSearch() {
     renderSearchResults(data);
   } catch (err) {
     container.innerHTML = `
-      <div style="padding: 2rem; text-align: center; color: var(--danger-text); font-size: 0.85rem;">
+      <div class="text-sm" style="padding: 2rem; text-align: center; color: var(--danger-text);">
         Failed to fetch search results: ${escapeHtml(err.message)}
       </div>
     `;
@@ -143,9 +143,9 @@ function renderSearchResults(data) {
   if (!data.results || data.results.length === 0) {
     container.innerHTML = `
       <div class="search-empty-state">
-        <div style="font-size: 1.8rem; margin-bottom: 0.5rem;">🕵️</div>
-        <div style="font-weight: 600; color: var(--text-primary);">No results found for "${escapeHtml(data.query)}"</div>
-        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+        <div class="text-2xl" style="margin-bottom: 0.5rem;">${uiIcon('search-x')}</div>
+        <div class="fw-semibold" style="color: var(--text-primary);">No results found for "${escapeHtml(data.query)}"</div>
+        <div class="text-sm" style="color: var(--text-muted); margin-top: 0.25rem;">
           Try searching for another technical concept, journey, or keyword.
         </div>
       </div>
@@ -154,12 +154,12 @@ function renderSearchResults(data) {
   }
 
   const typeIcons = {
-    journey: '🗺️',
-    note: '📖',
-    section: '📑',
-    concept: '💡',
-    code: '💻',
-    flashcard: '📇',
+    journey: uiIcon('map'),
+    note: uiIcon('book-open'),
+    section: uiIcon('file-text'),
+    concept: uiIcon('lightbulb'),
+    code: uiIcon('code-xml'),
+    flashcard: uiIcon('layers'),
   };
 
   const typeColors = {
@@ -172,12 +172,12 @@ function renderSearchResults(data) {
   };
 
   container.innerHTML = data.results.map((r, idx) => {
-    const icon = typeIcons[r.result_type] || '🔍';
+    const icon = typeIcons[r.result_type] || uiIcon('search');
     const color = typeColors[r.result_type] || 'var(--text-muted)';
     return `
       <div class="search-result-row" data-index="${idx}" onclick="selectSearchResult('${escapeJsString(r.id)}', '${r.result_type}', '${escapeJsString(r.journey_id || '')}', '${escapeJsString(r.note_id || '')}', '${escapeJsString(r.section_id || '')}', '${escapeJsString(r.title)}')">
         <div class="result-icon-col" style="color: ${color};">
-          <span style="font-size: 1.15rem;">${icon}</span>
+          <span class="text-lg">${icon}</span>
         </div>
         <div class="result-content-col">
           <div class="result-header-row">
@@ -317,8 +317,8 @@ async function loadLearningHistory() {
   if (!container) return;
 
   container.innerHTML = `
-    <div style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
-      <span class="spinner-pulse">⏳</span> Loading learning journeys timeline...
+    <div class="text-sm" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+      <span class="spinner-pulse">${uiIcon('loader-circle', 'icon-spin')}</span> Loading learning journeys timeline...
     </div>
   `;
 
@@ -328,9 +328,9 @@ async function loadLearningHistory() {
     if (!items || items.length === 0) {
       container.innerHTML = `
         <div class="search-empty-state">
-          <div style="font-size: 1.8rem; margin-bottom: 0.4rem;">🌱</div>
-          <div style="font-weight: 600; color: var(--text-primary);">No learning journeys yet</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">
+          <div class="text-2xl" style="margin-bottom: 0.4rem;">${uiIcon('sprout')}</div>
+          <div class="fw-semibold" style="color: var(--text-primary);">No learning journeys yet</div>
+          <div class="text-sm" style="color: var(--text-muted); margin-top: 0.2rem;">
             Start your first technical exploration using the topic intake form above!
           </div>
         </div>
@@ -356,30 +356,30 @@ async function loadLearningHistory() {
             <div>
               <div class="mhistory-topic-title">${escapeHtml(item.topic)}</div>
               <div class="mhistory-meta">
-                <span>📅 ${dt}</span>
+                <span>${uiIcon('calendar')} ${dt}</span>
                 <span>•</span>
-                <span class="mstatus-pill mstatus-${item.status}">${item.status.toUpperCase()}</span>
+                <span class="mstatus-pill mstatus-${item.status}">${formatStatus(item.status)}</span>
                 ${item.note_version ? `<span>•</span><span class="mver-pill">Note v${item.note_version}</span>` : ''}
                 ${item.latest_quiz_score ? `<span>•</span><span class="mscore-pill">Quiz: ${item.latest_quiz_score}</span>` : ''}
               </div>
             </div>
             <div class="mhistory-actions">
-              <button type="button" class="btn-submit" onclick="selectJourneyFromHistory('${item.id}')" style="padding: 0.4rem 0.85rem; font-size: 0.775rem;">
-                <span>📖 Open Living Note</span>
+              <button type="button" class="btn-submit text-xs" onclick="selectJourneyFromHistory('${item.id}')" style="padding: 0.4rem 0.85rem;">
+                <span>${uiIcon('book-open')} Open Living Note</span>
               </button>
             </div>
           </div>
           <div class="mhistory-concepts-row">
-            <span style="font-size: 0.75rem; color: var(--text-muted); margin-right: 0.3rem;">Concepts:</span>
-            ${conceptChips || '<span style="font-size: 0.75rem; color: var(--text-muted);">None recorded</span>'}
-            ${(item.concept_names || []).length > 6 ? `<span style="font-size: 0.75rem; color: var(--purple-text);">+${item.concept_names.length - 6} more</span>` : ''}
+            <span class="text-xs" style="color: var(--text-muted); margin-right: 0.3rem;">Concepts:</span>
+            ${conceptChips || '<span class="text-xs" style="color: var(--text-muted);">None recorded</span>'}
+            ${(item.concept_names || []).length > 6 ? `<span class="text-xs" style="color: var(--purple-text);">+${item.concept_names.length - 6} more</span>` : ''}
           </div>
         </div>
       `;
     }).join('');
   } catch (err) {
     container.innerHTML = `
-      <div style="padding: 2rem; text-align: center; color: var(--danger-text); font-size: 0.85rem;">
+      <div class="text-sm" style="padding: 2rem; text-align: center; color: var(--danger-text);">
         Failed to load history: ${escapeHtml(err.message)}
       </div>
     `;
@@ -398,8 +398,8 @@ async function loadConceptMemories() {
   if (!container) return;
 
   container.innerHTML = `
-    <div style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
-      <span class="spinner-pulse">⏳</span> Loading concept memory inventory...
+    <div class="text-sm" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+      <span class="spinner-pulse">${uiIcon('loader-circle', 'icon-spin')}</span> Loading concept memory inventory...
     </div>
   `;
 
@@ -408,7 +408,7 @@ async function loadConceptMemories() {
     renderFilteredConceptGrid('');
   } catch (err) {
     container.innerHTML = `
-      <div style="padding: 2rem; text-align: center; color: var(--danger-text); font-size: 0.85rem;">
+      <div class="text-sm" style="padding: 2rem; text-align: center; color: var(--danger-text);">
         Failed to load concepts: ${escapeHtml(err.message)}
       </div>
     `;
@@ -432,7 +432,7 @@ function renderFilteredConceptGrid(q) {
 
   if (filtered.length === 0) {
     container.innerHTML = `
-      <div style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.85rem; grid-column: 1 / -1;">
+      <div class="text-sm" style="padding: 2rem; text-align: center; color: var(--text-muted); grid-column: 1 / -1;">
         No concepts matching filter.
       </div>
     `;
@@ -449,12 +449,12 @@ function renderFilteredConceptGrid(q) {
         <div class="mconcept-card-header">
           <div class="mconcept-name">${escapeHtml(c.concept_name)}</div>
           <span class="mconcept-status" style="background: ${statusColor}18; color: ${statusColor}; border: 1px solid ${statusColor}40;">
-            ${c.current_status.toUpperCase()}
+            ${conceptStatusLabel(c.current_status).toUpperCase()}
           </span>
         </div>
         <div class="mconcept-story">${escapeHtml(c.provenance_story)}</div>
         <div class="mconcept-footer">
-          <span class="mconcept-apps">🔁 ${c.total_appearances} journey${c.total_appearances > 1 ? 's' : ''}</span>
+          <span class="mconcept-apps">${uiIcon('repeat')} ${c.total_appearances} journey${c.total_appearances > 1 ? 's' : ''}</span>
           <span class="mconcept-date">Seen ${firstDate}</span>
         </div>
       </div>
@@ -469,9 +469,9 @@ async function loadRelatedTopics() {
   if (!currentJourneyId) {
     container.innerHTML = `
       <div class="search-empty-state">
-        <div style="font-size: 1.8rem; margin-bottom: 0.4rem;">🧭</div>
-        <div style="font-weight: 600; color: var(--text-primary);">No active journey selected</div>
-        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">
+        <div class="text-2xl" style="margin-bottom: 0.4rem;">${uiIcon('compass')}</div>
+        <div class="fw-semibold" style="color: var(--text-primary);">No active journey selected</div>
+        <div class="text-sm" style="color: var(--text-muted); margin-top: 0.2rem;">
           Select or start a learning journey to see cross-journey concept links and recommended next paths.
         </div>
       </div>
@@ -480,8 +480,8 @@ async function loadRelatedTopics() {
   }
 
   container.innerHTML = `
-    <div style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
-      <span class="spinner-pulse">⏳</span> Synthesizing related topics and concept bridges...
+    <div class="text-sm" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+      <span class="spinner-pulse">${uiIcon('loader-circle', 'icon-spin')}</span> Synthesizing related topics and concept bridges...
     </div>
   `;
 
@@ -490,10 +490,10 @@ async function loadRelatedTopics() {
 
     const bridgingHtml = (data.bridging_concepts || []).length > 0 ? `
       <div class="mbridge-banner">
-        <div style="font-weight: 600; color: var(--purple-text); font-size: 0.85rem; margin-bottom: 0.3rem;">
-          🌉 Cross-Journey Concept Bridges (${data.bridging_concepts.length})
+        <div class="text-sm fw-semibold" style="color: var(--purple-text); margin-bottom: 0.3rem;">
+          ${uiIcon('link-2')} Cross-Journey Concept Bridges (${data.bridging_concepts.length})
         </div>
-        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.6rem;">
+        <div class="text-sm" style="color: var(--text-muted); margin-bottom: 0.6rem;">
           These foundational concepts link your current exploration with other technical domains you have studied:
         </div>
         <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
@@ -513,12 +513,12 @@ async function loadRelatedTopics() {
         <div class="mrelated-reason">${escapeHtml(item.reason)}</div>
         <div class="mrelated-footer">
           ${item.existing_journey_id ? `
-            <button type="button" class="btn-submit" onclick="selectJourneyFromHistory('${item.existing_journey_id}')" style="padding: 0.35rem 0.8rem; font-size: 0.775rem;">
-              <span>📖 Open Existing Journey</span>
+            <button type="button" class="btn-submit text-xs" onclick="selectJourneyFromHistory('${item.existing_journey_id}')" style="padding: 0.35rem 0.8rem;">
+              <span>${uiIcon('book-open')} Open Existing Journey</span>
             </button>
           ` : `
-            <button type="button" class="btn-submit" onclick="startNewJourneyWithTopic('${escapeJsString(item.topic)}')" style="padding: 0.35rem 0.8rem; font-size: 0.775rem; background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);">
-              <span>🚀 Start This Journey</span>
+            <button type="button" class="btn-submit text-xs" onclick="startNewJourneyWithTopic('${escapeJsString(item.topic)}')" style="padding: 0.35rem 0.8rem;">
+              <span>${uiIcon('rocket')} Start This Journey</span>
             </button>
           `}
         </div>
@@ -533,7 +533,7 @@ async function loadRelatedTopics() {
     `;
   } catch (err) {
     container.innerHTML = `
-      <div style="padding: 2rem; text-align: center; color: var(--danger-text); font-size: 0.85rem;">
+      <div class="text-sm" style="padding: 2rem; text-align: center; color: var(--danger-text);">
         Failed to load related topics: ${escapeHtml(err.message)}
       </div>
     `;
@@ -563,7 +563,7 @@ async function openConceptProvenanceModal(conceptName) {
 
   titleEl.textContent = conceptName;
   storyEl.textContent = 'Retrieving concept memory provenance...';
-  feedEl.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem;">Loading timeline...</div>';
+  feedEl.innerHTML = '<div class="text-sm" style="color: var(--text-muted);">Loading timeline...</div>';
   relatedEl.innerHTML = '';
 
   try {
@@ -582,11 +582,11 @@ async function openConceptProvenanceModal(conceptName) {
         <div class="cprov-step-item">
           <div class="cprov-step-num">${idx + 1}</div>
           <div class="cprov-step-content">
-            <div style="font-weight: 600; color: var(--text-primary); font-size: 0.85rem;">${escapeHtml(step.journey_topic)}</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">
-              <span>${dt}</span> • <span>Event: ${step.event_type.replace(/_/g, ' ')}</span> • <span style="color: var(--purple-text);">Category: ${step.category}</span>
+            <div class="text-sm fw-semibold" style="color: var(--text-primary);">${escapeHtml(step.journey_topic)}</div>
+            <div class="text-xs" style="color: var(--text-muted); margin-bottom: 0.25rem;">
+              <span>${dt}</span> • <span>Event: ${step.event_type.replace(/_/g, ' ')}</span> • <span style="color: var(--purple-text);">Category: ${sentenceCase(step.category)}</span>
             </div>
-            ${step.context_note ? `<div style="font-size: 0.775rem; color: var(--text-secondary); background: var(--bg-surface-raised);; padding: 0.4rem; border-radius: 4px;">${escapeHtml(step.context_note)}</div>` : ''}
+            ${step.context_note ? `<div class="text-xs" style="color: var(--text-secondary); background: var(--bg-surface-raised); padding: 0.4rem; border-radius: 4px;">${escapeHtml(step.context_note)}</div>` : ''}
           </div>
         </div>
       `;
@@ -595,7 +595,7 @@ async function openConceptProvenanceModal(conceptName) {
     // Render related concept chips
     relatedEl.innerHTML = (data.related_concepts || []).map(rc => `
       <span class="mconcept-chip" onclick="openConceptProvenanceModal('${escapeJsString(rc)}')">${escapeHtml(rc)}</span>
-    `).join('') || '<span style="font-size: 0.75rem; color: var(--text-muted);">None linked</span>';
+    `).join('') || '<span class="text-xs" style="color: var(--text-muted);">None linked</span>';
 
   } catch (err) {
     storyEl.textContent = `Could not load provenance: ${err.message}`;
@@ -637,7 +637,7 @@ function applyInNoteMemoryBadges(crossRefs) {
       badge.className = 'tool-btn memory-ref-badge';
       badge.setAttribute('data-concept', ref.concept_name);
       badge.title = ref.provenance_story;
-      badge.innerHTML = `<span>🧠 Memory: Seen in ${escapeHtml(ref.first_journey_topic.slice(0, 18))}...</span>`;
+      badge.innerHTML = `<span>${uiIcon('brain')} Memory: Seen in ${escapeHtml(ref.first_journey_topic.slice(0, 18))}...</span>`;
       badge.onclick = () => openConceptProvenanceModal(ref.concept_name);
       targetHeader.prepend(badge);
     }

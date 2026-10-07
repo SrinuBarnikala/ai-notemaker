@@ -19,7 +19,7 @@ function resetCopilotState() {
 
   const contextPill = document.getElementById('copilot-context-pill');
   if (contextPill) {
-    contextPill.textContent = '📍 Note Context';
+    setIconLabel(contextPill, 'map-pin', 'Note Context');
     contextPill.title = '';
   }
 
@@ -35,7 +35,7 @@ window.resetCopilotState = resetCopilotState;
 
 function openCopilotDrawer(sectionId = null, sectionTitle = null, prefillQuestion = "", selectedText = null) {
   if (!currentJourneyId) {
-    alert("Please create or open a learning journey first to consult Agent 9 Copilot.");
+    alert("Please create or open a learning journey first to ask the copilot.");
     return;
   }
 
@@ -63,13 +63,13 @@ function openCopilotDrawer(sectionId = null, sectionTitle = null, prefillQuestio
   const contextPill = document.getElementById('copilot-context-pill');
   if (contextPill) {
     if (sectionTitle) {
-      contextPill.textContent = `📍 ${sectionTitle}`;
+      setIconLabel(contextPill, 'map-pin', sectionTitle);
       contextPill.title = `Grounded in section: ${sectionTitle}`;
     } else if (currentTopic) {
-      contextPill.textContent = `📍 ${currentTopic} (All Sections)`;
+      setIconLabel(contextPill, 'map-pin', `${currentTopic} (All Sections)`);
       contextPill.title = "Grounded in entire living note";
     } else {
-      contextPill.textContent = `📍 Note Context`;
+      setIconLabel(contextPill, 'map-pin', 'Note Context');
     }
   }
 
@@ -131,11 +131,11 @@ function renderCopilotWelcome() {
   const topicName = currentTopic || "your topic";
   const welcomeHtml = `
     <div class="copilot-msg assistant">
-      <div class="copilot-avatar">🤖</div>
+      <div class="copilot-avatar">${uiIcon('bot')}</div>
       <div class="copilot-bubble">
-        <div class="copilot-msg-header">Agent 9 &bull; Socratic Copilot</div>
+        <div class="copilot-msg-header">Socratic copilot</div>
         <p>I am your contextual learning copilot for <strong>${escapeHtml(topicName)}</strong>. I adapt to your mental model, address detected knowledge gaps, and can explain any paragraph, diagram, or code block.</p>
-        <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--purple-text);">Ask anything or pick a quick starter below:</p>
+        <p class="text-sm" style="margin-top: 0.5rem; color: var(--purple-text);">Ask anything or pick a quick starter below:</p>
         <div class="copilot-followup-chips" style="margin-top: 0.65rem;">
           <button type="button" class="copilot-chip" onclick="handleQuickPrompt('Why is this architecture designed this way instead of common alternatives?')">Why this architecture?</button>
           <button type="button" class="copilot-chip" onclick="handleQuickPrompt('What are the edge-case failure modes and recovery sequence?')">Edge-case failure modes?</button>
@@ -176,7 +176,7 @@ async function sendCopilotMessage() {
         ${activeCopilotSelectedText ? `<div class="user-quote-ref">“${escapeHtml(activeCopilotSelectedText.substring(0, 100))}...”</div>` : ''}
         ${escapeHtml(question)}
       </div>
-      <div class="copilot-avatar user-avatar">👤</div>
+      <div class="copilot-avatar user-avatar">${uiIcon('user')}</div>
     </div>
   `;
   msgContainer.insertAdjacentHTML('beforeend', userMsgHtml);
@@ -191,12 +191,12 @@ async function sendCopilotMessage() {
   const loadingId = 'copilot-typing-' + Date.now();
   const loadingHtml = `
     <div class="copilot-msg assistant" id="${loadingId}">
-      <div class="copilot-avatar">🤖</div>
+      <div class="copilot-avatar">${uiIcon('bot')}</div>
       <div class="copilot-bubble copilot-typing-bubble">
         <span class="typing-dot"></span>
         <span class="typing-dot"></span>
         <span class="typing-dot"></span>
-        <span style="margin-left: 0.5rem; font-size: 0.8rem; color: var(--purple-text);">Agent 9 analyzing knowledge profile &amp; note context...</span>
+        <span class="text-sm" style="margin-left: 0.5rem; color: var(--purple-text);">Reading your profile and note…</span>
       </div>
     </div>
   `;
@@ -235,10 +235,10 @@ async function sendCopilotMessage() {
 
     const errorHtml = `
       <div class="copilot-msg assistant">
-        <div class="copilot-avatar">⚠️</div>
+        <div class="copilot-avatar">${uiIcon('triangle-alert')}</div>
         <div class="copilot-bubble" style="border-color: var(--border-danger); background: var(--color-danger-tint);">
-          <div style="font-weight: 700; color: var(--danger-text); margin-bottom: 0.3rem;">Copilot Inquire Error</div>
-          <div style="font-size: 0.85rem; color: var(--text-secondary);">${escapeHtml(err.message)}</div>
+          <div class="fw-bold" style="color: var(--danger-text); margin-bottom: 0.3rem;">Copilot Inquire Error</div>
+          <div class="text-sm" style="color: var(--text-secondary);">${escapeHtml(err.message)}</div>
         </div>
       </div>
     `;
@@ -258,8 +258,8 @@ function formatMarkdownResponse(raw) {
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   
   // Headers (### and ##)
-  html = html.replace(/^### (.*$)/gim, '<h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin: 0.6rem 0 0.25rem;">$1</h4>');
-  html = html.replace(/^## (.*$)/gim, '<h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin: 0.75rem 0 0.3rem;">$1</h3>');
+  html = html.replace(/^### (.*$)/gim, '<h4 class="text-md fw-bold" style="color: var(--text-primary); margin: 0.6rem 0 0.25rem;">$1</h4>');
+  html = html.replace(/^## (.*$)/gim, '<h3 class="text-lg fw-bold" style="color: var(--text-primary); margin: 0.75rem 0 0.3rem;">$1</h3>');
 
   // Code blocks: ```lang ... ```
   html = html.replace(/```([a-zA-Z0-9_\-\+]*)\n([\s\S]*?)```/g, function(match, lang, code) {
@@ -296,12 +296,12 @@ function renderAssistantResponse(data) {
     pinBannerHtml = `
       <div class="copilot-pin-banner">
         <div class="pin-banner-left">
-          <div class="pin-banner-badge">📌 HIGH-YIELD INSIGHT</div>
+          <div class="pin-banner-badge">${uiIcon('pin')} HIGH-YIELD INSIGHT</div>
           <div class="pin-banner-title">${escapeHtml(pinCandidate.title || 'Copilot Note Callout')}</div>
           <div class="pin-banner-desc">${escapeHtml(pinCandidate.content.substring(0, 120))}${pinCandidate.content.length > 120 ? '...' : ''}</div>
         </div>
         <button type="button" class="copilot-pin-btn" id="${pinId}" onclick='pinCopilotAnswerToSection("${pinId}", "${escapeJsString(targetSecId || '')}", "${escapeJsString(targetSecTitle)}", ${JSON.stringify(pinCandidate).replace(/'/g, "&#39;")})'>
-          <span>📌 Pin to Note</span>
+          <span>${uiIcon('pin')} Pin to Note</span>
         </button>
       </div>
     `;
@@ -326,9 +326,9 @@ function renderAssistantResponse(data) {
 
   const assistantHtml = `
     <div class="copilot-msg assistant">
-      <div class="copilot-avatar">🤖</div>
+      <div class="copilot-avatar">${uiIcon('bot')}</div>
       <div class="copilot-bubble">
-        <div class="copilot-msg-header">Agent 9 &bull; Socratic Explainer</div>
+        <div class="copilot-msg-header">Socratic explainer</div>
         <div class="copilot-answer-text">${formattedAnswer}</div>
         ${pinBannerHtml}
         ${followupsHtml}
@@ -362,7 +362,7 @@ async function pinCopilotAnswerToSection(btnId, sectionId, sectionTitle, pinCand
 
   const origHtml = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = `<span>⏳ Pinning...</span>`;
+  btn.innerHTML = `<span>${uiIcon('loader-circle', 'icon-spin')} Pinning...</span>`;
 
   try {
     const payload = {
@@ -382,7 +382,7 @@ async function pinCopilotAnswerToSection(btnId, sectionId, sectionTitle, pinCand
     }, "Failed to pin block.");
 
     btn.classList.add('pinned');
-    btn.innerHTML = `<span>✓ Pinned (v${resData.note_version})!</span>`;
+    btn.innerHTML = `<span>${uiIcon('check')} Pinned (v${resData.note_version})!</span>`;
 
     // Automatically reload living note so the reader reflects the pinned block & version bump
     if (typeof loadNote === 'function' && currentNote) {

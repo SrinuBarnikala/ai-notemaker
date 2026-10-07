@@ -40,20 +40,20 @@ let isGraphFullscreen = true; // Workspace is full-viewport by default
 let graphResizeObserver = null;
 
 const COLOR_MAP = {
-  known: { fill: '#059669', stroke: '#34d399', glow: 'rgba(52, 211, 153, 0.45)', text: '#a7f3d0' },
-  partial: { fill: '#d97706', stroke: '#fbbf24', glow: 'rgba(251, 191, 36, 0.45)', text: '#fde68a' },
-  gap: { fill: '#7c3aed', stroke: '#c084fc', glow: 'rgba(192, 132, 252, 0.45)', text: '#e9d5ff' },
-  misconception: { fill: '#dc2626', stroke: '#f87171', glow: 'rgba(248, 113, 113, 0.55)', text: '#fecaca' },
-  topic: { fill: '#4338ca', stroke: '#818cf8', glow: 'rgba(129, 140, 248, 0.5)', text: '#e0e7ff' },
-  journey: { fill: '#4338ca', stroke: '#818cf8', glow: 'rgba(129, 140, 248, 0.5)', text: '#e0e7ff' }
+  known: { fill: '#5f8a5a', stroke: '#9bbd96', glow: 'rgba(127, 163, 122, 0.25)', text: '#cfe3cb' },
+  partial: { fill: '#b8862f', stroke: '#e6b85a', glow: 'rgba(217, 164, 65, 0.25)', text: '#f1d9a0' },
+  gap: { fill: '#4f7a98', stroke: '#8fb0c9', glow: 'rgba(122, 155, 181, 0.25)', text: '#d3e2ee' },
+  misconception: { fill: '#a4503a', stroke: '#dd8670', glow: 'rgba(196, 104, 79, 0.3)', text: '#f2c7bb' },
+  topic: { fill: '#6b6558', stroke: '#b3aa97', glow: 'rgba(179, 170, 151, 0.2)', text: '#ece8df' },
+  journey: { fill: '#6b6558', stroke: '#b3aa97', glow: 'rgba(179, 170, 151, 0.2)', text: '#ece8df' }
 };
 
 const RELATION_STYLES = {
-  prerequisite: { stroke: '#38bdf8', width: 2.2, dash: [], arrow: '#38bdf8', label: 'prerequisite' },
-  subconcept: { stroke: '#a855f7', width: 1.8, dash: [6, 4], arrow: '#a855f7', label: 'subconcept' },
-  implements: { stroke: '#34d399', width: 2.2, dash: [], arrow: '#34d399', label: 'implements' },
-  compares_to: { stroke: '#f87171', width: 1.8, dash: [3, 3], arrow: '#f87171', label: 'compares to' },
-  relates_to: { stroke: 'rgba(148, 163, 184, 0.4)', width: 1.2, dash: [], arrow: 'rgba(148, 163, 184, 0.6)', label: 'relates to' }
+  prerequisite: { stroke: '#8fb0c9', width: 2.2, dash: [], arrow: '#8fb0c9', label: 'prerequisite' },
+  subconcept: { stroke: '#b3aa97', width: 1.8, dash: [6, 4], arrow: '#b3aa97', label: 'subconcept' },
+  implements: { stroke: '#9bbd96', width: 2.2, dash: [], arrow: '#9bbd96', label: 'implements' },
+  compares_to: { stroke: '#dd8670', width: 1.8, dash: [3, 3], arrow: '#dd8670', label: 'compares to' },
+  relates_to: { stroke: 'rgba(150, 143, 128, 0.45)', width: 1.2, dash: [], arrow: 'rgba(150, 143, 128, 0.65)', label: 'relates to' }
 };
 
 let GRAPH_THEME = null;
@@ -61,59 +61,59 @@ let GRAPH_THEME = null;
 function refreshGraphThemeColors() {
   const isLight = document.documentElement.getAttribute('data-theme') === 'light';
   const styles = getComputedStyle(document.documentElement);
-  const textPrimary = styles.getPropertyValue('--text-primary').trim() || (isLight ? '#0f172a' : '#edf7f5');
+  const textPrimary = styles.getPropertyValue('--text-primary').trim() || (isLight ? '#1f1d19' : '#ece8df');
 
   GRAPH_THEME = {
     isLight,
-    filteredEdge: isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.04)',
-    filteredNode: isLight ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.04)',
-    filteredNodeBorder: isLight ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.08)',
-    labelPillBg: isLight ? 'rgba(255, 255, 255, 0.92)' : 'rgba(4, 7, 17, 0.78)',
-    labelPillBgSelected: isLight ? 'rgba(241, 245, 249, 0.96)' : 'rgba(15, 23, 42, 0.95)',
-    labelPillBorder: isLight ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.2)',
+    filteredEdge: isLight ? 'rgba(31, 29, 25, 0.06)' : 'rgba(236, 232, 223, 0.05)',
+    filteredNode: isLight ? 'rgba(31, 29, 25, 0.05)' : 'rgba(236, 232, 223, 0.05)',
+    filteredNodeBorder: isLight ? 'rgba(31, 29, 25, 0.1)' : 'rgba(236, 232, 223, 0.09)',
+    labelPillBg: isLight ? 'rgba(255, 253, 248, 0.92)' : 'rgba(20, 19, 17, 0.82)',
+    labelPillBgSelected: isLight ? 'rgba(239, 235, 225, 0.96)' : 'rgba(36, 34, 31, 0.95)',
+    labelPillBorder: isLight ? 'rgba(31, 29, 25, 0.16)' : 'rgba(236, 232, 223, 0.2)',
     labelPillText: textPrimary,
     labelPillTextSelected: textPrimary,
-    selectionRing: isLight ? 'rgba(4, 120, 87, 0.8)' : 'rgba(255, 255, 255, 0.7)',
-    selectedBorder: isLight ? '#047857' : '#ffffff',
-    hoveredBorder: isLight ? '#0f172a' : '#ffffff',
-    midpointBg: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(11, 15, 28, 0.92)',
-    midpointBorder: isLight ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.2)',
+    selectionRing: isLight ? 'rgba(138, 90, 18, 0.8)' : 'rgba(236, 232, 223, 0.7)',
+    selectedBorder: isLight ? '#8a5a12' : '#ece8df',
+    hoveredBorder: isLight ? '#1f1d19' : '#ece8df',
+    midpointBg: isLight ? 'rgba(255, 253, 248, 0.95)' : 'rgba(28, 27, 24, 0.92)',
+    midpointBorder: isLight ? 'rgba(31, 29, 25, 0.16)' : 'rgba(236, 232, 223, 0.2)',
     midpointText: textPrimary,
-    pathHighlight: isLight ? '#b45309' : '#facc15',
-    pathHighlightGlow: isLight ? 'rgba(180, 83, 9, 0.45)' : 'rgba(250, 204, 21, 0.85)',
-    pathText: isLight ? '#78350f' : '#fef08a',
-    edgeHighlight: isLight ? '#4f46e5' : 'rgba(129, 140, 248, 0.95)',
-    edgeHighlightGlow: isLight ? 'rgba(79, 70, 229, 0.35)' : 'rgba(129, 140, 248, 0.6)',
-    edgeHighlightArrow: isLight ? '#4f46e5' : '#818cf8',
+    pathHighlight: isLight ? '#8a5a12' : '#e6b85a',
+    pathHighlightGlow: isLight ? 'rgba(138, 90, 18, 0.35)' : 'rgba(230, 184, 90, 0.5)',
+    pathText: isLight ? '#5c3b08' : '#f1d9a0',
+    edgeHighlight: isLight ? '#1f1d19' : 'rgba(236, 232, 223, 0.9)',
+    edgeHighlightGlow: isLight ? 'rgba(31, 29, 25, 0.22)' : 'rgba(236, 232, 223, 0.3)',
+    edgeHighlightArrow: isLight ? '#1f1d19' : '#ece8df',
 
     colorMap: isLight ? {
-      known: { fill: '#059669', stroke: '#047857', glow: 'rgba(5, 150, 105, 0.30)', text: '#064e3b' },
-      partial: { fill: '#d97706', stroke: '#b45309', glow: 'rgba(217, 119, 6, 0.30)', text: '#78350f' },
-      gap: { fill: '#7c3aed', stroke: '#6d28d9', glow: 'rgba(124, 58, 237, 0.30)', text: '#4c1d95' },
-      misconception: { fill: '#dc2626', stroke: '#b91c1c', glow: 'rgba(220, 38, 38, 0.35)', text: '#7f1d1d' },
-      topic: { fill: '#4338ca', stroke: '#3730a3', glow: 'rgba(67, 56, 202, 0.35)', text: '#1e1b4b' },
-      journey: { fill: '#4338ca', stroke: '#3730a3', glow: 'rgba(67, 56, 202, 0.35)', text: '#1e1b4b' }
+      known: { fill: '#3f6b3a', stroke: '#2e5229', glow: 'rgba(63, 107, 58, 0.18)', text: '#27441f' },
+      partial: { fill: '#a8741a', stroke: '#8a5a12', glow: 'rgba(138, 90, 18, 0.18)', text: '#5c3b08' },
+      gap: { fill: '#3b5f7d', stroke: '#2c4a63', glow: 'rgba(59, 95, 125, 0.18)', text: '#1f3a50' },
+      misconception: { fill: '#a2432c', stroke: '#80331f', glow: 'rgba(162, 67, 44, 0.2)', text: '#5c2113' },
+      topic: { fill: '#6b6558', stroke: '#4a463d', glow: 'rgba(107, 101, 88, 0.18)', text: '#1f1d19' },
+      journey: { fill: '#6b6558', stroke: '#4a463d', glow: 'rgba(107, 101, 88, 0.18)', text: '#1f1d19' }
     } : {
-      known: { fill: '#059669', stroke: '#34d399', glow: 'rgba(52, 211, 153, 0.45)', text: '#a7f3d0' },
-      partial: { fill: '#d97706', stroke: '#fbbf24', glow: 'rgba(251, 191, 36, 0.45)', text: '#fde68a' },
-      gap: { fill: '#7c3aed', stroke: '#c084fc', glow: 'rgba(192, 132, 252, 0.45)', text: '#e9d5ff' },
-      misconception: { fill: '#dc2626', stroke: '#f87171', glow: 'rgba(248, 113, 113, 0.55)', text: '#fecaca' },
-      topic: { fill: '#4338ca', stroke: '#818cf8', glow: 'rgba(129, 140, 248, 0.5)', text: '#e0e7ff' },
-      journey: { fill: '#4338ca', stroke: '#818cf8', glow: 'rgba(129, 140, 248, 0.5)', text: '#e0e7ff' }
+      known: { fill: '#5f8a5a', stroke: '#9bbd96', glow: 'rgba(127, 163, 122, 0.25)', text: '#cfe3cb' },
+      partial: { fill: '#b8862f', stroke: '#e6b85a', glow: 'rgba(217, 164, 65, 0.25)', text: '#f1d9a0' },
+      gap: { fill: '#4f7a98', stroke: '#8fb0c9', glow: 'rgba(122, 155, 181, 0.25)', text: '#d3e2ee' },
+      misconception: { fill: '#a4503a', stroke: '#dd8670', glow: 'rgba(196, 104, 79, 0.3)', text: '#f2c7bb' },
+      topic: { fill: '#6b6558', stroke: '#b3aa97', glow: 'rgba(179, 170, 151, 0.2)', text: '#ece8df' },
+      journey: { fill: '#6b6558', stroke: '#b3aa97', glow: 'rgba(179, 170, 151, 0.2)', text: '#ece8df' }
     },
 
     relationStyles: isLight ? {
-      prerequisite: { stroke: '#0284c7', width: 2.2, dash: [], arrow: '#0284c7', label: 'prerequisite' },
-      subconcept: { stroke: '#7c3aed', width: 1.8, dash: [6, 4], arrow: '#7c3aed', label: 'subconcept' },
-      implements: { stroke: '#059669', width: 2.2, dash: [], arrow: '#059669', label: 'implements' },
-      compares_to: { stroke: '#dc2626', width: 1.8, dash: [3, 3], arrow: '#dc2626', label: 'compares to' },
-      relates_to: { stroke: 'rgba(100, 116, 139, 0.5)', width: 1.2, dash: [], arrow: 'rgba(100, 116, 139, 0.7)', label: 'relates to' }
+      prerequisite: { stroke: '#3b5f7d', width: 2.2, dash: [], arrow: '#3b5f7d', label: 'prerequisite' },
+      subconcept: { stroke: '#6b6558', width: 1.8, dash: [6, 4], arrow: '#6b6558', label: 'subconcept' },
+      implements: { stroke: '#3f6b3a', width: 2.2, dash: [], arrow: '#3f6b3a', label: 'implements' },
+      compares_to: { stroke: '#a2432c', width: 1.8, dash: [3, 3], arrow: '#a2432c', label: 'compares to' },
+      relates_to: { stroke: 'rgba(107, 101, 88, 0.5)', width: 1.2, dash: [], arrow: 'rgba(107, 101, 88, 0.7)', label: 'relates to' }
     } : {
-      prerequisite: { stroke: '#38bdf8', width: 2.2, dash: [], arrow: '#38bdf8', label: 'prerequisite' },
-      subconcept: { stroke: '#a855f7', width: 1.8, dash: [6, 4], arrow: '#a855f7', label: 'subconcept' },
-      implements: { stroke: '#34d399', width: 2.2, dash: [], arrow: '#34d399', label: 'implements' },
-      compares_to: { stroke: '#f87171', width: 1.8, dash: [3, 3], arrow: '#f87171', label: 'compares to' },
-      relates_to: { stroke: 'rgba(148, 163, 184, 0.4)', width: 1.2, dash: [], arrow: 'rgba(148, 163, 184, 0.6)', label: 'relates to' }
+      prerequisite: { stroke: '#8fb0c9', width: 2.2, dash: [], arrow: '#8fb0c9', label: 'prerequisite' },
+      subconcept: { stroke: '#b3aa97', width: 1.8, dash: [6, 4], arrow: '#b3aa97', label: 'subconcept' },
+      implements: { stroke: '#9bbd96', width: 2.2, dash: [], arrow: '#9bbd96', label: 'implements' },
+      compares_to: { stroke: '#dd8670', width: 1.8, dash: [3, 3], arrow: '#dd8670', label: 'compares to' },
+      relates_to: { stroke: 'rgba(150, 143, 128, 0.45)', width: 1.2, dash: [], arrow: 'rgba(150, 143, 128, 0.65)', label: 'relates to' }
     }
   };
 
@@ -470,7 +470,7 @@ function extractFocusedSubgraph(centerId, maxNodes = 36) {
   if (resetHubBtn) resetHubBtn.style.display = 'inline-block';
   if (subgraphPill) {
     subgraphPill.style.display = 'inline-block';
-    subgraphPill.textContent = `🎯 Subgraph: ${centerNode.name.substring(0, 16)}${centerNode.name.length > 16 ? '...' : ''}`;
+    setIconLabel(subgraphPill, 'target', `Subgraph: ${centerNode.name.substring(0, 16)}${centerNode.name.length > 16 ? '...' : ''}`);
   }
 
   const nodeInGraph = graphNodes.find(n => n.id === centerId);
@@ -1008,7 +1008,7 @@ function selectConceptNode(node) {
   // Update Assistant context pill in sidebar
   const assistantContext = document.getElementById('graph-assistant-context');
   if (assistantContext) {
-    assistantContext.textContent = `📍 ${node.name.length > 18 ? node.name.substring(0, 16) + '...' : node.name}`;
+    setIconLabel(assistantContext, 'map-pin', node.name.length > 18 ? node.name.substring(0, 16) + '...' : node.name);
     assistantContext.title = `Context: ${node.name}`;
   }
 
@@ -1017,7 +1017,7 @@ function selectConceptNode(node) {
 
   const statusBadge = document.getElementById('inspector-status-badge');
   if (statusBadge) {
-    statusBadge.textContent = node.status.toUpperCase();
+    statusBadge.textContent = conceptStatusLabel(node.status).toUpperCase();
     statusBadge.className = 'inspector-status-badge status-' + (node.status || 'known');
   }
 
@@ -1068,7 +1068,7 @@ function selectConceptNode(node) {
   if (prereqCount) prereqCount.textContent = prereqEdges.length;
   if (prereqList) {
     if (prereqEdges.length === 0) {
-      prereqList.innerHTML = `<span style="font-size: 0.78rem; color: var(--text-muted);">None — Foundational root concept!</span>`;
+      prereqList.innerHTML = `<span class="text-xs" style="color: var(--text-muted);">None — Foundational root concept!</span>`;
     } else {
       prereqList.innerHTML = prereqEdges.map(e => {
         const p = e.sourceNode;
@@ -1077,7 +1077,7 @@ function selectConceptNode(node) {
           <div class="inspector-chip" onclick="inspectNodeById('${p.id}')" title="Inspect prerequisite: ${escapeHtml(p.name)}">
             <div style="display: flex; align-items: center; gap: 0.4rem; overflow: hidden;">
               <span style="width: 7px; height: 7px; border-radius: 50%; background: ${statusColor}; flex-shrink: 0;"></span>
-              <span style="font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHtml(p.name)}</span>
+              <span class="fw-semibold" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHtml(p.name)}</span>
             </div>
             <span class="chip-relation-tag">${escapeHtml(e.relationship)}</span>
           </div>
@@ -1093,7 +1093,7 @@ function selectConceptNode(node) {
   if (unlockCount) unlockCount.textContent = unlockEdges.length;
   if (unlockList) {
     if (unlockEdges.length === 0) {
-      unlockList.innerHTML = `<span style="font-size: 0.78rem; color: var(--text-muted);">Terminal concept or specialized leaf topic.</span>`;
+      unlockList.innerHTML = `<span class="text-xs" style="color: var(--text-muted);">Terminal concept or specialized leaf topic.</span>`;
     } else {
       unlockList.innerHTML = unlockEdges.map(e => {
         const u = e.targetNode;
@@ -1102,7 +1102,7 @@ function selectConceptNode(node) {
           <div class="inspector-chip" onclick="inspectNodeById('${u.id}')" title="Inspect unlocked concept: ${escapeHtml(u.name)}">
             <div style="display: flex; align-items: center; gap: 0.4rem; overflow: hidden;">
               <span style="width: 7px; height: 7px; border-radius: 50%; background: ${statusColor}; flex-shrink: 0;"></span>
-              <span style="font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHtml(u.name)}</span>
+              <span class="fw-semibold" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHtml(u.name)}</span>
             </div>
             <span class="chip-relation-tag">${escapeHtml(e.relationship)}</span>
           </div>
@@ -1155,7 +1155,7 @@ function closeConceptInspector() {
 
   const assistantContext = document.getElementById('graph-assistant-context');
   if (assistantContext) {
-    assistantContext.textContent = '📍 Note Context';
+    setIconLabel(assistantContext, 'map-pin', 'Note Context');
     assistantContext.title = 'Default note context';
   }
 
@@ -1166,23 +1166,23 @@ function generateRecommendation(node, prereqEdges, unlockEdges) {
   const unmasteredPrereqs = prereqEdges.filter(e => e.sourceNode.status !== 'known');
 
   if (node.status === 'misconception') {
-    return `⚠️ Prioritize Socratic Copilot: Active misconception detected. Click "🤖 Copilot" to clarify mental models against code examples.`;
+    return `Prioritize Socratic Copilot: Active misconception detected. Click "Copilot" to clarify mental models against code examples.`;
   }
   if (node.status === 'gap') {
     if (unmasteredPrereqs.length > 0) {
       const first = unmasteredPrereqs[0].sourceNode.name;
-      return `⚠️ Bridge Foundation First: You have ${unmasteredPrereqs.length} unmastered prerequisite(s). Study "${first}" before tackling this concept to avoid comprehension roadblocks.`;
+      return `Bridge Foundation First: You have ${unmasteredPrereqs.length} unmastered prerequisite(s). Study "${first}" before tackling this concept to avoid comprehension roadblocks.`;
     }
-    return `📖 Core Knowledge Gap: Review the Living Note section and practice with active recall flashcards to establish mastery.`;
+    return `Core Knowledge Gap: Review the Living Note section and practice with active recall flashcards to establish mastery.`;
   }
   if (node.status === 'partial') {
-    return `⏳ Deepen Understanding: Run interactive sandbox simulations or expand section depth to solidify this concept.`;
+    return `Deepen Understanding: Run interactive sandbox simulations or expand section depth to solidify this concept.`;
   }
   if (unlockEdges.length > 0) {
     const nextTarget = unlockEdges[0].targetNode.name;
-    return `✅ Mastered! Prereqs satisfied. Ready to advance downstream to "${nextTarget}".`;
+    return `Mastered! Prereqs satisfied. Ready to advance downstream to "${nextTarget}".`;
   }
-  return `✅ Mastered: Solid grasp verified. Review periodic flashcards to maintain retention.`;
+  return `Mastered: Solid grasp verified. Review periodic flashcards to maintain retention.`;
 }
 
 // --------------------------------------------------------------------------
@@ -1275,16 +1275,16 @@ function traceLearningPath(targetNode) {
       .filter(n => n && n.id !== targetNode.id);
 
     if (prereqNodes.length === 0) {
-      bannerSteps.innerHTML = `<span style="color: var(--success-text); font-weight: 700;">${escapeHtml(targetNode.name)}</span> is a foundational concept with no prior prerequisites. You can start here!`;
+      bannerSteps.innerHTML = `<span class="fw-bold" style="color: var(--success-text);">${escapeHtml(targetNode.name)}</span> is a foundational concept with no prior prerequisites. You can start here!`;
     } else {
       const stepsHtml = prereqNodes.map(n => {
         const isMastered = n.status === 'known';
         const color = isMastered ? 'var(--success-text)' : (n.status === 'partial' ? 'var(--warning-text)' : 'var(--purple-text)');
-        const icon = isMastered ? '✓ ' : (n.status === 'gap' ? '⚠️ ' : '⏳ ');
+        const icon = isMastered ? uiIcon('check') + ' ' : (n.status === 'gap' ? uiIcon('triangle-alert') + ' ' : uiIcon('loader-circle', 'icon-spin') + ' ');
         return `<span style="color: ${color}; cursor: pointer; text-decoration: underline;" onclick="inspectNodeById('${n.id}')">${icon}${escapeHtml(n.name)}</span>`;
-      }).join(' <span style="color: var(--text-muted); margin: 0 4px;">➔</span> ');
+      }).join(' <span style="color: var(--text-muted); margin: 0 4px;">' + uiIcon('arrow-right') + '</span> ');
 
-      bannerSteps.innerHTML = `${stepsHtml} <span style="color: var(--text-muted); margin: 0 4px;">➔</span> <strong style="color: var(--warning-text);">${escapeHtml(targetNode.name)} (Target)</strong>`;
+      bannerSteps.innerHTML = `${stepsHtml} <span style="color: var(--text-muted); margin: 0 4px;">${uiIcon('arrow-right')}</span> <strong style="color: var(--warning-text);">${escapeHtml(targetNode.name)} (Target)</strong>`;
     }
   }
 
@@ -1327,7 +1327,7 @@ function askCopilotFromInspector() {
 
   const assistantContext = document.getElementById('graph-assistant-context');
   if (assistantContext) {
-    assistantContext.textContent = `📍 ${node.name.length > 18 ? node.name.substring(0, 16) + '...' : node.name}`;
+    setIconLabel(assistantContext, 'map-pin', node.name.length > 18 ? node.name.substring(0, 16) + '...' : node.name);
     assistantContext.title = `Context: ${node.name}`;
   }
 
@@ -1357,7 +1357,7 @@ async function sendGraphAssistantMessage() {
   // Render User Message
   const userMsgHtml = `
     <div class="assistant-msg user">
-      <div class="assistant-avatar">👤</div>
+      <div class="assistant-avatar">${uiIcon('user')}</div>
       <div class="assistant-bubble">${escapeHtml(question)}</div>
     </div>
   `;
@@ -1375,12 +1375,12 @@ async function sendGraphAssistantMessage() {
   const loadingId = 'graph-assistant-typing-' + Date.now();
   const loadingHtml = `
     <div class="assistant-msg assistant" id="${loadingId}">
-      <div class="assistant-avatar">🤖</div>
+      <div class="assistant-avatar">${uiIcon('bot')}</div>
       <div class="assistant-bubble assistant-typing">
         <span class="typing-dot"></span>
         <span class="typing-dot"></span>
         <span class="typing-dot"></span>
-        <span style="margin-left: 0.45rem; font-size: 0.72rem; color: var(--purple-text);">Reasoning over concept topology...</span>
+        <span class="text-xs" style="margin-left: 0.45rem; color: var(--purple-text);">Reasoning over concept topology...</span>
       </div>
     </div>
   `;
@@ -1432,7 +1432,7 @@ async function sendGraphAssistantMessage() {
 
     const assistantMsgHtml = `
       <div class="assistant-msg assistant">
-        <div class="assistant-avatar">🤖</div>
+        <div class="assistant-avatar">${uiIcon('bot')}</div>
         <div class="assistant-bubble">
           <div class="assistant-bubble-content">${formattedAnswer}</div>
           ${followUpsHtml}
@@ -1446,10 +1446,10 @@ async function sendGraphAssistantMessage() {
 
     const errorHtml = `
       <div class="assistant-msg assistant">
-        <div class="assistant-avatar">⚠️</div>
+        <div class="assistant-avatar">${uiIcon('triangle-alert')}</div>
         <div class="assistant-bubble" style="border-color: var(--border-danger); background: var(--color-danger-tint);">
-          <div style="font-weight: 700; color: var(--danger-text); font-size: 0.76rem; margin-bottom: 0.2rem;">Assistant Notice</div>
-          <div style="font-size: 0.74rem; color: var(--text-secondary);">${escapeHtml(err.message)}</div>
+          <div class="text-xs fw-bold" style="color: var(--danger-text); margin-bottom: 0.2rem;">Assistant Notice</div>
+          <div class="text-xs" style="color: var(--text-secondary);">${escapeHtml(err.message)}</div>
         </div>
       </div>
     `;
@@ -1489,20 +1489,20 @@ function updateGraphTooltip(node, clientX, clientY) {
     return;
   }
 
-  const statusLabel = node.status.toUpperCase();
+  const statusLabel = conceptStatusLabel(node.status).toUpperCase();
   const color = COLOR_MAP[node.status] || COLOR_MAP.known;
   const domainLabel = node.journey_topic || node.group.toUpperCase();
 
   tooltip.innerHTML = `
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.35rem;">
-      <span style="font-size: 0.68rem; font-family: var(--font-mono); font-weight: 700; color: ${color.stroke}; background: ${color.fill}33; padding: 0.15rem 0.45rem; border-radius: 4px;">
+      <span class="text-xs fw-bold" style="color: ${color.stroke}; background: ${color.fill}33; padding: 0.15rem 0.45rem; border-radius: 4px;">
         ${statusLabel}
       </span>
-      <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">${escapeHtml(domainLabel)}</span>
+      <span class="text-xs" style="color: var(--text-muted);">${escapeHtml(domainLabel)}</span>
     </div>
-    <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.25rem;">${escapeHtml(node.name)}</div>
-    ${node.summary ? `<div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin-bottom: 0.35rem;">${escapeHtml(node.summary)}</div>` : ''}
-    <div style="font-size: 0.74rem; color: var(--purple-text); font-family: var(--font-mono); margin-top: 0.25rem;">💡 Click to inspect prerequisites &amp; explore neighborhood</div>
+    <div class="text-md fw-bold" style="color: var(--text-primary); margin-bottom: 0.25rem;">${escapeHtml(node.name)}</div>
+    ${node.summary ? `<div class="text-sm" style="color: var(--text-secondary); line-height: 1.4; margin-bottom: 0.35rem;">${escapeHtml(node.summary)}</div>` : ''}
+    <div class="text-xs" style="color: var(--purple-text); margin-top: 0.25rem;">${uiIcon('lightbulb')} Click to inspect prerequisites &amp; explore neighborhood</div>
   `;
 
   tooltip.style.left = `${clientX + 14}px`;
@@ -1561,20 +1561,20 @@ function handleGraphSearch(input) {
       .slice(0, 10);
 
     if (matches.length === 0) {
-      dropdown.innerHTML = `<div style="padding: 0.6rem 0.8rem; font-size: 0.78rem; color: var(--text-muted);">No matching concepts found</div>`;
+      dropdown.innerHTML = `<div class="text-xs" style="padding: 0.6rem 0.8rem; color: var(--text-muted);">No matching concepts found</div>`;
       dropdown.style.display = 'flex';
       return;
     }
 
     dropdown.innerHTML = matches.map(n => {
       const color = COLOR_MAP[n.status]?.stroke || 'var(--color-blue)';
-      const statusLabel = n.status.toUpperCase();
+      const statusLabel = conceptStatusLabel(n.status).toUpperCase();
       const domain = n.journey_topic || (n.group === 'journey' ? 'Domain Hub' : 'Technical Concept');
       return `
         <div class="search-dropdown-item" onclick="selectSearchConcept('${n.id}')">
           <div class="search-item-title">
             <span>${escapeHtml(n.name)}</span>
-            <span style="font-size: 0.65rem; color: ${color}; font-family: var(--font-mono);">${statusLabel}</span>
+            <span class="text-xs" style="color: ${color};">${statusLabel}</span>
           </div>
           <div class="search-item-meta">${escapeHtml(domain)}</div>
         </div>
@@ -1647,7 +1647,7 @@ function applyGraphFullscreenState() {
   }
 
   if (icon) {
-    icon.textContent = isGraphFullscreen ? '🗗' : '⛶';
+    icon.innerHTML = uiIcon(isGraphFullscreen ? 'minimize-2' : 'maximize-2');
   }
   if (label) {
     label.textContent = isGraphFullscreen ? 'Exit Fullscreen' : 'Fullscreen';
@@ -1867,9 +1867,9 @@ function renderGraph() {
       const relLabel = edge.label || style.label;
 
       graphCtx.save();
-      graphCtx.font = 'bold 9px "JetBrains Mono", monospace';
-      const textW = graphCtx.measureText(relLabel).width + 8;
-      const textH = 14;
+      graphCtx.font = 'bold 12px "Plus Jakarta Sans", sans-serif';
+      const textW = graphCtx.measureText(relLabel).width + 12;
+      const textH = 18;
 
       graphCtx.fillStyle = GRAPH_THEME.midpointBg;
       graphCtx.strokeStyle = isPathEdge ? GRAPH_THEME.pathHighlight : GRAPH_THEME.midpointBorder;
@@ -1950,7 +1950,7 @@ function renderGraph() {
     const shouldDrawLabel = !isZoomedOut || isSelected || isHovered || isPathNode || isNeighbor || node.group === 'journey' || node.group === 'topic';
 
     if (shouldDrawLabel && (!isFiltered || isHovered)) {
-      graphCtx.font = `${(isSelected || isHovered || isPathNode) ? 'bold ' : ''}11px "Plus Jakarta Sans", sans-serif`;
+      graphCtx.font = `${(isSelected || isHovered || isPathNode) ? 'bold ' : ''}12px "Plus Jakarta Sans", sans-serif`;
       graphCtx.textAlign = 'center';
       graphCtx.textBaseline = 'top';
 
@@ -1958,7 +1958,7 @@ function renderGraph() {
 
       const textMetrics = graphCtx.measureText(label);
       const textW = textMetrics.width + 10;
-      const textH = 15;
+      const textH = 17;
       const pillY = node.y + radius + 4;
 
       graphCtx.fillStyle = isSelected ? GRAPH_THEME.labelPillBgSelected : GRAPH_THEME.labelPillBg;

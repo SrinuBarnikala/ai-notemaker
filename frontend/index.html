@@ -43,7 +43,7 @@
 
   <!-- Focus Mode Exit Button (Only visible in Focus Mode) -->
   <button type="button" class="focus-exit-btn" id="btn-exit-focus" onclick="toggleFocusMode()">
-    <span>✕ Exit Focus Mode</span>
+    <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#x"></use></svg> Exit Focus Mode</span>
   </button>
 
   <header>
@@ -54,11 +54,11 @@
     <div class="header-right-group" style="display: flex; align-items: center; gap: 0.65rem;">
       <div class="header-badges" id="header-authenticated-actions" style="display: none;">
       <button type="button" class="header-action-btn" onclick="openSearchModal()" title="Search all notes, concepts, code & assessments (Ctrl+K)">
-        <span>🔍 Search</span>
+        <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#search"></use></svg> Search</span>
         <span class="kbd-pill">Ctrl+K</span>
       </button>
       <button type="button" class="header-action-btn" onclick="openMemoryModal('history')" title="View Learning History & Knowledge Memory">
-        <span>🧠 Memory &amp; History</span>
+        <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#brain"></use></svg> Memory &amp; History</span>
       </button>
       <div id="llm-status-badge" class="phase-badge llm-status-badge" style="display: none;"></div>
       <div class="header-user-group">
@@ -73,7 +73,7 @@
       </div>
     </div>
     <button type="button" class="header-action-btn theme-toggle-btn" id="btn-theme-toggle" onclick="toggleTheme()" aria-label="Switch to light theme" title="Switch to light theme">
-      <span id="theme-toggle-icon" class="theme-toggle-icon" aria-hidden="true">☀️</span>
+      <span id="theme-toggle-icon" class="theme-toggle-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#sun"></use></svg></span>
     </button>
   </div>
 </header>
@@ -83,7 +83,7 @@
     <div id="login-view" class="login-view-container" style="display: none;">
       <div class="login-card-wrapper">
         <div class="login-header-group">
-          <div class="login-pretitle">✦ PERSONALIZED LEARNING ENGINE</div>
+          <div class="login-pretitle"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#sparkle"></use></svg> PERSONALIZED LEARNING ENGINE</div>
           <h1 class="login-title">Welcome back</h1>
           <p class="login-subtitle">Continue building your personalized technical knowledge.</p>
         </div>
@@ -91,7 +91,7 @@
         <div class="card login-card">
           <!-- Notification / Error Banner -->
           <div id="login-alert" class="login-alert" style="display: none;" role="alert">
-            <span class="login-alert-icon" id="login-alert-icon">⚠️</span>
+            <span class="login-alert-icon" id="login-alert-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#triangle-alert"></use></svg></span>
             <span id="login-alert-text">Invalid email or password.</span>
           </div>
 
@@ -133,7 +133,7 @@
                   aria-label="Show password"
                   title="Show or hide password"
                 >
-                  <span id="toggle-password-icon">👁</span>
+                  <span id="toggle-password-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#eye"></use></svg></span>
                 </button>
               </div>
             </div>
@@ -147,7 +147,7 @@
 
             <button type="submit" class="btn-submit btn-login-submit" id="btn-login-submit">
               <span id="btn-login-text">Sign In</span>
-              <span id="btn-login-spinner" style="display: none;">⏳ Signing in...</span>
+              <span id="btn-login-spinner" style="display: none;"><svg class="icon icon-spin" aria-hidden="true"><use href="/static/icons.svg#loader-circle"></use></svg> Signing in...</span>
             </button>
           </form>
 
@@ -167,7 +167,7 @@
         <!-- Subtle Info Modal / Banner for Forgot Password Placeholder -->
         <div id="login-info-banner" class="login-info-banner" style="display: none;">
           <span id="login-info-banner-text"></span>
-          <button type="button" class="login-info-dismiss" onclick="dismissLoginInfoBanner()" aria-label="Dismiss message">✕</button>
+          <button type="button" class="login-info-dismiss" onclick="dismissLoginInfoBanner()" aria-label="Dismiss message"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#x"></use></svg></button>
         </div>
       </div>
     </div>
@@ -176,7 +176,7 @@
     <div id="register-view" class="login-view-container" style="display: none;">
       <div class="login-card-wrapper">
         <div class="login-header-group">
-          <div class="login-pretitle">✦ PERSONALIZED LEARNING SYSTEM</div>
+          <div class="login-pretitle"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#sparkle"></use></svg> PERSONALIZED LEARNING SYSTEM</div>
           <h1 class="login-title">Create your account</h1>
           <p class="login-subtitle">Build personalized technical notes around the way you learn.</p>
         </div>
@@ -184,7 +184,7 @@
         <div class="card login-card">
           <!-- Notification / Error Banner -->
           <div id="register-alert" class="login-alert" style="display: none;" role="alert">
-            <span class="login-alert-icon" id="register-alert-icon">⚠️</span>
+            <span class="login-alert-icon" id="register-alert-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#triangle-alert"></use></svg></span>
             <span id="register-alert-text">An account with this email already exists.</span>
           </div>
 
@@ -232,7 +232,7 @@
                   aria-label="Show password"
                   title="Show or hide password"
                 >
-                  <span id="toggle-register-password-icon">👁</span>
+                  <span id="toggle-register-password-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#eye"></use></svg></span>
                 </button>
               </div>
               <div id="register-password-error" class="field-error-msg"></div>
@@ -246,7 +246,7 @@
                 </div>
                 <div class="password-strength-text">
                   <span>Strength: <strong id="str-label">Weak</strong></span>
-                  <span id="str-hint" style="color: var(--text-muted); font-size: 0.7rem;">At least 8 characters</span>
+                  <span class="text-xs" id="str-hint" style="color: var(--text-muted);">At least 8 characters</span>
                 </div>
               </div>
             </div>
@@ -275,7 +275,7 @@
                   aria-label="Show confirm password"
                   title="Show or hide confirm password"
                 >
-                  <span id="toggle-register-confirm-icon">👁</span>
+                  <span id="toggle-register-confirm-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#eye"></use></svg></span>
                 </button>
               </div>
               <div id="register-confirm-error" class="field-error-msg"></div>
@@ -283,7 +283,7 @@
 
             <button type="submit" class="btn-submit btn-login-submit" id="btn-register-submit">
               <span id="btn-register-text">Create Account</span>
-              <span id="btn-register-spinner" style="display: none;">⏳ Creating account...</span>
+              <span id="btn-register-spinner" style="display: none;"><svg class="icon icon-spin" aria-hidden="true"><use href="/static/icons.svg#loader-circle"></use></svg> Creating account...</span>
             </button>
           </form>
 
@@ -314,14 +314,13 @@
         <div class="card-title">
           <span>1. Topic Intake</span>
         </div>
-        <span class="card-tag">POST /journeys</span>
       </div>
 
       <form id="intake-form" onsubmit="submitTopic(event)">
         <div class="intake-group">
           <label class="intake-label" for="topic-input">
             <span>What technical topic are you exploring?</span>
-            <span style="font-size: 0.775rem; color: var(--text-muted);">Topic or question</span>
+            <span class="text-xs" style="color: var(--text-muted);">Topic or question</span>
           </label>
           <input 
             type="text" 
@@ -345,7 +344,7 @@
 
         <button type="submit" class="btn-submit" id="btn-submit">
           <span id="btn-submit-text">Begin Knowledge Discovery</span>
-          <span id="btn-submit-spinner" style="display: none;">⏳ Creating Journey...</span>
+          <span id="btn-submit-spinner" style="display: none;"><svg class="icon icon-spin" aria-hidden="true"><use href="/static/icons.svg#loader-circle"></use></svg> Creating Journey...</span>
         </button>
       </form>
     </div>
@@ -356,7 +355,7 @@
         <div class="card-title">
           <span>2. Knowledge Discovery Agent</span>
         </div>
-        <div class="concept-pill" id="disc-concept">🎯 Initializing...</div>
+        <div class="concept-pill" id="disc-concept"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#target"></use></svg> Initializing...</div>
       </div>
 
       <div class="progress-bar-bg">
@@ -364,8 +363,8 @@
       </div>
 
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-        <span style="font-size: 0.875rem; color: var(--text-muted); font-family: var(--font-mono);" id="disc-step-label">Question 1 of 4</span>
-        <span style="font-size: 0.85rem; font-weight: 600; color: var(--color-blue);" id="disc-topic-label">--</span>
+        <span class="text-sm" style="color: var(--text-muted);" id="disc-step-label">Question 1 of 4</span>
+        <span class="text-sm fw-semibold" style="color: var(--color-blue);" id="disc-topic-label">--</span>
       </div>
 
       <div id="active-question-section">
@@ -388,7 +387,7 @@
 
         <button type="button" class="btn-submit" id="btn-answer-submit" onclick="submitAnswer()">
           <span id="btn-ans-text">Submit Answer & Adapt</span>
-          <span id="btn-ans-spinner" style="display: none;">🤖 Agent analyzing answer...</span>
+          <span id="btn-ans-spinner" style="display: none;">Analyzing your answer…</span>
         </button>
       </div>
 
@@ -407,15 +406,15 @@
       </div>
 
       <div class="profile-summary-box">
-        <div style="font-size: 0.775rem; font-family: var(--font-mono); color: var(--purple-text); text-transform: uppercase; margin-bottom: 0.4rem; letter-spacing: 0.05em;">
+        <div class="text-eyebrow" style="color: var(--purple-text); margin-bottom: 0.4rem;">
           Learner Mental Model Synthesis
         </div>
         <div class="profile-summary-text" id="prof-summary">Synthesizing knowledge profile...</div>
       </div>
 
       <div id="misconceptions-container" style="display: none; margin-bottom: 1.5rem;">
-        <div style="font-size: 0.85rem; font-weight: 700; color: var(--danger-text); margin-bottom: 0.5rem;">
-          ⚠️ Identified Misconceptions to Address:
+        <div class="text-sm fw-bold" style="color: var(--danger-text); margin-bottom: 0.5rem;">
+          <svg class="icon" aria-hidden="true"><use href="/static/icons.svg#triangle-alert"></use></svg> Identified Misconceptions to Address:
         </div>
         <div id="misconceptions-list"></div>
       </div>
@@ -424,7 +423,7 @@
         <div class="matrix-col">
           <div class="matrix-col-header">
             <span class="matrix-col-title" style="color: var(--success-text);">&check; Known Concepts</span>
-            <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);" id="count-known">0</span>
+            <span class="text-xs" style="color: var(--text-muted);" id="count-known">0</span>
           </div>
           <div id="col-known"></div>
         </div>
@@ -432,7 +431,7 @@
         <div class="matrix-col">
           <div class="matrix-col-header">
             <span class="matrix-col-title" style="color: var(--warning-text);">&bull; Partially Understood</span>
-            <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);" id="count-partial">0</span>
+            <span class="text-xs" style="color: var(--text-muted);" id="count-partial">0</span>
           </div>
           <div id="col-partial"></div>
         </div>
@@ -440,7 +439,7 @@
         <div class="matrix-col">
           <div class="matrix-col-header">
             <span class="matrix-col-title" style="color: var(--purple-text);">&quest; Unknowns & Gaps</span>
-            <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);" id="count-gaps">0</span>
+            <span class="text-xs" style="color: var(--text-muted);" id="count-gaps">0</span>
           </div>
           <div id="col-gaps"></div>
         </div>
@@ -457,7 +456,6 @@
         <div class="card-title">
           <span>4. Personalized Note Architecture</span>
         </div>
-        <span class="card-tag">Agent 3 &bull; Bespoke Blueprint</span>
       </div>
 
       <div class="arch-summary-box">
@@ -469,7 +467,7 @@
 
       <button type="button" class="btn-submit" id="btn-gen-note" onclick="triggerNoteGeneration(currentJourneyId)">
         <span id="btn-note-text">Generate Living Structured Note &rarr;</span>
-        <span id="btn-note-spinner" style="display: none;">🤖 Agent 4 composing structured note...</span>
+        <span id="btn-note-spinner" style="display: none;">Writing your note…</span>
       </button>
     </div>
 
@@ -479,7 +477,6 @@
         <div class="card-title">
           <span>5. Living Technical Note</span>
         </div>
-        <span class="card-tag">Phase 6 &bull; Web Note Viewer</span>
       </div>
 
       <!-- Note Reader Header Banner -->
@@ -488,7 +485,7 @@
           <h1 class="note-main-h1" id="note-topic-heading">--</h1>
           <div class="note-meta-badges">
             <span class="note-version-pill" id="note-version-badge" onclick="openVersionHistoryModal()" style="cursor: pointer;" title="Inspect Living Note Versions & What Changed">VERSION 1</span>
-            <span class="note-readtime-pill" id="note-readtime-badge">⏱️ ~3 min read</span>
+            <span class="note-readtime-pill" id="note-readtime-badge"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#timer"></use></svg> ~3 min read</span>
             <span class="feature-pill active" id="note-sections-count">4 Sections</span>
           </div>
         </div>
@@ -498,7 +495,7 @@
       <!-- Phase 13: Historical Version Banner (Shown when viewing a historical snapshot) -->
       <div id="historical-version-banner" class="historical-version-banner" style="display: none;">
         <div class="banner-left">
-          <span class="banner-icon">🏷️</span>
+          <span class="banner-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#tag"></use></svg></span>
           <div>
             <span class="banner-title" id="historical-banner-title">Viewing Historical Snapshot: Version 1</span>
             <span class="banner-sub" id="historical-banner-sub">This is a read-only historical checkpoint. You can compare diffs or restore this version.</span>
@@ -527,7 +524,7 @@
           <span class="section-label">VIEW</span>
           <div class="section-buttons-row">
             <button type="button" class="tool-btn btn-view-control" id="btn-focus-toggle" onclick="toggleFocusMode()" title="Toggle focus reading mode">
-              <span class="btn-icon">📖</span>
+              <span class="btn-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#book-open"></use></svg></span>
               <span class="btn-label">Focus Mode</span>
             </button>
           </div>
@@ -539,20 +536,20 @@
             <span class="section-label">PRIMARY ACTIONS</span>
           </div>
           <div class="section-buttons-row">
-            <button type="button" class="tool-btn btn-primary-action btn-copilot" id="btn-copilot-toggle" onclick="openCopilotDrawer(null, null)" title="Consult Agent 9 Socratic In-Note Copilot">
-              <span class="btn-icon">🤖</span>
+            <button type="button" class="tool-btn btn-primary-action btn-copilot" id="btn-copilot-toggle" onclick="openCopilotDrawer(null, null)" title="Ask the Socratic copilot about this note">
+              <span class="btn-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#bot"></use></svg></span>
               <span class="btn-label">Ask Copilot</span>
             </button>
             <button type="button" class="tool-btn btn-primary-action btn-assessment" id="btn-assessment-toggle" onclick="openAssessmentModal()" title="Active recall flashcards and scenario quiz">
-              <span class="btn-icon">🧠</span>
+              <span class="btn-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#brain"></use></svg></span>
               <span class="btn-label">Test Mastery</span>
             </button>
-            <button type="button" class="tool-btn btn-primary-action btn-visuals" id="btn-plan-visuals" onclick="triggerPlanVisuals()" title="Synthesize &amp; enhance architecture diagrams with Agent 7">
-              <span class="btn-icon">📊</span>
+            <button type="button" class="tool-btn btn-primary-action btn-visuals" id="btn-plan-visuals" onclick="triggerPlanVisuals()" title="Generate and improve diagrams across the note">
+              <span class="btn-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#chart-column"></use></svg></span>
               <span class="btn-label">Plan Visuals</span>
             </button>
-            <button type="button" class="tool-btn btn-primary-action btn-code" id="btn-plan-code" onclick="triggerPlanCode()" title="Synthesize &amp; plan executable code implementations with Agent 8">
-              <span class="btn-icon">💻</span>
+            <button type="button" class="tool-btn btn-primary-action btn-code" id="btn-plan-code" onclick="triggerPlanCode()" title="Plan runnable code examples across the note">
+              <span class="btn-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#code-xml"></use></svg></span>
               <span class="btn-label">Plan Code</span>
             </button>
           </div>
@@ -565,39 +562,39 @@
           </div>
           <div class="section-buttons-row">
             <button type="button" class="tool-btn btn-utility-action btn-search" id="btn-search-toggle" onclick="openSearchModal()" title="Search note, code &amp; concepts (Ctrl+K)">
-              <span class="btn-icon">🔍</span>
+              <span class="btn-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#search"></use></svg></span>
               <span class="btn-label">Search</span>
             </button>
             <button type="button" class="tool-btn btn-utility-action btn-memory" id="btn-memory-toggle" onclick="openMemoryModal('history')" title="Inspect Learning History &amp; Concept Memory">
-              <span class="btn-icon">🧠</span>
+              <span class="btn-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#brain"></use></svg></span>
               <span class="btn-label">Memory</span>
             </button>
             <button type="button" class="tool-btn btn-utility-action btn-versions" id="btn-view-versions" onclick="openVersionHistoryModal()" title="View Version History &amp; What Changed">
-              <span class="btn-icon">🏷️</span>
+              <span class="btn-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#tag"></use></svg></span>
               <span class="btn-label">Versions (<span id="version-count-pill">1</span>)</span>
             </button>
             <button type="button" class="tool-btn btn-utility-action btn-graph" id="btn-graph-toggle" onclick="openGraphModal(false)" title="Inspect Concept Knowledge Graph &amp; Prerequisite Flow">
-              <span class="btn-icon">🕸️</span>
+              <span class="btn-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#network"></use></svg></span>
               <span class="btn-label">Knowledge Graph</span>
             </button>
             <button type="button" class="tool-btn btn-utility-action btn-export-md" id="btn-export-md" onclick="exportNote('markdown')" title="Export formatted GitHub Markdown (.md)">
-              <span class="btn-icon">📥</span>
+              <span class="btn-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#download"></use></svg></span>
               <span class="btn-label">Export .md</span>
             </button>
             <button type="button" class="tool-btn btn-utility-action btn-export-pdf" id="btn-export-pdf" onclick="exportNote('pdf')" title="Export print-ready PDF document derived from structured note">
-              <span class="btn-icon">📄</span>
+              <span class="btn-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#file-text"></use></svg></span>
               <span class="btn-label">Export PDF</span>
             </button>
             <button type="button" class="tool-btn btn-utility-action btn-history" id="btn-revisions-toggle" onclick="toggleRevisionsDrawer()" title="View living note evolution history">
-              <span class="btn-icon">📜</span>
+              <span class="btn-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#scroll-text"></use></svg></span>
               <span class="btn-label">History (<span id="rev-count-pill">0</span>)</span>
             </button>
             <button type="button" class="tool-btn btn-utility-action btn-link" id="btn-copy-link" onclick="copyNoteLink()" title="Copy link to this note">
-              <span class="btn-icon">🔗</span>
+              <span class="btn-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#link"></use></svg></span>
               <span class="btn-label" id="btn-link-text">Link</span>
             </button>
             <button type="button" class="tool-btn btn-utility-action btn-print" id="btn-print-note" onclick="window.print()" title="Print or save as PDF">
-              <span class="btn-icon">🖨️</span>
+              <span class="btn-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#printer"></use></svg></span>
               <span class="btn-label">Print</span>
             </button>
           </div>
@@ -609,7 +606,7 @@
         <aside class="note-toc-sidebar" id="note-viewer-toc">
           <div class="toc-header">
             <span>Table of Contents</span>
-            <span id="toc-progress-text" style="color: var(--text-muted); font-size: 0.7rem;">0%</span>
+            <span class="text-xs" id="toc-progress-text" style="color: var(--text-muted);">0%</span>
           </div>
           <nav>
             <ul class="toc-list" id="toc-list">
@@ -626,7 +623,7 @@
       <!-- Note Viewer Footer -->
       <div class="note-viewer-footer">
         <div class="note-footer-note">
-          <span>🌱 Living Note:</span>
+          <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#sprout"></use></svg> Living Note:</span>
           <span>Evolves continuously with your future discovery sessions.</span>
         </div>
         <button type="button" class="tool-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
@@ -650,23 +647,23 @@
       <div class="modal-dialog">
         <div class="modal-header">
           <div>
-            <div class="modal-pretitle">AGENT 5 &bull; LIVING NOTE EVOLUTION</div>
+            <div class="modal-pretitle">Living note evolution</div>
             <h3 class="modal-title" id="evolve-modal-title">Evolve Section</h3>
           </div>
           <div class="modal-header-actions">
-            <button type="button" class="modal-expand-btn" onclick="toggleModalMaximize('evolve-modal')" title="Toggle Window Size">⛶</button>
-            <button type="button" class="modal-close-btn" onclick="closeEvolveModal()">✕</button>
+            <button type="button" class="modal-expand-btn" onclick="toggleModalMaximize('evolve-modal')" title="Toggle Window Size"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#maximize-2"></use></svg></button>
+            <button type="button" class="modal-close-btn" onclick="closeEvolveModal()"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#x"></use></svg></button>
           </div>
         </div>
 
         <div class="modal-body">
           <label class="intake-label">Evolution Goal</label>
           <div class="evolve-type-grid" id="evolve-type-selector">
-            <button type="button" class="type-pill active" data-type="add_code" onclick="selectEvolveType(this, 'add_code')">⚡ + Code Example</button>
-            <button type="button" class="type-pill" data-type="expand_section" onclick="selectEvolveType(this, 'expand_section')">🔍 Deepen Detail</button>
-            <button type="button" class="type-pill" data-type="clarify" onclick="selectEvolveType(this, 'clarify')">💡 Clarify Concept</button>
+            <button type="button" class="type-pill active" data-type="add_code" onclick="selectEvolveType(this, 'add_code')"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#zap"></use></svg> + Code Example</button>
+            <button type="button" class="type-pill" data-type="expand_section" onclick="selectEvolveType(this, 'expand_section')"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#search"></use></svg> Deepen Detail</button>
+            <button type="button" class="type-pill" data-type="clarify" onclick="selectEvolveType(this, 'clarify')"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#lightbulb"></use></svg> Clarify Concept</button>
             <button type="button" class="type-pill" data-type="add_section" onclick="selectEvolveType(this, 'add_section')">+ New Section</button>
-            <button type="button" class="type-pill" data-type="custom_prompt" onclick="selectEvolveType(this, 'custom_prompt')">💬 Custom Request</button>
+            <button type="button" class="type-pill" data-type="custom_prompt" onclick="selectEvolveType(this, 'custom_prompt')"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#message-square"></use></svg> Custom Request</button>
           </div>
 
           <label class="intake-label" style="margin-top: 0.85rem;" for="evolve-prompt-input">
@@ -681,14 +678,14 @@
             <button type="button" class="chip" onclick="setEvolvePrompt('Explain performance trade-offs and memory implications in high-throughput systems.')">High-Load Tradeoffs</button>
           </div>
 
-          <div id="evolve-status-msg" style="display: none; margin-top: 0.85rem; font-size: 0.85rem; color: var(--color-blue);"></div>
+          <div class="text-sm" id="evolve-status-msg" style="display: none; margin-top: 0.85rem; color: var(--color-blue);"></div>
         </div>
 
         <div class="modal-footer">
           <button type="button" class="tool-btn" onclick="closeEvolveModal()">Cancel</button>
           <button type="button" class="btn-submit" id="btn-submit-evolve" style="width: auto; padding: 0.65rem 1.6rem;" onclick="submitEvolution()">
             <span id="btn-evolve-text">Evolve &amp; Update Note</span>
-            <span id="btn-evolve-spinner" style="display: none;">🤖 Agent evolving note...</span>
+            <span id="btn-evolve-spinner" style="display: none;">Updating your note…</span>
           </button>
         </div>
       </div>
@@ -702,10 +699,10 @@
             <div class="modal-pretitle">VERSION TIMELINE</div>
             <h3 class="modal-title">Living Note Evolution History</h3>
           </div>
-          <button type="button" class="modal-close-btn" onclick="toggleRevisionsDrawer()">✕</button>
+          <button type="button" class="modal-close-btn" onclick="toggleRevisionsDrawer()"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#x"></use></svg></button>
         </div>
         <div class="modal-body" id="revisions-list-body">
-          <div style="color: var(--text-muted); font-size: 0.875rem;">No revisions recorded yet. This is Version 1.</div>
+          <div class="text-sm" style="color: var(--text-muted);">No revisions recorded yet. This is Version 1.</div>
         </div>
       </div>
     </div>
@@ -714,7 +711,7 @@
       <div class="modal-dialog">
         <div class="modal-header">
           <div>
-            <div class="modal-pretitle">AGENT 6 &bull; ACTIVE RECALL &amp; MASTERY</div>
+            <div class="modal-pretitle">Active recall</div>
             <h3 class="modal-title" id="assessment-modal-title">Active Recall &amp; Mastery Assessment</h3>
           </div>
           <div class="modal-header-actions">
@@ -725,32 +722,32 @@
               <button type="button" class="scale-pill-btn" onclick="adjustAssessmentFontSize(0.1)" title="Larger Text">A+</button>
             </div>
             <!-- Window Maximize Toggle -->
-            <button type="button" class="modal-expand-btn" id="btn-toggle-assessment-maximize" onclick="toggleAssessmentMaximize()" title="Toggle Widescreen / Normal">⛶</button>
-            <button type="button" class="modal-close-btn" onclick="closeAssessmentModal()" title="Close (Esc)">✕</button>
+            <button type="button" class="modal-expand-btn" id="btn-toggle-assessment-maximize" onclick="toggleAssessmentMaximize()" title="Toggle Widescreen / Normal"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#maximize-2"></use></svg></button>
+            <button type="button" class="modal-close-btn" onclick="closeAssessmentModal()" title="Close (Esc)"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#x"></use></svg></button>
           </div>
         </div>
 
         <div class="assessment-tabs">
           <button type="button" class="assessment-tab active" id="tab-flashcards" onclick="switchAssessmentTab('flashcards')">
-            <span>📇 Conceptual Flashcards</span>
+            <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#layers"></use></svg> Conceptual Flashcards</span>
           </button>
           <button type="button" class="assessment-tab" id="tab-quiz" onclick="switchAssessmentTab('quiz')">
-            <span>🎯 Scenario Mastery Quiz</span>
+            <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#target"></use></svg> Scenario Mastery Quiz</span>
           </button>
         </div>
 
         <div class="modal-body" id="assessment-modal-body">
           <div id="assessment-loading" style="display: none; text-align: center; padding: 3rem;">
-            <div style="font-size: 2rem; margin-bottom: 0.75rem;">🤖</div>
-            <div style="font-weight: 700; color: var(--purple-text);">Agent 6 Synthesizing Active Recall Materials...</div>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.3rem;">Targeting your living note sections, architecture, and knowledge gaps.</p>
+            <div class="text-icon-lg" style="margin-bottom: 0.75rem;"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#bot"></use></svg></div>
+            <div class="fw-bold" style="color: var(--purple-text);">Preparing your practice materials…</div>
+            <p class="text-sm" style="color: var(--text-muted); margin-top: 0.3rem;">Targeting your living note sections, architecture, and knowledge gaps.</p>
           </div>
 
           <!-- Flashcards Tab Content -->
           <div id="flashcards-panel">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-              <span style="font-size: 0.85rem; color: var(--text-muted); font-family: var(--font-mono); font-weight: 600;" id="fc-counter">Card 1 of 3</span>
-              <span style="font-size: 0.775rem; color: var(--purple-text); background: var(--color-purple-tint); border: 1px solid var(--border-purple); padding: 0.25rem 0.65rem; border-radius: 9999px;">💡 Click card or press Space to flip</span>
+              <span class="text-sm fw-semibold" style="color: var(--text-muted);" id="fc-counter">Card 1 of 3</span>
+              <span class="text-xs" style="color: var(--purple-text); background: var(--color-purple-tint); border: 1px solid var(--border-purple); padding: 0.25rem 0.65rem; border-radius: 9999px;"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#lightbulb"></use></svg> Click card or press Space to flip</span>
             </div>
 
             <div class="flashcard-stage" onclick="flipFlashcard()">
@@ -769,7 +766,7 @@
                 <div class="card-side back">
                   <div class="card-header-row">
                     <span class="card-concept-badge" style="color: var(--success-text); background: var(--accent-tint); border-color: var(--border-accent);">Verified Answer</span>
-                    <span style="font-size: 0.75rem; color: var(--success-text); font-family: var(--font-mono); font-weight: 700;">&check; Technical Invariant</span>
+                    <span class="text-xs fw-bold" style="color: var(--success-text);">&check; Technical Invariant</span>
                   </div>
                   <div class="card-body-text" id="fc-back-text">Detailed Explanation</div>
                   <div class="card-footer-row">
@@ -784,8 +781,8 @@
               <button type="button" class="tool-btn" id="btn-prev-card" onclick="navigateFlashcard(-1)" style="padding: 0.65rem 1.25rem;">
                 <span>&larr; Previous</span>
               </button>
-              <button type="button" class="tool-btn" onclick="flipFlashcard()" style="background: var(--accent-primary); border-color: var(--accent-primary); color: var(--accent-btn-text); font-weight: 700; padding: 0.65rem 1.4rem; box-shadow: var(--shadow-sm);">
-                <span>🔄 Flip Card (Space)</span>
+              <button type="button" class="tool-btn fw-bold" onclick="flipFlashcard()" style="background: var(--accent-primary); border-color: var(--accent-primary); color: var(--accent-btn-text); padding: 0.65rem 1.4rem; box-shadow: var(--shadow-sm);">
+                <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#refresh-cw"></use></svg> Flip Card (Space)</span>
               </button>
               <button type="button" class="tool-btn" id="btn-next-card" onclick="navigateFlashcard(1)" style="padding: 0.65rem 1.25rem;">
                 <span>Next &rarr;</span>
@@ -802,7 +799,7 @@
                 <!-- Question jump pills injected by JS -->
               </div>
               <div style="display: flex; align-items: center; gap: 0.65rem;">
-                <span id="quiz-progress-label" style="font-family: var(--font-mono); font-size: 0.775rem; color: var(--text-muted); font-weight: 600;">0/0 Answered</span>
+                <span class="text-xs fw-semibold" id="quiz-progress-label" style="color: var(--text-muted);">0/0 Answered</span>
                 <div class="quiz-view-toggle">
                   <button type="button" class="view-mode-btn active" id="quiz-mode-focus-btn" onclick="setQuizViewMode('focus')">Focus (1 by 1)</button>
                   <button type="button" class="view-mode-btn" id="quiz-mode-all-btn" onclick="setQuizViewMode('all')">All Questions</button>
@@ -811,7 +808,7 @@
             </div>
 
             <div id="quiz-progress-bar-wrap" style="margin-bottom: 1rem; width: 100%; height: 5px; background: var(--quiz-progress-bg); border-radius: 9999px; overflow: hidden;">
-              <div id="quiz-progress-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--color-purple), var(--accent-primary)); transition: width 0.3s ease;"></div>
+              <div id="quiz-progress-fill" style="width: 0%; height: 100%; background: var(--accent-primary); transition: width 0.3s ease;"></div>
             </div>
 
             <div id="quiz-questions-list"></div>
@@ -821,7 +818,7 @@
               <button type="button" class="tool-btn" id="btn-quiz-prev" onclick="navigateQuizQuestion(-1)">
                 <span>&larr; Previous Question</span>
               </button>
-              <span style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono);" id="quiz-card-indicator">Question 1 of 3</span>
+              <span class="text-sm" style="color: var(--text-muted);" id="quiz-card-indicator">Question 1 of 3</span>
               <button type="button" class="tool-btn" id="btn-quiz-next" onclick="navigateQuizQuestion(1)">
                 <span>Next Question &rarr;</span>
               </button>
@@ -835,7 +832,7 @@
                 <span id="btn-quiz-spinner" style="display: none;">Evaluating Answers &amp; Promoting Concepts...</span>
               </button>
               <button type="button" class="tool-btn" id="btn-retake-quiz" onclick="retakeQuiz()" style="display: none; padding: 0.75rem 1.25rem; background: var(--accent-primary); border-color: var(--accent-primary); color: var(--accent-btn-text);">
-                <span>🔄 Retake Quiz</span>
+                <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#refresh-cw"></use></svg> Retake Quiz</span>
               </button>
             </div>
           </div>
@@ -852,21 +849,21 @@
       <div class="modal-card" style="max-width: 95vw; width: 1200px; height: 90vh; display: flex; flex-direction: column;">
         <div class="modal-header">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <span class="diagram-badge" id="diag-modal-badge">⚡ ARCHITECTURE FLOW</span>
+            <span class="diagram-badge" id="diag-modal-badge"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#zap"></use></svg> ARCHITECTURE FLOW</span>
             <h3 class="modal-title" id="diag-modal-title">Interactive System Diagram</h3>
           </div>
           <div style="display: flex; align-items: center; gap: 0.5rem;">
             <div class="diag-zoom-toolbar">
-              <button type="button" class="tool-btn" onclick="adjustModalZoom(-0.2)" title="Zoom Out (-)">🔍-</button>
+              <button type="button" class="tool-btn" onclick="adjustModalZoom(-0.2)" title="Zoom Out (-)"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#zoom-out"></use></svg></button>
               <span id="diag-modal-zoom-pill" class="diag-zoom-pill">100%</span>
-              <button type="button" class="tool-btn" onclick="adjustModalZoom(0.2)" title="Zoom In (+)">🔍+</button>
+              <button type="button" class="tool-btn" onclick="adjustModalZoom(0.2)" title="Zoom In (+)"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#zoom-in"></use></svg></button>
               <button type="button" class="tool-btn" onclick="resetModalZoom()" title="Reset Zoom">1:1</button>
             </div>
             <button type="button" class="tool-btn" onclick="downloadCurrentModalSvg()" title="Download SVG Vector Image">
-              <span>💾 SVG</span>
+              <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#download"></use></svg> SVG</span>
             </button>
             <button type="button" class="tool-btn" onclick="copyCurrentModalSpec()" title="Copy Mermaid Definition">
-              <span>📋 Copy</span>
+              <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#clipboard-copy"></use></svg> Copy</span>
             </button>
             <button type="button" class="modal-close" onclick="closeDiagramModal()" aria-label="Close dialog" title="Close (Esc)">&times;</button>
           </div>
@@ -877,7 +874,7 @@
           </div>
         </div>
         <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono);">Scroll &amp; pan supported. Press ESC to close.</span>
+          <span class="text-sm" style="color: var(--text-muted);">Scroll &amp; pan supported. Press ESC to close.</span>
           <button type="button" class="tool-btn" onclick="closeDiagramModal()">Close</button>
         </div>
       </div>
@@ -888,43 +885,43 @@
       <div class="modal-card" style="max-width: 600px;">
         <div class="modal-header">
           <div>
-            <span class="diagram-badge">🎨 AGENT 7 — VISUAL PLANNER</span>
+            <span class="diagram-badge"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#palette"></use></svg> Visual planner</span>
             <h3 class="modal-title" id="visual-modal-title">Synthesize Section Diagram</h3>
           </div>
           <button type="button" class="modal-close" onclick="closeSectionVisualModal()" aria-label="Close modal" title="Close (Esc)">&times;</button>
         </div>
         <div class="modal-body">
-          <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+          <p class="text-sm" style="color: var(--text-secondary); margin-bottom: 1.25rem;">
             Generate or redesign a high-clarity Mermaid.js architecture diagram for this section.
           </p>
 
           <div style="margin-bottom: 1.25rem;">
-            <label style="display: block; font-size: 0.825rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">
+            <label class="text-sm fw-semibold" style="display: block; color: var(--text-secondary); margin-bottom: 0.5rem;">
               Choose Visual Paradigm:
             </label>
             <div class="visual-type-grid" id="visual-type-grid">
               <div class="vtype-card active" data-type="flowchart" onclick="selectVisualType('flowchart', this)">
-                <div class="vtype-icon">🔀</div>
+                <div class="vtype-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#workflow"></use></svg></div>
                 <div class="vtype-name">Flowchart</div>
                 <div class="vtype-desc">Data pipeline &amp; decision logic</div>
               </div>
               <div class="vtype-card" data-type="sequence" onclick="selectVisualType('sequence', this)">
-                <div class="vtype-icon">⚡</div>
+                <div class="vtype-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#arrow-right-left"></use></svg></div>
                 <div class="vtype-name">Sequence</div>
                 <div class="vtype-desc">Protocol &amp; message flow</div>
               </div>
               <div class="vtype-card" data-type="architecture" onclick="selectVisualType('architecture', this)">
-                <div class="vtype-icon">🏛️</div>
+                <div class="vtype-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#blocks"></use></svg></div>
                 <div class="vtype-name">Architecture</div>
                 <div class="vtype-desc">Layers, services &amp; caches</div>
               </div>
               <div class="vtype-card" data-type="state_machine" onclick="selectVisualType('state_machine', this)">
-                <div class="vtype-icon">🔄</div>
+                <div class="vtype-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#repeat"></use></svg></div>
                 <div class="vtype-name">State Machine</div>
                 <div class="vtype-desc">Lifecycles &amp; transition rules</div>
               </div>
               <div class="vtype-card" data-type="concept_map" onclick="selectVisualType('concept_map', this)">
-                <div class="vtype-icon">🗺️</div>
+                <div class="vtype-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#map"></use></svg></div>
                 <div class="vtype-name">Concept Map</div>
                 <div class="vtype-desc">Mental models &amp; relationships</div>
               </div>
@@ -932,25 +929,25 @@
           </div>
 
           <div style="margin-bottom: 1.25rem;">
-            <label style="display: block; font-size: 0.825rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;" for="visual-custom-prompt">
+            <label class="text-sm fw-semibold" style="display: block; color: var(--text-secondary); margin-bottom: 0.5rem;" for="visual-custom-prompt">
               Specific Focus / Prompt (Optional):
             </label>
             <textarea
               id="visual-custom-prompt"
-              class="intake-input"
+              class="intake-input text-sm"
               rows="3"
               placeholder="e.g. Focus on leader failover timeout and heartbeat acknowledgment..."
-              style="resize: vertical; font-size: 0.875rem;"
+              style="resize: vertical;"
             ></textarea>
           </div>
 
-          <div id="visual-modal-status" style="display: none; padding: 0.75rem; border-radius: 8px; margin-bottom: 0.5rem; font-size: 0.85rem;"></div>
+          <div class="text-sm" id="visual-modal-status" style="display: none; padding: 0.75rem; border-radius: 8px; margin-bottom: 0.5rem;"></div>
         </div>
         <div class="modal-footer">
           <button type="button" class="tool-btn" onclick="closeSectionVisualModal()">Cancel</button>
           <button type="button" class="btn-submit" id="btn-submit-visual" onclick="submitSectionVisual()" style="width: auto; padding: 0.65rem 1.4rem;">
-            <span id="btn-visual-text">✨ Generate Diagram</span>
-            <span id="btn-visual-spinner" style="display: none;">⏳ Synthesizing Diagram...</span>
+            <span id="btn-visual-text"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#sparkles"></use></svg> Generate Diagram</span>
+            <span id="btn-visual-spinner" style="display: none;"><svg class="icon icon-spin" aria-hidden="true"><use href="/static/icons.svg#loader-circle"></use></svg> Synthesizing Diagram...</span>
           </button>
         </div>
       </div>
@@ -961,48 +958,48 @@
       <div class="modal-card" style="max-width: 620px;">
         <div class="modal-header">
           <div>
-            <span class="code-lang-tag tag-python" style="margin-bottom: 0.35rem;">💻 AGENT 8 — CODE PLANNER</span>
+            <span class="code-lang-tag tag-python" style="margin-bottom: 0.35rem;"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#code-xml"></use></svg> Code planner</span>
             <h3 class="modal-title" id="code-modal-title">Synthesize Section Implementation</h3>
           </div>
           <button type="button" class="modal-close" onclick="closeSectionCodeModal()" aria-label="Close modal" title="Close (Esc)">&times;</button>
         </div>
         <div class="modal-body">
-          <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+          <p class="text-sm" style="color: var(--text-secondary); margin-bottom: 1.25rem;">
             Synthesize or customize an interactive, executable code implementation with complexity metrics and assertions for this section.
           </p>
 
           <div style="margin-bottom: 1.25rem;">
-            <label style="display: block; font-size: 0.825rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;">
+            <label class="text-sm fw-semibold" style="display: block; color: var(--text-secondary); margin-bottom: 0.5rem;">
               Target Execution Language:
             </label>
             <div class="code-lang-grid" id="code-lang-grid">
               <div class="clang-card active" data-lang="python" onclick="selectCodeLanguage('python', this)">
-                <div class="clang-icon">🐍</div>
+                <div class="clang-icon">Py</div>
                 <div class="clang-name">Python</div>
                 <div class="clang-tag">▶ WASM Sandbox</div>
               </div>
               <div class="clang-card" data-lang="go" onclick="selectCodeLanguage('go', this)">
-                <div class="clang-icon">🐹</div>
+                <div class="clang-icon">Go</div>
                 <div class="clang-name">Go</div>
                 <div class="clang-tag">Concurrent Systems</div>
               </div>
               <div class="clang-card" data-lang="rust" onclick="selectCodeLanguage('rust', this)">
-                <div class="clang-icon">🦀</div>
+                <div class="clang-icon">Rs</div>
                 <div class="clang-name">Rust</div>
                 <div class="clang-tag">Memory &amp; Safety</div>
               </div>
               <div class="clang-card" data-lang="typescript" onclick="selectCodeLanguage('typescript', this)">
-                <div class="clang-icon">⚡</div>
+                <div class="clang-icon">TS</div>
                 <div class="clang-name">TypeScript</div>
                 <div class="clang-tag">Typed Frontend/Node</div>
               </div>
               <div class="clang-card" data-lang="sql" onclick="selectCodeLanguage('sql', this)">
-                <div class="clang-icon">💾</div>
+                <div class="clang-icon">SQL</div>
                 <div class="clang-name">SQL</div>
                 <div class="clang-tag">Query Analytics</div>
               </div>
               <div class="clang-card" data-lang="bash" onclick="selectCodeLanguage('bash', this)">
-                <div class="clang-icon">⚡</div>
+                <div class="clang-icon">Sh</div>
                 <div class="clang-name">Bash</div>
                 <div class="clang-tag">DevOps &amp; OS</div>
               </div>
@@ -1010,55 +1007,55 @@
           </div>
 
           <div style="margin-bottom: 1.25rem;">
-            <label style="display: block; font-size: 0.825rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem;" for="code-custom-prompt">
+            <label class="text-sm fw-semibold" style="display: block; color: var(--text-secondary); margin-bottom: 0.5rem;" for="code-custom-prompt">
               Implementation Requirements / Edge Cases (Optional):
             </label>
             <textarea
               id="code-custom-prompt"
-              class="intake-input"
+              class="intake-input text-sm"
               rows="3"
               placeholder="e.g. Include circular buffer boundary checks, lock-free synchronization, and print benchmark timings..."
-              style="resize: vertical; font-size: 0.875rem;"
+              style="resize: vertical;"
             ></textarea>
           </div>
 
           <div style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.6rem;">
             <input type="checkbox" id="code-include-tests" checked style="accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer;">
-            <label for="code-include-tests" style="font-size: 0.825rem; color: var(--text-secondary); cursor: pointer;">
+            <label class="text-sm" for="code-include-tests" style="color: var(--text-secondary); cursor: pointer;">
               Include executable test runner &amp; sample input assertions in <code>if __name__ == '__main__':</code>
             </label>
           </div>
 
-          <div id="code-modal-status" style="display: none; padding: 0.75rem; border-radius: 8px; margin-bottom: 0.5rem; font-size: 0.85rem;"></div>
+          <div class="text-sm" id="code-modal-status" style="display: none; padding: 0.75rem; border-radius: 8px; margin-bottom: 0.5rem;"></div>
         </div>
         <div class="modal-footer">
           <button type="button" class="tool-btn" onclick="closeSectionCodeModal()">Cancel</button>
           <button type="button" class="btn-submit" id="btn-submit-code" onclick="submitSectionCode()" style="width: auto; padding: 0.65rem 1.4rem;">
-            <span id="btn-code-text">✨ Synthesize Implementation</span>
-            <span id="btn-code-spinner" style="display: none;">⏳ Synthesizing Code...</span>
+            <span id="btn-code-text"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#sparkles"></use></svg> Synthesize Implementation</span>
+            <span id="btn-code-spinner" style="display: none;"><svg class="icon icon-spin" aria-hidden="true"><use href="/static/icons.svg#loader-circle"></use></svg> Synthesizing Code...</span>
           </button>
         </div>
       </div>
     </div>
 
     <!-- Floating "Ask Copilot" selection badge -->
-    <div id="floating-ask-badge" title="Ask Agent 9 Socratic Copilot about this selection">
-      <span>🤖 Ask Copilot</span>
+    <div id="floating-ask-badge" title="Ask the Socratic copilot about this selection">
+      <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#bot"></use></svg> Ask Copilot</span>
     </div>
 
     <!-- Phase 11: Agent 9 Socratic Copilot Slide-Over Drawer & Backdrop -->
     <div id="copilot-backdrop" onclick="closeCopilotDrawer()"></div>
 
-    <aside id="copilot-drawer" aria-label="Agent 9 Socratic Copilot Drawer">
+    <aside id="copilot-drawer" aria-label="Socratic copilot">
       <div class="copilot-drawer-header">
         <div>
-          <div class="copilot-header-pretitle">AGENT 9 &bull; SOCRATIC COPILOT</div>
+          <div class="copilot-header-pretitle">Socratic copilot</div>
           <div class="copilot-header-title">
             <span>Ask Living Note</span>
-            <span class="copilot-context-pill" id="copilot-context-pill">📍 All Sections</span>
+            <span class="copilot-context-pill" id="copilot-context-pill"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#map-pin"></use></svg> All Sections</span>
           </div>
         </div>
-        <button type="button" class="modal-close-btn" onclick="closeCopilotDrawer()" title="Close Copilot (Esc)">✕</button>
+        <button type="button" class="modal-close-btn" onclick="closeCopilotDrawer()" title="Close Copilot (Esc)"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#x"></use></svg></button>
       </div>
 
       <div id="copilot-messages-container">
@@ -1069,9 +1066,9 @@
 
       <div class="copilot-drawer-footer">
         <div id="copilot-selected-quote" style="display: none;">
-          <span style="font-size: 0.72rem; color: var(--purple-text); margin-right: 0.35rem; font-weight: 700;">CONTEXT:</span>
+          <span class="text-xs fw-bold" style="color: var(--purple-text); margin-right: 0.35rem;">CONTEXT:</span>
           <span id="copilot-quote-text" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
-          <button type="button" class="quote-dismiss-btn" onclick="clearCopilotSelectedQuote()" title="Clear excerpt context">✕</button>
+          <button type="button" class="quote-dismiss-btn" onclick="clearCopilotSelectedQuote()" title="Clear excerpt context"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#x"></use></svg></button>
         </div>
         <div class="copilot-input-row">
           <textarea
@@ -1098,7 +1095,6 @@
             </button>
             <div class="header-divider"></div>
             <div class="header-brand">
-              <span class="agent-compact-badge">✧ AGENT 10</span>
               <h2 class="workspace-topic-title" id="graph-modal-title">Concept Dependency Graph</h2>
               <span class="workspace-mode-pill" id="graph-workspace-badge">WORKSPACE</span>
               <div style="display:none;" id="btn-graph-fullscreen" aria-hidden="true"><span id="graph-fullscreen-icon"></span><span id="graph-fullscreen-label">Fullscreen</span></div>
@@ -1107,7 +1103,7 @@
           <div class="header-right">
             <div class="graph-scope-segmented">
               <button type="button" class="scope-seg-btn active" id="btn-graph-mode-journey" onclick="switchGraphMode('journey')">Active Note</button>
-              <button type="button" class="scope-seg-btn" id="btn-graph-mode-global" onclick="switchGraphMode('global')">🌐 Explore Knowledge</button>
+              <button type="button" class="scope-seg-btn" id="btn-graph-mode-global" onclick="switchGraphMode('global')"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#globe"></use></svg> Explore Knowledge</button>
             </div>
           </div>
         </header>
@@ -1130,7 +1126,7 @@
                 <div class="sidebar-section-title">SEARCH CONCEPTS</div>
                 <div class="sidebar-search-wrap">
                   <input type="text" id="graph-search-input" class="graph-search-input" placeholder="Search concepts..." oninput="handleGraphSearch(this)" onfocus="handleGraphSearchFocus(this)" autocomplete="off" />
-                  <span class="graph-subgraph-pill" id="graph-subgraph-hud" style="display: none;">🎯 Subgraph</span>
+                  <span class="graph-subgraph-pill" id="graph-subgraph-hud" style="display: none;"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#target"></use></svg> Subgraph</span>
                   <div id="graph-search-dropdown" class="graph-search-dropdown" style="display: none;"></div>
                 </div>
               </div>
@@ -1140,11 +1136,11 @@
                 <div class="sidebar-section-title">VIEW SCOPE</div>
                 <div class="segmented-control-vertical">
                   <button type="button" class="seg-btn active" id="btn-graph-scope-neighbor" onclick="setNeighborhoodScope('neighbor')">
-                    <span class="seg-icon">🎯</span>
+                    <span class="seg-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#target"></use></svg></span>
                     <span class="seg-text">1-Hop Focus</span>
                   </button>
                   <button type="button" class="seg-btn" id="btn-graph-scope-all" onclick="setNeighborhoodScope('all')">
-                    <span class="seg-icon">🌐</span>
+                    <span class="seg-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#globe"></use></svg></span>
                     <span class="seg-text">Full Network</span>
                   </button>
                 </div>
@@ -1177,7 +1173,7 @@
               <div class="sidebar-section">
                 <div class="sidebar-section-title">LEARNING TOOLS</div>
                 <button type="button" class="learning-path-sidebar-btn" id="btn-graph-learning-path" onclick="toggleLearningPathMode()" title="Highlight prerequisite chain to selected concept">
-                  <span class="lp-icon">🛤️</span>
+                  <span class="lp-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#route"></use></svg></span>
                   <div class="lp-text-wrap">
                     <span class="lp-title">Prerequisite Learning Path</span>
                     <span class="lp-sub">Trace dependency chain from foundations</span>
@@ -1189,7 +1185,7 @@
               <div class="sidebar-section selected-concept-section" id="graph-inspector-panel" style="display: none;">
                 <div class="sidebar-section-header">
                   <div class="sidebar-section-title" style="color: var(--accent-primary);">SELECTED CONCEPT</div>
-                  <button type="button" class="btn-clear-selection" onclick="closeConceptInspector()" title="Clear selection">✕</button>
+                  <button type="button" class="btn-clear-selection" onclick="closeConceptInspector()" title="Clear selection"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#x"></use></svg></button>
                 </div>
 
                 <div class="inspector-card">
@@ -1202,7 +1198,7 @@
                   </div>
 
                   <div class="inspector-recommendation-box" id="inspector-recommendation-box">
-                    <div class="rec-header">💡 Learning Recommendation</div>
+                    <div class="rec-header"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#lightbulb"></use></svg> Learning Recommendation</div>
                     <div class="rec-text" id="inspector-recommendation-text">Study direct prerequisites before attempting advanced mechanisms.</div>
                   </div>
 
@@ -1234,20 +1230,20 @@
 
                   <!-- Gap / Pitfall Alert -->
                   <div class="inspector-warning-box" id="inspector-gap-block" style="display: none;">
-                    <div class="warn-header">⚠️ Flagged Misconception / Gap</div>
+                    <div class="warn-header"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#triangle-alert"></use></svg> Flagged Misconception / Gap</div>
                     <div class="warn-body" id="inspector-gap-text"></div>
                   </div>
 
                   <!-- Action Buttons -->
                   <div class="inspector-actions-row">
                     <button type="button" class="btn-goto-note" id="btn-graph-goto-note" onclick="goToSectionFromInspector()" title="Jump to living note section">
-                      <span>📖 Go to Note</span>
+                      <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#book-open"></use></svg> Go to Note</span>
                     </button>
                     <button type="button" class="btn-ask-assistant" id="btn-graph-ask-copilot" onclick="askCopilotFromInspector()" title="Ask Graph Assistant about this concept">
-                      <span>🤖 Ask Assistant</span>
+                      <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#bot"></use></svg> Ask Assistant</span>
                     </button>
                     <button type="button" class="btn-trace-path" id="btn-graph-trace-path" onclick="tracePathFromInspector()" title="Trace Path">
-                      <span>🛤️ Path</span>
+                      <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#route"></use></svg> Path</span>
                     </button>
                   </div>
                 </div>
@@ -1257,12 +1253,12 @@
               <div class="sidebar-section graph-assistant-section" id="graph-assistant-section">
                 <div class="sidebar-section-header">
                   <div class="sidebar-section-title" style="color: var(--purple-text);">GRAPH ASSISTANT</div>
-                  <span class="assistant-context-pill" id="graph-assistant-context">📍 Note Context</span>
+                  <span class="assistant-context-pill" id="graph-assistant-context"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#map-pin"></use></svg> Note Context</span>
                 </div>
                 <div class="graph-assistant-box">
                   <div class="graph-assistant-messages" id="graph-assistant-messages">
                     <div class="assistant-welcome-msg">
-                      <div class="assistant-avatar">🤖</div>
+                      <div class="assistant-avatar"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#bot"></use></svg></div>
                       <div class="assistant-bubble">
                         <span>Ask any question about concept dependencies, prerequisites, or architecture.</span>
                       </div>
@@ -1331,18 +1327,18 @@
 
             <!-- Floating Learning Path Breadcrumbs Banner -->
             <div id="graph-path-banner" class="graph-floating-path-banner" style="display: none;">
-              <span class="path-banner-icon">🛤️</span>
+              <span class="path-banner-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#route"></use></svg></span>
               <div class="path-banner-content">
                 <span class="path-banner-title">Prerequisite Path:</span>
                 <span id="graph-path-steps" class="path-banner-steps">Select a concept to trace prerequisite chain</span>
               </div>
-              <button type="button" class="path-banner-close" onclick="exitLearningPathMode()" title="Exit Learning Path">✕</button>
+              <button type="button" class="path-banner-close" onclick="exitLearningPathMode()" title="Exit Learning Path"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#x"></use></svg></button>
             </div>
 
             <!-- Loading Spinner Overlay -->
             <div id="graph-loading" class="graph-loading-overlay" style="display: none;">
-              <div class="loading-icon">🕸️</div>
-              <div class="loading-text">Agent 10 Synthesizing Dependency Topology...</div>
+              <div class="loading-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#network"></use></svg></div>
+              <div class="loading-text">Building your concept graph…</div>
             </div>
 
             <!-- The HTML5 Canvas -->
@@ -1367,10 +1363,9 @@
         <div class="modal-header">
           <div>
             <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-              <span class="vcard-num-badge" style="background: var(--color-amber-tint); color: var(--warning-text); border-color: var(--border-amber);">🏷️ PHASE 13</span>
               <h3 class="modal-title" style="margin: 0;">Living Note Version History &amp; What Changed</h3>
             </div>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">
+            <p class="text-sm" style="color: var(--text-muted); margin: 0;">
               Browse historical snapshots, inspect semantic code and section diffs, or roll back to any previous version.
             </p>
           </div>
@@ -1381,10 +1376,10 @@
           <!-- Segmented Tab Bar -->
           <div class="vtab-bar">
             <button type="button" class="vtab-btn active" id="btn-vtab-timeline" onclick="switchVersionModalTab('timeline')">
-              <span>⏱️ Version Timeline &amp; Snapshots</span>
+              <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#timer"></use></svg> Version Timeline &amp; Snapshots</span>
             </button>
             <button type="button" class="vtab-btn" id="btn-vtab-diff" onclick="switchVersionModalTab('diff')">
-              <span>🔀 Semantic Diff Inspector</span>
+              <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#shuffle"></use></svg> Semantic Diff Inspector</span>
             </button>
           </div>
 
@@ -1403,12 +1398,12 @@
                 <label for="diff-from-version">Base Version (From):</label>
                 <select id="diff-from-version" class="diff-select" onchange="handleRunDiffClick()"></select>
               </div>
-              <span style="color: var(--text-muted); font-size: 1.1rem; font-weight: 700;">&rarr;</span>
+              <span class="text-lg fw-bold" style="color: var(--text-muted);">&rarr;</span>
               <div class="diff-select-group">
                 <label for="diff-to-version">Target Version (To):</label>
                 <select id="diff-to-version" class="diff-select" onchange="handleRunDiffClick()"></select>
               </div>
-              <button type="button" class="btn-submit" onclick="handleRunDiffClick()" style="padding: 0.45rem 1.1rem; font-size: 0.82rem; margin-left: auto;">
+              <button type="button" class="btn-submit text-sm" onclick="handleRunDiffClick()" style="padding: 0.45rem 1.1rem; margin-left: auto;">
                 <span>Compare Versions</span>
               </button>
             </div>
@@ -1427,7 +1422,7 @@
         </div>
 
         <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-mono);">
+          <span class="text-xs" style="color: var(--text-muted);">
             Living note versions are non-destructive. Restoring a version creates a new version checkpoint.
           </span>
           <button type="button" class="tool-btn" onclick="closeVersionHistoryModal()">Done</button>
@@ -1439,7 +1434,7 @@
     <div class="modal-overlay" id="spotlight-search-modal" style="display: none;" onclick="closeModalOnOverlay(event)">
       <div class="modal-card spotlight-modal-card">
         <div class="spotlight-search-bar">
-          <span class="spotlight-search-icon">🔍</span>
+          <span class="spotlight-search-icon"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#search"></use></svg></span>
           <input 
             type="text" 
             id="spotlight-search-input" 
@@ -1456,11 +1451,11 @@
         <!-- Filter Pills Bar -->
         <div class="search-filters-bar">
           <button type="button" class="search-filter-pill active" data-type="all" onclick="setSearchTypeFilter('all')">All</button>
-          <button type="button" class="search-filter-pill" data-type="note" onclick="setSearchTypeFilter('note')">📖 Notes</button>
-          <button type="button" class="search-filter-pill" data-type="concept" onclick="setSearchTypeFilter('concept')">💡 Concepts</button>
-          <button type="button" class="search-filter-pill" data-type="code" onclick="setSearchTypeFilter('code')">💻 Code</button>
-          <button type="button" class="search-filter-pill" data-type="flashcard" onclick="setSearchTypeFilter('flashcard')">📇 Flashcards</button>
-          <button type="button" class="search-filter-pill" data-type="journey" onclick="setSearchTypeFilter('journey')">🗺️ Journeys</button>
+          <button type="button" class="search-filter-pill" data-type="note" onclick="setSearchTypeFilter('note')"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#book-open"></use></svg> Notes</button>
+          <button type="button" class="search-filter-pill" data-type="concept" onclick="setSearchTypeFilter('concept')"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#lightbulb"></use></svg> Concepts</button>
+          <button type="button" class="search-filter-pill" data-type="code" onclick="setSearchTypeFilter('code')"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#code-xml"></use></svg> Code</button>
+          <button type="button" class="search-filter-pill" data-type="flashcard" onclick="setSearchTypeFilter('flashcard')"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#layers"></use></svg> Flashcards</button>
+          <button type="button" class="search-filter-pill" data-type="journey" onclick="setSearchTypeFilter('journey')"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#map"></use></svg> Journeys</button>
         </div>
 
         <!-- Search Results Feed -->
@@ -1474,7 +1469,7 @@
             <span><kbd>↵</kbd> to jump</span>
             <span><kbd>esc</kbd> to dismiss</span>
           </div>
-          <span style="color: var(--text-muted); font-size: 0.72rem; font-family: var(--font-mono);">Phase 15 Unified Search</span>
+          <span class="text-xs" style="color: var(--text-muted);">Searches notes, concepts and code</span>
         </div>
       </div>
     </div>
@@ -1485,10 +1480,9 @@
         <div class="modal-header">
           <div>
             <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-              <span class="vcard-num-badge" style="background: var(--color-blue-tint); color: var(--color-blue); border-color: var(--border-blue);">🧠 PHASE 6 TO 15: SEARCH &amp; KNOWLEDGE MEMORY</span>
               <h3 class="modal-title" style="margin: 0;">Knowledge Memory &amp; Learning History</h3>
             </div>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">
+            <p class="text-sm" style="color: var(--text-muted); margin: 0;">
               Track your cumulative technical knowledge over time, explore concept memory trajectories, and discover related topics.
             </p>
           </div>
@@ -1504,13 +1498,13 @@
           <!-- Segmented Tab Bar -->
           <div class="vtab-bar">
             <button type="button" class="vtab-btn active" id="btn-mtab-history" onclick="switchMemoryModalTab('history')">
-              <span>📅 Learning History Timeline</span>
+              <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#calendar"></use></svg> Learning History Timeline</span>
             </button>
             <button type="button" class="vtab-btn" id="btn-mtab-concepts" onclick="switchMemoryModalTab('concepts')">
-              <span>💡 Concept Memory Matrix</span>
+              <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#lightbulb"></use></svg> Concept Memory Matrix</span>
             </button>
             <button type="button" class="vtab-btn" id="btn-mtab-related" onclick="switchMemoryModalTab('related')">
-              <span>🧭 Related Topics &amp; Bridges</span>
+              <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#compass"></use></svg> Related Topics &amp; Bridges</span>
             </button>
           </div>
 
@@ -1526,10 +1520,10 @@
             <div style="margin-bottom: 1rem;">
               <input 
                 type="text" 
-                class="intake-input" 
+                class="intake-input text-sm" 
                 placeholder="Filter concept memory by name, status, or origin journey..." 
                 oninput="filterConceptGrid(this.value)"
-                style="padding: 0.55rem 0.85rem; font-size: 0.85rem;"
+                style="padding: 0.55rem 0.85rem;"
               />
             </div>
             <div id="memory-concepts-grid" class="mconcepts-grid">
@@ -1546,7 +1540,7 @@
         </div>
 
         <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-mono);">
+          <span class="text-xs" style="color: var(--text-muted);">
             Knowledge Memory connects concepts across your technical learning journeys.
           </span>
           <button type="button" class="tool-btn" onclick="closeMemoryModal()">Close</button>
@@ -1559,10 +1553,10 @@
       <div class="modal-card" style="max-width: 680px; width: 90vw; max-height: 85vh; display: flex; flex-direction: column;">
         <div class="modal-header">
           <div style="display: flex; align-items: center; gap: 0.6rem;">
-            <span style="font-size: 1.4rem;">🧠</span>
+            <span class="text-xl"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#brain"></use></svg></span>
             <div>
               <h3 class="modal-title" id="cprov-title" style="margin: 0;">Concept Provenance</h3>
-              <div style="font-size: 0.75rem; color: var(--purple-text); font-family: var(--font-mono);">Knowledge Evolution Tracker</div>
+              <div class="text-xs" style="color: var(--purple-text);">Knowledge Evolution Tracker</div>
             </div>
           </div>
           <button type="button" class="modal-close" onclick="closeConceptProvenanceModal()" aria-label="Close modal">&times;</button>
@@ -1575,7 +1569,7 @@
           </div>
 
           <!-- Chronological Journey Evolution Timeline -->
-          <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; margin: 1.25rem 0 0.6rem;">
+          <div class="text-eyebrow fw-bold" style="color: var(--text-primary); margin: 1.25rem 0 0.6rem;">
             Learning Journey Milestones
           </div>
           <div class="cprov-timeline-feed" id="cprov-timeline-feed">
@@ -1583,7 +1577,7 @@
           </div>
 
           <!-- Related Peer Concepts -->
-          <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; margin: 1.25rem 0 0.6rem;">
+          <div class="text-eyebrow fw-bold" style="color: var(--text-primary); margin: 1.25rem 0 0.6rem;">
             Related Technical Concepts
           </div>
           <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;" id="cprov-related-chips">
@@ -1602,10 +1596,10 @@
       <div class="modal-card" style="max-width: 660px; width: 92vw; max-height: 88vh; display: flex; flex-direction: column;">
         <div class="modal-header">
           <div style="display: flex; align-items: center; gap: 0.6rem;">
-            <span style="font-size: 1.4rem;">👤</span>
+            <span class="text-xl"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#user"></use></svg></span>
             <div>
               <h3 class="modal-title" style="margin: 0;">Learner Profile &amp; Settings</h3>
-              <div style="font-size: 0.75rem; color: var(--purple-text); font-family: var(--font-mono);">Identity, Pedagogical Defaults &amp; Security</div>
+              <div class="text-xs" style="color: var(--purple-text);">Identity, Pedagogical Defaults &amp; Security</div>
             </div>
           </div>
           <button type="button" class="modal-close" onclick="closeProfileModal()" aria-label="Close profile modal">&times;</button>
@@ -1614,13 +1608,13 @@
         <!-- Modal Tab Navigation -->
         <div class="profile-tabs">
           <button type="button" class="profile-tab-btn active" id="btn-ptab-identity" onclick="switchProfileTab('identity')">
-            <span>👤 Identity</span>
+            <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#user"></use></svg> Identity</span>
           </button>
           <button type="button" class="profile-tab-btn" id="btn-ptab-learning" onclick="switchProfileTab('learning')">
-            <span>⚙️ Learner Defaults</span>
+            <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#settings"></use></svg> Learner Defaults</span>
           </button>
           <button type="button" class="profile-tab-btn" id="btn-ptab-security" onclick="switchProfileTab('security')">
-            <span>🔒 Security</span>
+            <span><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#lock"></use></svg> Security</span>
           </button>
         </div>
 
@@ -1696,7 +1690,7 @@
             <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
               <button type="submit" class="btn-submit" id="btn-save-profile" style="width: auto; padding: 0.6rem 1.4rem;">
                 <span id="btn-save-profile-text">Save Identity</span>
-                <span id="btn-save-profile-spinner" style="display: none;">⏳ Saving...</span>
+                <span id="btn-save-profile-spinner" style="display: none;"><svg class="icon icon-spin" aria-hidden="true"><use href="/static/icons.svg#loader-circle"></use></svg> Saving...</span>
               </button>
             </div>
           </form>
@@ -1706,7 +1700,7 @@
         <div class="profile-tab-content" id="ptab-learning">
           <div id="profile-learning-alert" class="login-alert" style="display: none;"></div>
 
-          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.5;">
+          <div class="text-sm" style="color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.5;">
             These defaults shape how AI agents research, architect, and synthesize your technical notes. Real-time discovery probing adapts to you based on these priors.
           </div>
 
@@ -1790,7 +1784,7 @@
             </div>
 
             <!-- Live Knowledge Summary -->
-            <div style="font-size: 0.78rem; font-weight: 700; color: var(--purple-text); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1.25rem;">
+            <div class="text-eyebrow fw-bold" style="color: var(--purple-text); margin-top: 1.25rem;">
               Live Knowledge Memory Summary
             </div>
             <div class="profile-stats-grid">
@@ -1815,7 +1809,7 @@
             <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
               <button type="submit" class="btn-submit" id="btn-save-learning" style="width: auto; padding: 0.6rem 1.4rem;">
                 <span id="btn-save-learning-text">Save Learner Settings</span>
-                <span id="btn-save-learning-spinner" style="display: none;">⏳ Saving...</span>
+                <span id="btn-save-learning-spinner" style="display: none;"><svg class="icon icon-spin" aria-hidden="true"><use href="/static/icons.svg#loader-circle"></use></svg> Saving...</span>
               </button>
             </div>
           </form>
@@ -1870,7 +1864,7 @@
 
             <button type="submit" class="btn-submit" id="btn-change-password" style="width: auto; padding: 0.6rem 1.4rem;">
               <span id="btn-change-password-text">Update Password</span>
-              <span id="btn-change-password-spinner" style="display: none;">⏳ Updating...</span>
+              <span id="btn-change-password-spinner" style="display: none;"><svg class="icon icon-spin" aria-hidden="true"><use href="/static/icons.svg#loader-circle"></use></svg> Updating...</span>
             </button>
           </form>
         </div>

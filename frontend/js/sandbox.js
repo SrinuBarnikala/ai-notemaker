@@ -41,7 +41,7 @@
       if (term) term.style.display = 'block';
       if (stdoutEl) {
         stdoutEl.className = 'terminal-body';
-        stdoutEl.textContent = '⏳ Initializing Pyodide WebAssembly sandbox & executing...\n';
+        stdoutEl.textContent = 'Initializing Pyodide WebAssembly sandbox & executing...\n';
       }
       if (statusEl) {
         statusEl.textContent = 'Executing...';
@@ -142,7 +142,7 @@ sys.stderr = sys_stderr_backup
       navigator.clipboard.writeText(codeText).then(() => {
         const orig = btn.innerHTML;
         btn.classList.add('copied');
-        btn.innerHTML = '<span>✓ Copied!</span>';
+        btn.innerHTML = '<span>' + uiIcon('check') + ' Copied!</span>';
         setTimeout(() => {
           btn.classList.remove('copied');
           btn.innerHTML = orig;
@@ -159,7 +159,7 @@ sys.stderr = sys_stderr_backup
       const origHtml = btn ? btn.innerHTML : '';
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<span>⏳ Planning Code...</span>';
+        btn.innerHTML = '<span>' + uiIcon('loader-circle', 'icon-spin') + ' Planning Code...</span>';
       }
 
       try {
@@ -173,7 +173,7 @@ sys.stderr = sys_stderr_backup
           renderNote(updatedNote);
         }
 
-        alert(`Agent 8 successfully synthesized & planned ${plan.total_code_blocks} runnable code implementation(s) across your note!`);
+        alert(`Planned ${plan.total_code_blocks} runnable code implementation(s) across your note.`);
       } catch (err) {
         alert(`Code Planner error: ${err.message}`);
       } finally {
