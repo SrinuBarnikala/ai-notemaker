@@ -35,6 +35,8 @@ def get_llm_provider(settings: Settings = None) -> LLMProvider:
             api_key=settings.openai_api_key,
             timeout=settings.llm_timeout_seconds,
             provider_label="openai",
+            max_tokens_param="max_completion_tokens",
+            send_temperature=False,
         )
     elif provider_type == "mock":
         return MockLLMProvider(
