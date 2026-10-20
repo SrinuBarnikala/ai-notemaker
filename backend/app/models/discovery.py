@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, Integer, Text, DateTime, ForeignKey
+from sqlalchemy import Column, String, Integer, Text, DateTime, ForeignKey, Index
 from sqlalchemy.orm import relationship
 
 from backend.app.db.session import Base
@@ -28,8 +28,15 @@ class DiscoveryInteraction(Base):
     concept_target = Column(String(200), nullable=False)
     learner_answer = Column(Text, nullable=True)
     quick_assessment = Column(Text, nullable=True)
+    # JSON snapshot of the provisional learner state after this answer (NULL for legacy rows)
+    analysis = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), default=get_utc_now, nullable=False)
     answered_at = Column(DateTime(timezone=True), nullable=True)
+
+    # One row per question number within a journey (defense in depth beside the application lock).
+    __table_args__ = (
+        Index("uq_discovery_journey_question_index", "journey_id", "question_index", unique=True),
+    )
 
     journey = relationship("LearningJourney", back_populates="discovery_interactions")
 

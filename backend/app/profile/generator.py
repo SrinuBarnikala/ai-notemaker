@@ -15,6 +15,14 @@ from backend.app.profile.prompts import (
     PROFILE_GENERATION_PROMPT_TEMPLATE,
 )
 from backend.app.profile.parser import parse_knowledge_profile
+from backend.app.discovery.state import (
+    DISCOVERY_CONCLUDED_STATUSES,
+    load_analysis,
+    same_finding,
+    load_state,
+    state_to_context_dict,
+    state_to_prompt_text,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -72,9 +80,18 @@ async def generate_knowledge_profile(
         for i in interactions
     ]
 
+    # Learner state recorded by the most recent analyzed answer (absent for legacy sessions)
+    learner_state = None
+    last_analysis: dict = {}
+    for item in interactions:
+        state = load_state(item.analysis)
+        if state is not None:
+            learner_state, last_analysis = state, load_analysis(item.analysis)
+
     prompt = PROFILE_GENERATION_PROMPT_TEMPLATE.format(
         topic=journey.topic,
         interaction_log=log_str,
+        learner_state=state_to_prompt_text(learner_state) if learner_state else "Not recorded for this session.",
     )
 
     provider = get_llm_provider(settings)
@@ -85,14 +102,42 @@ async def generate_knowledge_profile(
             temperature=0.3,
         )
     except Exception as err:
+        # A provider outage is not a reason to persist a made-up profile; the caller can retry.
         logger.error("LLM call failed in knowledge profile synthesis: %s", err)
-        raw_output = ""
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The AI service could not be reached while building your profile. Please try again in a moment.",
+        )
 
     parsed = parse_knowledge_profile(
         raw_text=raw_output,
         topic=journey.topic,
         interactions=dict_interactions,
+        learner_state=learner_state,
     )
+
+    # Whatever the model says, findings the learner corrected during discovery are not current.
+    if learner_state is not None and learner_state.resolved:
+        retired = [r.value for r in learner_state.resolved if r.field in ("misconceptions", "gaps")]
+        parsed.misconceptions = [m for m in parsed.misconceptions if not any(same_finding(m, r) for r in retired)]
+        parsed.gaps = [g for g in parsed.gaps if not any(same_finding(g, r) for r in retired)]
+
+    learner_context = None
+    if learner_state is not None:
+        analyses = [load_analysis(i.analysis) for i in interactions]
+        learner_context = state_to_context_dict(learner_state)
+        learner_context["discovery"] = {
+            "answered_questions": len(interactions),
+            "completed": journey.status in DISCOVERY_CONCLUDED_STATUSES,
+            "stopped_reason": last_analysis.get("stopped_reason"),
+            "fallback_questions": sum(1 for a in analyses if a.get("question_fallback")),
+            "unanalyzed_answers": sum(1 for a in analyses if a.get("analysis_failed")),
+            "profile_synthesis": "fallback" if parsed.used_fallback else "model",
+        }
+    elif parsed.used_fallback:
+        # Legacy session (no stored discovery state): still record that this profile is a fallback
+        learner_context = {"discovery": {"profile_synthesis": "fallback"}}
+    learner_context_json = json.dumps(learner_context) if learner_context is not None else None
 
     # Persist or update existing profile
     profile = (
@@ -108,6 +153,7 @@ async def generate_knowledge_profile(
             summary=parsed.summary,
             misconceptions=json.dumps(parsed.misconceptions),
             gaps=json.dumps(parsed.gaps),
+            learner_context=learner_context_json,
         )
         db.add(profile)
         db.flush()
@@ -116,6 +162,7 @@ async def generate_knowledge_profile(
         profile.summary = parsed.summary
         profile.misconceptions = json.dumps(parsed.misconceptions)
         profile.gaps = json.dumps(parsed.gaps)
+        profile.learner_context = learner_context_json
         # Clear existing concepts
         db.query(KnowledgeConcept).filter(KnowledgeConcept.profile_id == profile.id).delete()
         db.flush()
@@ -131,7 +178,10 @@ async def generate_knowledge_profile(
         )
         db.add(concept_record)
 
-    journey.status = "profile_ready"
+    # Regenerating a profile (for example a retry) must not move a journey that has already
+    # progressed to the architecture or note stage backwards.
+    if journey.status in ("created", "discovery", "discovery_completed", "profile_ready"):
+        journey.status = "profile_ready"
     db.commit()
     db.refresh(profile)
 
@@ -144,6 +194,8 @@ async def generate_knowledge_profile(
         concepts=parsed.concepts,
         misconceptions=parsed.misconceptions,
         gaps=parsed.gaps,
+        learner_context=learner_context,
+        synthesis_fallback=parsed.used_fallback,
         created_at=profile.created_at,
         updated_at=profile.updated_at,
     )

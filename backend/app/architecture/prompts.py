@@ -34,6 +34,8 @@ Learner Personalization Profile:
 - Explanation Depth Preference: {explanation_depth}
 - Learning Style: {learning_style}
 - Specific Target Goals: {target_goals}
+- Per-topic discovery for THIS topic (tags show whether each item was stated, demonstrated or inferred; where it conflicts with the account defaults above, prefer it; do not treat inferred items or unknowns as facts):
+{learner_discovery_formatted}
 - Empirically Verified Mastery (from assessments): {verified_mastery_formatted}
 - Relevant Prior Concepts (from earlier journeys): {prior_concepts_formatted}
 

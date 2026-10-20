@@ -24,6 +24,13 @@ class Settings(BaseSettings):
 
     ollama_base_url: str = "http://localhost:11434"
 
+    # Knowledge Discovery: safety limit on answered questions (a ceiling, not a target)
+    discovery_max_questions: int = 6
+    # Overall deadline for one discovery request (all nested model calls and retries combined).
+    # Chosen to exceed a single provider attempt at the default 120 s timeout, so one slow but
+    # successful call is not cut off, while still bounding stacked retries.
+    discovery_request_timeout_seconds: float = 180.0
+
     groq_api_key: Optional[str] = None
     openai_api_key: Optional[str] = None
     openai_base_url: str = "https://api.openai.com/v1"

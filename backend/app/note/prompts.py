@@ -35,6 +35,8 @@ Learner Profile & Context:
 - Preferred Programming Language: {preferred_language}
 - Learner Discovery Inputs:
 {discovery_summary}
+- Per-topic discovery (tags: stated / demonstrated / inferred; unknowns are not facts; prefer over generic assumptions):
+{learner_discovery_formatted}
 
 Document Roadmap:
 - Total Sections: {total_sections}

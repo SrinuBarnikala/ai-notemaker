@@ -4,6 +4,8 @@ from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 
 class DiscoveryAnswerRequest(BaseModel):
+    # Optional guard: when sent, the answer is only accepted for this question number
+    question_index: Optional[int] = Field(None, ge=1)
     answer: str = Field(
         ...,
         min_length=1,
@@ -28,7 +30,10 @@ class DiscoveryQuestionResponse(BaseModel):
     is_finished: bool
     quick_assessment: Optional[str] = None
     total_questions_answered: int = 0
-    max_questions: int = 4
+    # Safety limit on answered questions, not a target; the conversation usually ends sooner
+    max_questions: int = 6
+    # True when this question is a generic fallback because the model could not supply one
+    fallback_used: bool = False
 
 
 class DiscoveryInteractionItem(BaseModel):

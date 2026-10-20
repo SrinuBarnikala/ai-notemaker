@@ -92,6 +92,11 @@ cp .env.example .env
 ```
 Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
 
+> **Run a single server process.** Knowledge Discovery serializes requests per journey with an in-process lock
+> (`backend/app/discovery/locks.py`). A database unique index on `(journey_id, question_index)` backstops duplicate
+> questions across processes, but several worker processes would not share the lock, so a "continue" vs "finish"
+> race between processes would not be prevented.
+
 ### 5. Running Tests
 ```powershell
 .venv\Scripts\pytest -v tests/

@@ -46,7 +46,8 @@ def test_complete_end_to_end_journey_and_personalization(client):
     prof_res = client.post(f"/journeys/{journey_id}/knowledge-profile")
     assert prof_res.status_code == 200
     profile = prof_res.json()
-    assert profile["overall_confidence"] in ["beginner", "intermediate", "advanced", "mixed"]
+    # The mock model produces no usable profile, so no confidence level may be claimed.
+    assert profile["overall_confidence"] == "unknown"
     assert len(profile["concepts"]) >= 1
 
     # 4. Personalized Architecture Blueprinting (Phase 4)

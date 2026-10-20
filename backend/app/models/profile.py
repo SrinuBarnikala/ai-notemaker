@@ -29,6 +29,8 @@ class KnowledgeProfile(Base):
     summary = Column(Text, nullable=False)
     misconceptions = Column(Text, nullable=False, default="[]")  # JSON string list
     gaps = Column(Text, nullable=False, default="[]")  # JSON string list
+    # JSON object of per-topic discovery results (intent, depth, preferences, ...); NULL for legacy profiles
+    learner_context = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), default=get_utc_now, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=get_utc_now, onupdate=get_utc_now, nullable=False)
 

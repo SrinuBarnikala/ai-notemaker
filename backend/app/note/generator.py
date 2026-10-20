@@ -159,6 +159,7 @@ async def generate_structured_note(
             misconceptions=", ".join(misconceptions_list) or "None detected",
             preferred_language=preferred_language,
             discovery_summary=discovery_summary,
+            learner_discovery_formatted=context.format_discovery_for_prompt(),
             total_sections=total_sections,
             section_order=s.order_index,
             section_title=s.title,

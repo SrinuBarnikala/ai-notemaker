@@ -358,12 +358,11 @@
         <div class="concept-pill" id="disc-concept"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#target"></use></svg> Initializing...</div>
       </div>
 
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="disc-progress" style="width: 25%;"></div>
-      </div>
-
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-        <span class="text-sm" style="color: var(--text-muted);" id="disc-step-label">Question 1 of 4</span>
+        <span class="disc-step-wrap">
+          <span class="disc-steps" id="disc-steps" aria-hidden="true"></span>
+          <span class="text-sm" style="color: var(--text-muted);" id="disc-step-label">Getting to know you</span>
+        </span>
         <span class="text-sm fw-semibold" style="color: var(--color-blue);" id="disc-topic-label">--</span>
       </div>
 
@@ -372,21 +371,19 @@
           <div class="question-prompt-text" id="disc-question-text">Generating adaptive probe...</div>
         </div>
 
-        <div class="chip-container">
-          <span class="chip-label">Quick answer starters:</span>
-          <button type="button" class="chip" onclick="addAnswerStarter('I have built and deployed this in production. Specifically, ')">Production experience</button>
-          <button type="button" class="chip" onclick="addAnswerStarter('I understand the high-level concept: ')">Conceptual basics</button>
-          <button type="button" class="chip" onclick="addAnswerStarter('I have not used this yet and want to understand how it works.')">New to this</button>
-        </div>
-
         <textarea 
           id="disc-answer-input" 
           class="answer-textarea" 
-          placeholder="Type your explanation or thoughts here. Be honest about uncertainty—this shapes your custom note!"
+          placeholder="Answer in your own words. &quot;I'm not sure&quot; is a perfectly good answer, and it helps shape your notes."
         ></textarea>
 
+        <div class="disc-error" id="disc-error" role="alert" style="display: none;">
+          <span id="disc-error-text"></span>
+          <button type="button" class="chip" id="disc-error-retry" style="display: none;" onclick="retryDiscovery()">Try again</button>
+        </div>
+
         <button type="button" class="btn-submit" id="btn-answer-submit" onclick="submitAnswer()">
-          <span id="btn-ans-text">Submit Answer & Adapt</span>
+          <span id="btn-ans-text">Send answer</span>
           <span id="btn-ans-spinner" style="display: none;">Analyzing your answer…</span>
         </button>
       </div>
@@ -401,8 +398,17 @@
           <span>3. Synthesized Knowledge Profile</span>
         </div>
         <div id="profile-confidence-container">
-          <span class="confidence-badge confidence-intermediate" id="prof-confidence">INTERMEDIATE</span>
+          <span class="confidence-badge confidence-unknown" id="prof-confidence">NOT ASSESSED</span>
         </div>
+      </div>
+
+      <div class="inline-notice" id="prof-fallback-notice" role="status" style="display: none;">
+        <span>The AI could not analyse your answers, so this profile assigns no knowledge levels. Your answers are saved; you can generate it again.</span>
+        <button type="button" class="chip" onclick="retryProfileGeneration()">Regenerate profile</button>
+      </div>
+      <div class="inline-notice" id="prof-error" role="alert" style="display: none;">
+        <span id="prof-error-text"></span>
+        <button type="button" class="chip" onclick="retryProfileGeneration()">Try again</button>
       </div>
 
       <div class="profile-summary-box">
@@ -458,6 +464,8 @@
         </div>
       </div>
 
+      <div class="inline-notice" id="arch-fallback-notice" role="status" style="display: none;"></div>
+
       <div class="arch-summary-box">
         <div class="arch-summary-title">Architecture Rationale for You</div>
         <div class="arch-summary-text" id="arch-rationale">Generating personalized section blueprint...</div>
@@ -490,6 +498,7 @@
           </div>
         </div>
         <p class="note-summary-text" id="note-summary-text">--</p>
+        <div class="inline-notice" id="note-fallback-notice" role="status" style="display: none;"></div>
       </div>
 
       <!-- Phase 13: Historical Version Banner (Shown when viewing a historical snapshot) -->

@@ -1,23 +1,40 @@
 import logging
-from typing import Optional, Dict, Any
+import re
+from typing import Any, Dict, List, Optional, Tuple
+
 from pydantic import BaseModel, Field
+
 from backend.app.core.json_utils import strip_code_fence, find_bracket_span, try_parse_json
+from backend.app.discovery.state import DiscoveryLearnerState, Retraction, parse_retractions, parse_state
+from backend.app.discovery.text import QUESTION_MARKS, jaccard, tokenize
 
 logger = logging.getLogger(__name__)
 
+MAX_QUESTION_CHARS = 600
+MIN_QUESTION_CHARS = 8
+DUPLICATE_SIMILARITY = 0.75
+MAX_FOCUS_CHARS = 200
 
-class InitialQuestionParsed(BaseModel):
-    question: str = Field(..., min_length=5)
-    concept_target: str = Field(..., min_length=2)
-    reasoning: Optional[str] = ""
+
+class DiscoveryParseError(ValueError):
+    """Model output was unusable (malformed JSON or missing required parts)."""
 
 
-class AdaptiveStepParsed(BaseModel):
-    quick_assessment: str = Field(..., min_length=3)
-    is_finished: bool = False
+class OpeningParsed(BaseModel):
+    question: str = Field(..., min_length=MIN_QUESTION_CHARS)
+    focus: str = ""
+    reasoning: str = ""
+
+
+class TurnParsed(BaseModel):
+    state: DiscoveryLearnerState
+    assessment: Optional[str] = None
+    ready_to_finish: bool = False
+    finish_reason: str = ""
+    focus: str = ""
     next_question: Optional[str] = None
-    concept_target: Optional[str] = None
-    reasoning: Optional[str] = ""
+    reasoning: str = ""
+    retractions: List[Retraction] = Field(default_factory=list)
 
 
 def extract_json_object(text: str) -> Optional[Dict[str, Any]]:
@@ -38,90 +55,169 @@ def extract_json_object(text: str) -> Optional[Dict[str, Any]]:
     return try_parse_json(clean)
 
 
-def parse_initial_question(raw_text: str, topic: str) -> InitialQuestionParsed:
-    """
-    Parses LLM output for initial question. Falls back to deterministic domain question
-    if LLM output is malformed.
-    """
-    data = extract_json_object(raw_text)
-    if data:
-        try:
-            return InitialQuestionParsed(
-                question=str(data.get("question", "")).strip(),
-                concept_target=str(data.get("concept_target", topic)).strip() or topic,
-                reasoning=str(data.get("reasoning", "")).strip(),
-            )
-        except Exception as e:
-            logger.warning("Pydantic validation failed for initial question: %s", e)
+def _text(value: Any, limit: int = MAX_QUESTION_CHARS) -> str:
+    return re.sub(r"[ \t]+", " ", str(value or "")).strip()[:limit]
 
-    # Safe deterministic fallback
-    logger.info("Using fallback for initial discovery question on topic: %s", topic)
-    return InitialQuestionParsed(
-        question=f"What is your high-level mental model of {topic}, and how would you explain its primary purpose?",
-        concept_target="Core Foundations",
-        reasoning="Fallback initialized to establish broad baseline understanding.",
+
+def _focus(value: Any) -> str:
+    return re.sub(r"\s+", " ", str(value or "")).strip()[:MAX_FOCUS_CHARS]
+
+
+def _require_object(raw_text: str) -> Dict[str, Any]:
+    data = extract_json_object(raw_text or "")
+    if not isinstance(data, dict):
+        raise DiscoveryParseError("the reply was not a valid JSON object")
+    return data
+
+
+def parse_opening(raw_text: str) -> OpeningParsed:
+    data = _require_object(raw_text)
+    question = _text(data.get("next_question") or data.get("question"))
+    if len(question) < MIN_QUESTION_CHARS:
+        raise DiscoveryParseError('"next_question" is missing or too short')
+    return OpeningParsed(
+        question=question,
+        focus=_focus(data.get("focus") or data.get("concept_target")),
+        reasoning=_text(data.get("reasoning"), 400),
     )
 
 
-def parse_adaptive_step(
-    raw_text: str,
-    current_index: int,
-    max_questions: int,
+def parse_turn(raw_text: str, topic: str) -> TurnParsed:
+    data = _require_object(raw_text)
+    if not isinstance(data.get("state"), dict):
+        raise DiscoveryParseError('"state" is missing or not an object')
+
+    ready = data.get("ready_to_finish")
+    if not isinstance(ready, bool):
+        ready = str(ready).strip().lower() == "true"
+
+    question = _text(data.get("next_question")) or None
+    if not ready and not question:
+        raise DiscoveryParseError('"next_question" is required when "ready_to_finish" is false')
+
+    assessment = _text(data.get("assessment"), 500) or None
+    return TurnParsed(
+        state=parse_state(data["state"], topic),
+        assessment=assessment,
+        ready_to_finish=ready,
+        finish_reason=_text(data.get("finish_reason"), 400),
+        focus=_focus(data.get("focus")),
+        next_question=None if ready else question,
+        reasoning=_text(data.get("reasoning"), 400),
+        retractions=parse_retractions(data.get("retractions")),
+    )
+
+
+_LABEL_PREFIX = re.compile(r"^\s*(?:next\s+)?question\s*[:\-]\s*", re.IGNORECASE)
+
+
+def parse_plain_question(raw_text: str) -> Tuple[str, str]:
+    """
+    Reads a question from a reply that should be plain text, tolerating a JSON object or code
+    fences. Returns (question, focus). Text without a question mark is rejected, so unusable
+    output (for example "Mocked LLM response") is never shown to a learner as a question.
+    """
+    data = extract_json_object(raw_text or "")
+    if isinstance(data, dict):
+        candidate = _text(data.get("next_question") or data.get("question"))
+        focus = _focus(data.get("focus"))
+    else:
+        candidate = _text(strip_code_fence(raw_text or ""))
+        focus = ""
+    candidate = _LABEL_PREFIX.sub("", candidate).strip().strip("`").strip()
+    if len(candidate) >= 2 and candidate[0] == candidate[-1] and candidate[0] in "\"'":
+        candidate = candidate[1:-1].strip()
+    candidate = re.sub(r"[ \t]*\n[ \t]*", " ", candidate).strip()
+    if len(candidate) < MIN_QUESTION_CHARS:
+        raise DiscoveryParseError("the reply was empty or too short to be a question")
+    if not any(mark in candidate for mark in QUESTION_MARKS):
+        raise DiscoveryParseError("the reply did not contain a question")
+    return candidate, focus
+
+
+# ---------------------------------------------------------------------------
+# One-question and no-repeat guard
+# ---------------------------------------------------------------------------
+
+_LIST_LINE = re.compile(r"^\s*(?:\d+[.)]|[-*•])\s+", re.MULTILINE)
+_QUOTED = re.compile(r'"[^"]*"|“[^”]*”')
+
+
+def question_problem(question: Optional[str], asked_questions: List[str]) -> Optional[str]:
+    """Returns why a question can't be shown to the learner, or None if it is acceptable."""
+    q = (question or "").strip()
+    if len(q) < MIN_QUESTION_CHARS:
+        return "it is empty or too short"
+    if len(q) > MAX_QUESTION_CHARS:
+        return "it is too long for a single conversational question"
+    if len(_LIST_LINE.findall(q)) >= 2:
+        return "it is formatted as a list of questions"
+    # A quoted phrase (e.g. the learner's own question) may contain "?" without being a second question.
+    unquoted = _QUOTED.sub(" ", q)
+    if sum(unquoted.count(mark) for mark in QUESTION_MARKS) > 1:
+        return "it asks more than one question"
+    new_tokens = tokenize(q)
+    for earlier in asked_questions:
+        if jaccard(new_tokens, tokenize(earlier)) >= DUPLICATE_SIMILARITY:
+            return "it repeats an earlier question"
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Flagged fallback question (used only when the model cannot supply a usable one)
+# ---------------------------------------------------------------------------
+
+def _topic_phrase(topic: str) -> str:
+    topic = re.sub(r"\s+", " ", (topic or "").replace('"', "'")).strip().rstrip("?").strip()
+    if not topic:
+        return "this topic"
+    return f'"{topic}"' if len(topic) <= 120 else "this topic"
+
+
+def fallback_question(
     topic: str,
-) -> AdaptiveStepParsed:
+    state: Optional[DiscoveryLearnerState],
+    asked_questions: List[str],
+) -> Tuple[str, str]:
     """
-    Parses LLM output for adaptive next step. Enforces max_questions termination
-    and provides safe fallbacks.
+    A generic question chosen by what is still unknown, parameterised by the learner's
+    topic. It never decides anything about the learner. Returns (question, focus).
     """
-    data = extract_json_object(raw_text)
-
-    # If maximum turns reached, always enforce termination
-    if current_index >= max_questions:
-        assessment = "Completed discovery across key concepts."
-        if data and data.get("quick_assessment"):
-            assessment = str(data["quick_assessment"]).strip()
-        return AdaptiveStepParsed(
-            quick_assessment=assessment,
-            is_finished=True,
-            next_question=None,
-            concept_target=None,
-            reasoning=f"Reached maximum discovery limit ({max_questions} questions).",
-        )
-
-    if data:
-        try:
-            is_finished = bool(data.get("is_finished", False))
-            next_q = data.get("next_question")
-            next_target = data.get("concept_target")
-
-            if is_finished or not next_q:
-                return AdaptiveStepParsed(
-                    quick_assessment=str(data.get("quick_assessment", "Sufficient knowledge discovered.")).strip(),
-                    is_finished=True,
-                    next_question=None,
-                    concept_target=None,
-                    reasoning=str(data.get("reasoning", "")).strip(),
-                )
-
-            return AdaptiveStepParsed(
-                quick_assessment=str(data.get("quick_assessment", "Answer analyzed.")).strip(),
-                is_finished=False,
-                next_question=str(next_q).strip(),
-                concept_target=str(next_target or "Advanced Concepts").strip(),
-                reasoning=str(data.get("reasoning", "")).strip(),
-            )
-        except Exception as e:
-            logger.warning("Pydantic validation failed for adaptive step: %s", e)
-
-    # Safe deterministic fallback
-    return AdaptiveStepParsed(
-        quick_assessment=f"Noted your perspective on {topic}.",
-        is_finished=(current_index >= max_questions - 1),
-        next_question=(
-            f"Have you implemented or debugged {topic} in practice, and what trade-offs did you encounter?"
-            if current_index < max_questions - 1
-            else None
+    t = _topic_phrase(topic)
+    candidates: List[Tuple[str, str, bool]] = [
+        (
+            f"In your own words, what do you already understand about {t}? A rough idea is completely fine.",
+            "Current understanding",
+            state is None or not state.is_confirmed("understanding"),
         ),
-        concept_target="Practical Implementation" if current_index < max_questions - 1 else None,
-        reasoning="Fallback adaptive question probing practical implementation experience.",
-    )
+        (
+            f"What are you hoping to be able to do or understand once you've learned about {t}?",
+            "Learning goal",
+            state is None or not state.is_confirmed("intent"),
+        ),
+        (
+            f"How deep would you like to go with {t}: a quick overview, a solid conceptual understanding, or the full technical detail?",
+            "Desired depth",
+            state is None or not state.is_confirmed("desired_depth"),
+        ),
+        (
+            "When a new idea finally clicks for you, what usually helps most: diagrams, analogies, worked examples, code, or math?",
+            "Explanation style",
+            state is None or not state.explanation_preferences,
+        ),
+        (
+            f"Is there anything about {t} you'd especially like your notes to focus on?",
+            "Focus areas",
+            True,
+        ),
+        (
+            "Is there anything else you'd like me to know before I prepare your notes?",
+            "Anything else",
+            True,
+        ),
+    ]
+    for question, focus, needed in candidates:
+        if needed and question_problem(question, asked_questions) is None:
+            return question, focus
+    question, focus, _ = candidates[-1]
+    return question, focus

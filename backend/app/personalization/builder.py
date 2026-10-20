@@ -8,6 +8,7 @@ from typing import Optional, List, Any
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
+from backend.app.discovery.state import GROUNDED_BASES
 from backend.app.models.journey import LearningJourney
 from backend.app.models.profile import KnowledgeProfile, KnowledgeConcept
 from backend.app.models.user_profile import UserProfile
@@ -17,6 +18,7 @@ from backend.app.personalization.models import (
     PersonalizationContext,
     LearnerProfileContext,
     TopicKnowledgeContext,
+    DiscoveredLearnerContext,
     EmpiricalMasteryContext,
     CrossJourneyPriorContext,
 )
@@ -84,6 +86,29 @@ def safe_load_str_list(val: Any) -> List[str]:
     return result
 
 
+def safe_load_learner_context(raw: Any) -> Optional[dict]:
+    """Parses KnowledgeProfile.learner_context; NULL (legacy) or unreadable values give None."""
+    if not raw:
+        return None
+    try:
+        data = json.loads(raw) if isinstance(raw, str) else raw
+    except (TypeError, ValueError):
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def _tagged(finding: Any) -> Optional[str]:
+    if not isinstance(finding, dict) or not str(finding.get("value") or "").strip():
+        return None
+    return f"{str(finding['value']).strip()} [{finding.get('basis') or 'inferred'}]"
+
+
+def _tagged_list(findings: Any) -> List[str]:
+    if not isinstance(findings, list):
+        return []
+    return [t for t in (_tagged(f) for f in findings) if t]
+
+
 class PersonalizationContextBuilder:
     """
     Builder responsible for composing the complete PersonalizationContext
@@ -141,6 +166,9 @@ class PersonalizationContextBuilder:
         # 4. Assemble Topic-Specific Mental Model (KnowledgeProfile + KnowledgeConcept)
         topic_knowledge_ctx = cls._build_topic_knowledge_context(db, journey.id)
 
+        # 4b. Assemble per-topic discovery results (kept separate from account-level defaults)
+        discovered_ctx = cls._build_discovered_context(db, journey.id)
+
         # 5. Assemble Empirical Verification (Assessment + AssessmentSubmission)
         empirical_mastery_ctx = cls._build_empirical_mastery_context(db, journey.id)
 
@@ -155,6 +183,7 @@ class PersonalizationContextBuilder:
             user_id=effective_user_id,
             learner_profile=learner_profile_ctx,
             topic_knowledge=topic_knowledge_ctx,
+            discovered=discovered_ctx,
             empirical_mastery=empirical_mastery_ctx,
             cross_journey=cross_journey_ctx,
         )
@@ -235,6 +264,47 @@ class PersonalizationContextBuilder:
             partially_known_concepts=partial,
             active_gaps=gaps,
             misconceptions=misconceptions,
+        )
+
+    @classmethod
+    def _build_discovered_context(
+        cls,
+        db: Session,
+        journey_id: str,
+    ) -> DiscoveredLearnerContext:
+        """
+        Reads the structured per-topic discovery results stored on the KnowledgeProfile.
+        Legacy profiles (no learner_context) yield an empty context.
+        """
+        kp = db.query(KnowledgeProfile).filter(KnowledgeProfile.journey_id == journey_id).first()
+        data = safe_load_learner_context(kp.learner_context) if kp else None
+        if not data:
+            return DiscoveredLearnerContext()
+
+        intention = data.get("intention")
+        goal_text = None
+        if (
+            isinstance(intention, dict)
+            and str(intention.get("value") or "").strip()
+            and intention.get("basis") in GROUNDED_BASES
+        ):
+            goal_text = str(intention["value"]).strip()
+
+        unresolved = data.get("unresolved")
+        resolved = data.get("resolved")
+        return DiscoveredLearnerContext(
+            goal_text=goal_text,
+            intention=_tagged(intention),
+            desired_depth=_tagged(data.get("desired_depth")),
+            understanding=_tagged(data.get("understanding")),
+            related_familiarity=_tagged_list(data.get("related_familiarity")),
+            explanation_preferences=_tagged_list(data.get("explanation_preferences")),
+            challenge_willingness=_tagged(data.get("challenge_willingness")),
+            available_time=_tagged(data.get("available_time")),
+            unresolved=[str(u) for u in unresolved if str(u).strip()] if isinstance(unresolved, list) else [],
+            resolved=[
+                str(r["value"]) for r in resolved if isinstance(r, dict) and str(r.get("value") or "").strip()
+            ] if isinstance(resolved, list) else [],
         )
 
     @classmethod

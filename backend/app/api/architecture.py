@@ -36,7 +36,8 @@ async def create_note_architecture(
     """
     return await generate_note_architecture(
         journey_id=journey_id,
-        learning_goal=payload.learning_goal or "Master core mechanics and practical architecture",
+        learning_goal=payload.learning_goal,
+        default_goal="Master internal mechanics and practical architecture",
         db=db,
         settings=settings,
         user_id=current_user.id if current_user else None,

@@ -53,6 +53,14 @@ function setIconLabel(el, name, text) {
   el.appendChild(document.createTextNode(' ' + text));
 }
 
+// Shows (or hides, when text is empty) a plain-text notice element; text is never interpreted as HTML.
+function setNotice(id, text) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = text || '';
+  el.style.display = text ? 'flex' : 'none';
+}
+
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str || '';

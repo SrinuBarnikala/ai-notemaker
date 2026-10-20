@@ -22,6 +22,9 @@ from backend.app.personalization.models import PersonalizationContext
 logger = logging.getLogger(__name__)
 
 
+DEFAULT_LEARNING_GOAL = "Master core mechanics, resolve gaps, and implement in production"
+
+
 def format_concepts_for_prompt(concepts: List[Any]) -> str:
     if not concepts:
         return "No specific concepts classified."
@@ -42,8 +45,9 @@ async def generate_note_architecture(
     journey_id: str,
     db: Session,
     settings: Settings,
-    learning_goal: Optional[str] = "Master core mechanics, resolve gaps, and implement in production",
+    learning_goal: Optional[str] = None,
     user_id: Optional[str] = None,
+    default_goal: str = DEFAULT_LEARNING_GOAL,
 ) -> NoteArchitectureResponse:
     """
     Synthesizes a personalized NoteArchitecture for a learning journey based on its KnowledgeProfile
@@ -68,6 +72,9 @@ async def generate_note_architecture(
     )
 
     journey = db.query(LearningJourney).filter(LearningJourney.id == journey_id).first()
+
+    # Goal precedence: explicit request > intention discovered for this topic > caller default
+    learning_goal = learning_goal or context.discovered_goal or default_goal
 
     # Preserve compact discovery interaction summary
     interactions = (
@@ -127,6 +134,7 @@ async def generate_note_architecture(
         explanation_depth=context.explanation_depth,
         learning_style=context.learning_style,
         target_goals=context.target_goals or "None explicitly specified",
+        learner_discovery_formatted=context.format_discovery_for_prompt(),
         verified_mastery_formatted=verified_mastery_formatted,
         prior_concepts_formatted=prior_concepts_formatted,
         overall_confidence=context.overall_confidence,
