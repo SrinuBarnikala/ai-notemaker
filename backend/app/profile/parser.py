@@ -1,47 +1,51 @@
 import logging
-from typing import List, Dict, Any, Literal
+from typing import List, Dict, Any, Literal, Optional
 from pydantic import BaseModel, Field
 
 from backend.app.discovery.parser import extract_json_object
+from backend.app.discovery.state import DiscoveryLearnerState
 from backend.app.schemas.profile import ConceptItem
 
 logger = logging.getLogger(__name__)
 
 
 class ProfileParsed(BaseModel):
-    overall_confidence: Literal["beginner", "intermediate", "advanced", "mixed"] = "intermediate"
+    overall_confidence: Literal["beginner", "intermediate", "advanced", "mixed", "unknown"] = "unknown"
     summary: str = Field(..., min_length=10)
     concepts: List[ConceptItem] = Field(default_factory=list)
     misconceptions: List[str] = Field(default_factory=list)
     gaps: List[str] = Field(default_factory=list)
+    used_fallback: bool = False
 
 
 def parse_knowledge_profile(
     raw_text: str,
     topic: str,
     interactions: List[Dict[str, Any]],
+    learner_state: Optional[DiscoveryLearnerState] = None,
 ) -> ProfileParsed:
     """
     Parses and validates LLM output for Knowledge Profile.
-    Falls back to deterministic synthesis from interactions if model output fails.
+    If the model output is unusable, falls back to a profile that assigns no knowledge levels
+    (nothing is guessed from keywords) and carries over only what discovery recorded.
     """
     data = extract_json_object(raw_text)
     if data:
         try:
             # Normalize confidence
-            conf = str(data.get("overall_confidence", "intermediate")).lower().strip()
-            if conf not in ["beginner", "intermediate", "advanced", "mixed"]:
-                conf = "intermediate"
+            conf = str(data.get("overall_confidence", "unknown")).lower().strip()
+            if conf not in ["beginner", "intermediate", "advanced", "mixed", "unknown"]:
+                conf = "unknown"  # an unusable value means "not assessed", never a guessed level
 
             # Parse concepts
             concepts = []
             for c in data.get("concepts", []):
-                lvl = str(c.get("level", "moderate")).lower().strip()
+                lvl = str(c.get("level", "unknown")).lower().strip()
                 if lvl not in ["strong", "moderate", "weak", "unknown"]:
-                    lvl = "moderate"
-                cat = str(c.get("category", "partially_known")).lower().strip()
+                    lvl = "unknown"
+                cat = str(c.get("category", "unknown")).lower().strip()
                 if cat not in ["known", "partially_known", "unknown"]:
-                    cat = "partially_known"
+                    cat = "unknown"
                 concepts.append(
                     ConceptItem(
                         name=str(c.get("name", "Technical Concept")).strip(),
@@ -67,63 +71,34 @@ def parse_knowledge_profile(
         except Exception as e:
             logger.warning("Pydantic validation failed for Knowledge Profile: %s", e)
 
-    # Deterministic fallback synthesis directly from interactions
-    logger.info("Using deterministic fallback synthesis for knowledge profile on %s", topic)
-    concepts = []
-    gaps = []
-    misconceptions = []
+    logger.info("Using non-inferential fallback profile for %s", topic)
+    return _fallback_profile(topic, learner_state)
 
-    for item in interactions:
-        target = item.get("concept_target") or "Core Architecture"
-        ans = (item.get("learner_answer") or "").lower()
-        if "production" in ans or "built" in ans or "strong" in ans or "deployed" in ans:
-            concepts.append(
-                ConceptItem(
-                    name=target,
-                    level="strong",
-                    category="known",
-                    notes="Demonstrated hands-on experience and solid baseline understanding.",
-                )
-            )
-        elif "not used" in ans or "never" in ans or "new" in ans or "uncertain" in ans:
-            concepts.append(
-                ConceptItem(
-                    name=target,
-                    level="weak",
-                    category="unknown",
-                    notes="Self-reported unfamiliarity or emerging comprehension.",
-                )
-            )
-            gaps.append(f"Foundational mechanics of {target}")
-        else:
-            concepts.append(
-                ConceptItem(
-                    name=target,
-                    level="moderate",
-                    category="partially_known",
-                    notes="Understands high-level concept but would benefit from architectural depth.",
-                )
-            )
-            gaps.append(f"Production trade-offs and edge cases of {target}")
 
-    if not concepts:
-        concepts.append(
-            ConceptItem(
-                name=f"{topic} Fundamentals",
-                level="moderate",
-                category="partially_known",
-                notes="Initial conceptual baseline established.",
-            )
-        )
-        gaps.append(f"Advanced implementation patterns for {topic}")
+def _fallback_profile(topic: str, state: Optional[DiscoveryLearnerState]) -> ProfileParsed:
+    summary_parts = ["Automated profile synthesis was unavailable, so no knowledge levels were assigned."]
+    gaps: List[str] = []
+    misconceptions: List[str] = []
+    if state is not None:
+        if state.understanding:
+            summary_parts.append(f"Learner's understanding as recorded in discovery: {state.understanding.value.rstrip('. ')}.")
+        if state.intent:
+            summary_parts.append(f"Goal as recorded in discovery: {state.intent.value.rstrip('. ')}.")
+        gaps = [f.value for f in state.gaps]
+        misconceptions = [f.value for f in state.misconceptions]
 
     return ProfileParsed(
-        overall_confidence="intermediate" if len(gaps) <= 2 else "beginner",
-        summary=(
-            f"The learner displays familiarity with core conceptual aspects of {topic} "
-            f"while identifying key gaps in advanced execution, trade-offs, and edge cases."
-        ),
-        concepts=concepts,
+        overall_confidence="unknown",
+        summary=" ".join(summary_parts),
+        concepts=[
+            ConceptItem(
+                name=topic,
+                level="unknown",
+                category="unknown",
+                notes="Not assessed: profile synthesis was unavailable.",
+            )
+        ],
         misconceptions=misconceptions,
         gaps=gaps,
+        used_fallback=True,
     )

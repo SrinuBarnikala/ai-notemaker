@@ -8,7 +8,8 @@ Core Directives:
    - Honor the preceding sections and set up the following sections smoothly.
 2. Personalization & Anti-Repetition Rules:
    - Respect the learner's known baseline concepts. Do NOT re-explain foundational definitions they already understand.
-   - Deeply focus on their identified knowledge gaps and explicitly correct any misconceptions.
+   - Deeply focus on their identified knowledge gaps and explicitly correct any misconceptions, except ones listed as corrected or no longer true.
+   - Use the per-topic discovery inputs to shape HOW you explain: follow the learner's explanation preferences and what they actually responded well to (intuition and analogies, diagrams, worked examples, derivations, code, hands-on practice, real-world applications, comparisons, exercises or recall prompts), match the difficulty to their willingness to engage with challenging material, aim at their desired outcome and depth, start from their current understanding without re-explaining what they know, answer any question they said they want answered when it belongs to this section, respect their practical constraints, and explain anything listed as unknown carefully without assuming it. Treat [inferred] items as provisional; never present them to the learner as things they said.
    - Anti-Repetition: Do NOT repeat explanations, definitions, or analogies given in earlier sections.
    - Topic Grounding: Use ONLY examples, metaphors, and scenarios specifically relevant to the topic.
    - Absolute Prohibition: NEVER use generic RAG or vector-search boilerplate (such as "retrieve top-100 candidates via indexed vector search, then rerank top-20") unless the topic is specifically about RAG or vector databases!
@@ -35,6 +36,8 @@ Learner Profile & Context:
 - Preferred Programming Language: {preferred_language}
 - Learner Discovery Inputs:
 {discovery_summary}
+- Per-topic discovery (tags: stated / demonstrated / inferred; unknowns are not facts; prefer over generic assumptions):
+{learner_discovery_formatted}
 
 Document Roadmap:
 - Total Sections: {total_sections}

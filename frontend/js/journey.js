@@ -6,12 +6,6 @@
       input.focus();
     }
 
-    function addAnswerStarter(text) {
-      const textarea = document.getElementById('disc-answer-input');
-      textarea.value = text;
-      textarea.focus();
-    }
-
     /* Reader Controls */
 
 
@@ -50,6 +44,63 @@
       }
     }
 
+    let discoveryBusy = false;
+    let currentQuestionIndex = null;
+
+    // The group: a motive statement, then zero to five PEER questions (unnumbered, none nested under another).
+    // Everything is inserted as text, never HTML. Groups from before motives existed have no motive.
+    function renderGroup(data) {
+      const motiveBlock = document.getElementById('disc-motive-block');
+      const hasMotive = Boolean(data.motive);
+      motiveBlock.style.display = hasMotive ? 'block' : 'none';
+      document.getElementById('disc-motive').textContent = data.motive || '';
+
+      const list = document.getElementById('disc-questions');
+      list.textContent = '';
+      (data.questions || []).forEach(text => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        list.appendChild(li);
+      });
+      list.style.display = (data.questions && data.questions.length) ? 'flex' : 'none';
+
+      document.getElementById('disc-group-hint').textContent = (data.questions && data.questions.length)
+        ? 'Answer everything in one message, in your own words. You don\'t have to go question by question.'
+        : 'There are no specific questions this time. Tell me whatever comes to mind about this.';
+    }
+
+    function clearGroup(message) {
+      document.getElementById('disc-motive-block').style.display = 'block';
+      document.getElementById('disc-motive').textContent = message;
+      const list = document.getElementById('disc-questions');
+      list.textContent = '';
+      list.style.display = 'none';
+      document.getElementById('disc-group-hint').textContent = '';
+    }
+
+    // Progress is individual questions asked against the budget, never the number of groups or motives.
+    function updateProgress(data) {
+      const max = data.max_questions || 10;
+      const asked = Math.min(data.questions_asked || 0, max);
+      document.getElementById('disc-step-label').textContent = `Questions asked: ${asked} of up to ${max}`;
+      document.getElementById('disc-progress').style.width = `${Math.round((asked / max) * 100)}%`;
+    }
+
+    // While true the answer is already saved server-side: keep it visible but locked until the next card loads.
+    function setAwaitingResume(waiting) {
+      document.getElementById('disc-answer-input').readOnly = waiting;
+    }
+
+    function showDiscoveryError(message, retryable) {
+      document.getElementById('disc-error-text').textContent = message;
+      document.getElementById('disc-error-retry').style.display = retryable ? 'inline-block' : 'none';
+      document.getElementById('disc-error').style.display = 'flex';
+    }
+
+    function clearDiscoveryError() {
+      document.getElementById('disc-error').style.display = 'none';
+    }
+
     async function startDiscovery(journeyId, topic) {
       currentJourneyId = journeyId;
       currentTopic = topic;
@@ -66,49 +117,58 @@
       discPanel.scrollIntoView({ behavior: 'smooth' });
 
       document.getElementById('disc-topic-label').textContent = topic;
-      document.getElementById('disc-question-text').textContent = 'Consulting Knowledge Discovery Agent...';
-      setIconLabel(document.getElementById('disc-concept'), 'target', 'Probing baseline...');
-      document.getElementById('disc-step-label').textContent = 'Question 1 of 4';
-      document.getElementById('disc-progress').style.width = '25%';
+      clearGroup('Thinking about where to begin…');
+      setIconLabel(document.getElementById('disc-concept'), 'target', 'Getting started');
+      document.getElementById('disc-step-label').textContent = 'Getting to know you';
+      document.getElementById('disc-progress').style.width = '0%';
       document.getElementById('active-question-section').style.display = 'block';
+      clearDiscoveryError();
+      document.getElementById('btn-answer-submit').disabled = true;
 
       try {
+        // Idempotent: returns the pending question, or resumes an answer that was saved but not followed up.
         const data = await API.request(`/journeys/${journeyId}/discovery/start`, { method: 'POST' }, 'Failed to start discovery');
         renderQuestion(data);
         loadDiscoveryHistory(journeyId);
-
-        if (data.is_finished) {
-          triggerProfileGeneration(journeyId);
-        }
       } catch (err) {
-        document.getElementById('disc-question-text').textContent = 'Error: ' + err.message;
+        clearGroup('We could not load your next questions.');
+        showDiscoveryError(err.message, true);
       }
     }
 
+    function retryDiscovery() {
+      return startDiscovery(currentJourneyId, currentTopic);
+    }
+
     function renderQuestion(data) {
+      const submitBtn = document.getElementById('btn-answer-submit');
       if (data.is_finished) {
         document.getElementById('active-question-section').style.display = 'none';
-        document.getElementById('disc-progress').style.width = '100%';
-        document.getElementById('disc-step-label').textContent = 'Discovery Concluded';
+        updateProgress(data);
+        document.getElementById('disc-step-label').textContent = `Discovery concluded after ${data.questions_asked || 0} questions`;
         setIconLabel(document.getElementById('disc-concept'), 'target', 'Complete');
         triggerProfileGeneration(currentJourneyId);
         return;
       }
 
-      const maxQ = data.max_questions || 4;
-      document.getElementById('disc-step-label').textContent = `Question ${data.question_index} of ${maxQ}`;
-      document.getElementById('disc-question-text').textContent = data.question_text;
+      clearDiscoveryError();
+      document.getElementById('active-question-section').style.display = 'block';
+      currentQuestionIndex = data.question_index;
+      updateProgress(data);
+      renderGroup(data);
       setIconLabel(document.getElementById('disc-concept'), 'target', data.concept_target);
-      document.getElementById('disc-progress').style.width = `${Math.min((data.question_index / maxQ) * 100, 100)}%`;
+      setAwaitingResume(false);
       document.getElementById('disc-answer-input').value = '';
       document.getElementById('disc-answer-input').focus();
+      submitBtn.disabled = false;
     }
 
     async function submitAnswer() {
+      if (discoveryBusy) return; // guard against double submission
       const textarea = document.getElementById('disc-answer-input');
       const answer = textarea.value.trim();
       if (!answer) {
-        alert('Please enter an answer or select a starter chip.');
+        showDiscoveryError('Write a few words first. Even "I\'m not sure" helps.', false);
         return;
       }
 
@@ -116,6 +176,8 @@
       const btnText = document.getElementById('btn-ans-text');
       const btnSpinner = document.getElementById('btn-ans-spinner');
 
+      discoveryBusy = true;
+      clearDiscoveryError();
       btn.disabled = true;
       btnText.style.display = 'none';
       btnSpinner.style.display = 'inline';
@@ -124,14 +186,25 @@
         const data = await API.request(`/journeys/${currentJourneyId}/discovery/answer`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ answer })
+          body: JSON.stringify({ answer, question_index: currentQuestionIndex })
         }, 'Failed to submit answer');
         renderQuestion(data);
         loadDiscoveryHistory(currentJourneyId);
       } catch (err) {
-        alert('Error: ' + err.message);
+        if (err.status === 503 || err.status === 409) {
+          // 503: the answer is already saved on the server, so resume instead of resubmitting; the text stays
+          // visible (locked) until the next card loads. 409: this submission was refused (not saved); keep the
+          // draft so nothing is lost until the user reloads the question.
+          if (err.status === 503) setAwaitingResume(true);
+          showDiscoveryError(err.message, true);
+          loadDiscoveryHistory(currentJourneyId);
+        } else {
+          // Not saved (for example, invalid input): keep the text so nothing is lost.
+          showDiscoveryError(err.message, false);
+          btn.disabled = false;
+        }
       } finally {
-        btn.disabled = false;
+        discoveryBusy = false;
         btnText.style.display = 'inline';
         btnSpinner.style.display = 'none';
       }
@@ -151,7 +224,8 @@
 
         feed.innerHTML = answered.map(item => `
           <div class="qa-card">
-            <div class="qa-q">Q${item.question_index} (${item.concept_target}): ${escapeHtml(item.question_text)}</div>
+            ${item.motive ? `<div class="qa-motive">${escapeHtml(item.motive)}</div>` : ''}
+            ${(item.questions || []).length ? `<ul class="qa-questions">${item.questions.map(q => `<li>${escapeHtml(q)}</li>`).join('')}</ul>` : ''}
             <div class="qa-a">${escapeHtml(item.learner_answer)}</div>
             ${item.quick_assessment ? `<div class="qa-assessment">${uiIcon('lightbulb')} Insight: ${escapeHtml(item.quick_assessment)}</div>` : ''}
           </div>
@@ -167,19 +241,31 @@
       profilePanel.scrollIntoView({ behavior: 'smooth' });
 
       document.getElementById('prof-summary').textContent = 'Building your mental model from your answers…';
+      document.getElementById('prof-error').style.display = 'none';
 
       try {
         const profile = await API.request(`/journeys/${journeyId}/knowledge-profile`, { method: 'POST' }, 'Failed to synthesize profile');
         renderProfile(profile);
       } catch (err) {
-        document.getElementById('prof-summary').textContent = 'Failed to generate profile: ' + err.message;
+        // Discovery answers are already saved; regenerating only rebuilds the profile.
+        document.getElementById('prof-summary').textContent = 'Your answers are saved, but the profile could not be built yet.';
+        document.getElementById('prof-error-text').textContent = err.message;
+        document.getElementById('prof-error').style.display = 'flex';
       }
+    }
+
+    function retryProfileGeneration() {
+      return triggerProfileGeneration(currentJourneyId);
     }
 
     function renderProfile(profile) {
       const confBadge = document.getElementById('prof-confidence');
-      confBadge.textContent = profile.overall_confidence.toUpperCase();
+      const confidenceLabels = { unknown: 'NOT ASSESSED', developing: 'DEVELOPING' };
+      confBadge.textContent = confidenceLabels[profile.overall_confidence] || profile.overall_confidence.toUpperCase();
       confBadge.className = `confidence-badge confidence-${profile.overall_confidence}`;
+      document.getElementById('prof-error').style.display = 'none';
+      document.getElementById('prof-fallback-notice').style.display = profile.synthesis_fallback ? 'flex' : 'none';
+      renderLearnerContext(profile.learner_context);
 
       document.getElementById('prof-summary').textContent = profile.summary;
 
@@ -219,6 +305,76 @@
       colGaps.innerHTML = gapsHtml || '<div class="text-sm" style="color: var(--text-muted);">None identified yet.</div>';
     }
 
+    const BASIS_LABELS = { stated: 'you said', demonstrated: 'you showed', inferred: 'inferred' };
+
+    // "What we learned from your answers": per-topic findings with how each is known. Text only, never HTML.
+    function renderLearnerContext(ctx) {
+      const box = document.getElementById('prof-learner-context');
+      box.textContent = '';
+      const rows = [];
+      const add = (label, items) => {
+        const list = (Array.isArray(items) ? items : [items]).filter(i => i && i.value);
+        if (list.length) rows.push({ label, list });
+      };
+      if (ctx) {
+        add('Why you are learning it', ctx.intention);
+        add('What you want to achieve', ctx.desired_outcome);
+        add('How you like things explained', ctx.explanation_preferences);
+        add('How you responded to explanations', ctx.observed_approach);
+        add('Willingness to tackle difficulty', ctx.challenge_willingness);
+        add('What you understand now', ctx.understanding);
+        add('Related ideas you know', ctx.related_familiarity);
+        add('How deep you want to go', ctx.desired_depth);
+        add('Questions you want answered', ctx.questions_to_answer);
+        add('Time and practical limits', [ctx.available_time, ...(ctx.constraints || [])]);
+      }
+      const unresolved = ctx && Array.isArray(ctx.unresolved) ? ctx.unresolved : [];
+      if (!rows.length && !unresolved.length) { box.style.display = 'none'; return; }
+
+      const title = document.createElement('div');
+      title.className = 'lc-title';
+      title.textContent = 'What we learned from your answers';
+      box.appendChild(title);
+
+      const makeRow = (label) => {
+        const row = document.createElement('div');
+        row.className = 'lc-row';
+        const l = document.createElement('div');
+        l.className = 'lc-label';
+        l.textContent = label;
+        const v = document.createElement('div');
+        v.className = 'lc-value';
+        row.appendChild(l);
+        row.appendChild(v);
+        box.appendChild(row);
+        return v;
+      };
+
+      rows.forEach(({ label, list }) => {
+        const cell = makeRow(label);
+        list.forEach(item => {
+          const line = document.createElement('div');
+          line.appendChild(document.createTextNode(item.value));
+          const basis = document.createElement('span');
+          basis.className = 'lc-basis';
+          basis.textContent = BASIS_LABELS[item.basis] || 'inferred';
+          line.appendChild(basis);
+          if (item.evidence) {
+            const ev = document.createElement('span');
+            ev.className = 'lc-evidence';
+            ev.textContent = '\u201c' + item.evidence + '\u201d' + (item.source_card ? ` (card ${item.source_card})` : '');
+            line.appendChild(ev);
+          }
+          cell.appendChild(line);
+        });
+      });
+      if (unresolved.length) {
+        const cell = makeRow('Still unknown');
+        cell.textContent = unresolved.join('; ');
+      }
+      box.style.display = 'block';
+    }
+
     function renderConceptCard(c) {
       return `
         <div class="concept-item-card">
@@ -250,7 +406,7 @@
         const arch = await API.request(`/journeys/${targetId}/architecture`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ learning_goal: 'Master core mechanics, resolve gaps, and implement in production' })
+          body: JSON.stringify({})
         }, 'Failed to generate architecture');
         renderArchitecture(arch);
       } catch (err) {
@@ -259,6 +415,9 @@
     }
 
     function renderArchitecture(arch) {
+      setNotice('arch-fallback-notice', arch.generation_status === 'llm_fallback'
+        ? 'The AI service was unavailable, so this outline comes from a built-in template and is not personalised by the model. You can generate it again later.'
+        : '');
       document.getElementById('arch-rationale').textContent = arch.summary_rationale;
       const bList = document.getElementById('blueprint-list');
 

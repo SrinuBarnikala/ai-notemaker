@@ -31,13 +31,26 @@ def test_profile_parser_corrupt_fallback():
         {"concept_target": "Reranking", "learner_answer": "I have never used this.", "quick_assessment": "Unfamiliar"}
     ]
     parsed = parse_knowledge_profile(corrupt, topic="RAG", interactions=mock_interactions)
-    assert parsed.overall_confidence in ["beginner", "intermediate", "advanced", "mixed"]
-    assert len(parsed.concepts) >= 2
-    # First should be strong because learner mentioned 'production'
-    assert any(c.level == "strong" for c in parsed.concepts)
-    # Second should be weak because learner mentioned 'never'
-    assert any(c.level == "weak" for c in parsed.concepts)
-    assert len(parsed.gaps) > 0
+    assert parsed.used_fallback is True
+    assert parsed.overall_confidence == "unknown"  # never a guessed level
+    # Nothing is guessed from keywords like 'production' or 'never': no levels are assigned.
+    assert len(parsed.concepts) >= 1
+    assert all(c.level == "unknown" and c.category == "unknown" for c in parsed.concepts)
+    assert parsed.gaps == [] and parsed.misconceptions == []
+    assert "unavailable" in parsed.summary
+
+
+def test_profile_parser_fallback_carries_only_recorded_discovery_state():
+    from backend.app.discovery.state import DiscoveryLearnerState, Finding
+    state = DiscoveryLearnerState(
+        original_topic="RAG",
+        intent=Finding(value="Build a search feature", basis="stated", evidence="I want to build search"),
+        gaps=[Finding(value="Reranking", basis="inferred")],
+    )
+    parsed = parse_knowledge_profile("not json", topic="RAG", interactions=[], learner_state=state)
+    assert parsed.used_fallback is True
+    assert parsed.gaps == ["Reranking"]
+    assert "Build a search feature" in parsed.summary
 
 
 def test_generate_and_get_profile_flow(client):
@@ -74,7 +87,8 @@ def test_generate_and_get_profile_flow(client):
     p_data = gen_res.json()
     assert p_data["journey_id"] == journey_id
     assert p_data["topic"] == "FastAPI Dependency Injection"
-    assert p_data["overall_confidence"] in ["beginner", "intermediate", "advanced", "mixed"]
+    assert p_data["overall_confidence"] == "unknown"  # mock output is unusable: not assessed
+    assert p_data["synthesis_fallback"] is True
     assert len(p_data["summary"]) > 10
     assert len(p_data["concepts"]) >= 1
     assert "gaps" in p_data

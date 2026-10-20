@@ -19,7 +19,7 @@ class SectionBlueprint(BaseModel):
 
 
 class GenerateArchitectureRequest(BaseModel):
-    learning_goal: Optional[str] = "Master internal mechanics and practical architecture"
+    learning_goal: Optional[str] = None
 
 
 class NoteArchitectureResponse(BaseModel):

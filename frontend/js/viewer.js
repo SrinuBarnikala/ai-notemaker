@@ -254,6 +254,12 @@
       // Note Header
       document.getElementById('note-topic-heading').textContent = note.topic;
       document.getElementById('note-summary-text').textContent = note.summary;
+      setNotice('note-fallback-notice',
+        note.generation_status === 'llm_fallback'
+          ? 'The AI service was unavailable, so this note is an offline draft rather than a model-written note. Regenerate it once the service is back.'
+          : note.generation_status === 'llm_partial_fallback'
+            ? 'Some sections are offline drafts because the AI service was unavailable for them.'
+            : '');
       
       const verBadge = document.getElementById('note-version-badge');
       verBadge.textContent = `VERSION ${note.version}`;

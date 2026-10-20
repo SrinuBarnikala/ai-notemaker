@@ -8,6 +8,7 @@ from backend.app.models.journey import LearningJourney
 from backend.app.models.profile import KnowledgeProfile, KnowledgeConcept
 from backend.app.schemas.profile import KnowledgeProfileResponse, ConceptItem
 from backend.app.profile.generator import generate_knowledge_profile
+from backend.app.personalization.builder import safe_load_learner_context
 
 router = APIRouter()
 
@@ -80,6 +81,13 @@ def get_knowledge_profile(
     misconceptions = json.loads(profile.misconceptions or "[]")
     gaps = json.loads(profile.gaps or "[]")
 
+    learner_context = safe_load_learner_context(profile.learner_context)
+    synthesis_fallback = bool(
+        learner_context
+        and isinstance(learner_context.get("discovery"), dict)
+        and learner_context["discovery"].get("profile_synthesis") == "fallback"
+    )
+
     return KnowledgeProfileResponse(
         id=profile.id,
         journey_id=journey.id,
@@ -89,6 +97,8 @@ def get_knowledge_profile(
         concepts=concept_items,
         misconceptions=misconceptions,
         gaps=gaps,
+        learner_context=learner_context,
+        synthesis_fallback=synthesis_fallback,
         created_at=profile.created_at,
         updated_at=profile.updated_at,
     )

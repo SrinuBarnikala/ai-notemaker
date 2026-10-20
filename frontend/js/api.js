@@ -64,7 +64,9 @@ async function apiRequest(url, options, fallbackErrorMessage) {
     } catch (_) {
       // non-JSON error body — fall back to the provided message
     }
-    throw new Error(detail || fallbackErrorMessage || `Request failed with status ${res.status}`);
+    const error = new Error(detail || fallbackErrorMessage || `Request failed with status ${res.status}`);
+    error.status = res.status;
+    throw error;
   }
   return res.json();
 }

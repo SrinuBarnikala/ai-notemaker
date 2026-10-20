@@ -74,6 +74,78 @@ class TopicKnowledgeContext(BaseModel):
     )
 
 
+class DiscoveredLearnerContext(BaseModel):
+    """
+    Per-topic results of the discovery conversation. Items carry a provenance tag
+    ([stated], [demonstrated], [inferred]). Separate from, and never written back to, the
+    account-level LearnerProfileContext defaults.
+    """
+    goal_text: Optional[str] = Field(
+        default=None,
+        description="What the learner wants to achieve with this topic, without provenance tag: their desired outcome "
+                    "if the learner stated or demonstrated it, else their stated intention. A merely inferred value "
+                    "is never used as the goal.",
+    )
+    # The nine learner dimensions, each with its provenance tag ([stated], [demonstrated], [inferred])
+    intention: Optional[str] = None
+    desired_outcome: Optional[str] = None
+    explanation_preferences: List[str] = Field(default_factory=list)
+    observed_approach: List[str] = Field(default_factory=list)
+    challenge_willingness: Optional[str] = None
+    understanding: Optional[str] = None
+    related_familiarity: List[str] = Field(default_factory=list)
+    desired_depth: Optional[str] = None
+    questions_to_answer: List[str] = Field(default_factory=list)
+    available_time: Optional[str] = None
+    constraints: List[str] = Field(default_factory=list)
+    # Judgments about coverage, for example a dimension judged irrelevant to this learner (with the reason)
+    coverage_notes: List[str] = Field(default_factory=list)
+    unresolved: List[str] = Field(default_factory=list)
+    resolved: List[str] = Field(
+        default_factory=list,
+        description="Findings the learner corrected during discovery; no longer current",
+    )
+
+    def is_empty(self) -> bool:
+        return not any([
+            self.intention, self.desired_outcome, self.desired_depth, self.understanding, self.related_familiarity,
+            self.explanation_preferences, self.observed_approach, self.challenge_willingness, self.available_time,
+            self.questions_to_answer, self.constraints, self.coverage_notes, self.unresolved, self.resolved,
+        ])
+
+    def format_lines(self) -> List[str]:
+        lines: List[str] = []
+        if self.intention:
+            lines.append(f"- Learning intention: {self.intention}")
+        if self.desired_outcome:
+            lines.append(f"- Desired outcome: {self.desired_outcome}")
+        if self.explanation_preferences:
+            lines.append(f"- Explanation preferences: {'; '.join(self.explanation_preferences)}")
+        if self.observed_approach:
+            lines.append(f"- Observed response to explanation approaches: {'; '.join(self.observed_approach)}")
+        if self.challenge_willingness:
+            lines.append(f"- Willingness to engage with challenging material: {self.challenge_willingness}")
+        if self.understanding:
+            lines.append(f"- Current understanding: {self.understanding}")
+        if self.related_familiarity:
+            lines.append(f"- Familiar related concepts: {'; '.join(self.related_familiarity)}")
+        if self.desired_depth:
+            lines.append(f"- Desired depth: {self.desired_depth}")
+        if self.questions_to_answer:
+            lines.append(f"- Questions the learner wants answered (address them): {'; '.join(self.questions_to_answer)}")
+        if self.available_time:
+            lines.append(f"- Available time: {self.available_time}")
+        if self.constraints:
+            lines.append(f"- Practical constraints: {'; '.join(self.constraints)}")
+        for note in self.coverage_notes:
+            lines.append(f"- {note}")
+        if self.resolved:
+            lines.append(f"- Corrected during discovery, NO LONGER TRUE (do not present as current): {'; '.join(self.resolved)}")
+        if self.unresolved:
+            lines.append(f"- Still unknown (do not assume): {'; '.join(self.unresolved)}")
+        return lines
+
+
 class EmpiricalMasteryContext(BaseModel):
     """
     Empirically verified mastery results from quizzes/assessments.
@@ -121,6 +193,7 @@ class PersonalizationContext(BaseModel):
     # 2. Components
     learner_profile: LearnerProfileContext = Field(default_factory=LearnerProfileContext)
     topic_knowledge: TopicKnowledgeContext = Field(default_factory=TopicKnowledgeContext)
+    discovered: DiscoveredLearnerContext = Field(default_factory=DiscoveredLearnerContext)
     empirical_mastery: EmpiricalMasteryContext = Field(default_factory=EmpiricalMasteryContext)
     cross_journey: CrossJourneyPriorContext = Field(default_factory=CrossJourneyPriorContext)
 
@@ -148,6 +221,17 @@ class PersonalizationContext(BaseModel):
     @property
     def target_goals(self) -> Optional[str]:
         return self.learner_profile.target_goals
+
+    @property
+    def discovered_goal(self) -> Optional[str]:
+        return self.discovered.goal_text
+
+    def format_discovery_for_prompt(self) -> str:
+        """Per-topic discovery block for architecture/note prompts."""
+        lines = self.discovered.format_lines()
+        if not lines:
+            return "No per-topic discovery details recorded."
+        return "\n".join(lines)
 
     @property
     def overall_confidence(self) -> str:
@@ -218,6 +302,11 @@ class PersonalizationContext(BaseModel):
 
         if self.misconceptions:
             lines.append(f"Identified Misconceptions (Debunk or warn against): {', '.join(self.misconceptions)}")
+
+        discovery_lines = self.discovered.format_lines()
+        if discovery_lines:
+            lines.append("Per-topic learner discovery (takes precedence over the account defaults above where they conflict):")
+            lines.extend(discovery_lines)
 
         if self.verified_mastered_concepts:
             lines.append(f"Empirically Verified Mastery (From quizzes): {', '.join(self.verified_mastered_concepts)}")

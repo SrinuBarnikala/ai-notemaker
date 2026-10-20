@@ -1,8 +1,11 @@
+import logging
 from pathlib import Path
 from typing import Generator
 from sqlalchemy import create_engine, text, event
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from backend.app.config import get_settings
+
+logger = logging.getLogger(__name__)
 
 settings = get_settings()
 
@@ -52,10 +55,87 @@ def check_db_health() -> bool:
         return False
 
 
-def ensure_schema_migrations():
-    """Add any missing columns to existing SQLite tables automatically."""
+DISCOVERY_INDEX_NAME = "uq_discovery_journey_question_index"
+
+
+def _table_columns(conn, table: str) -> list:
+    return [row[1] for row in conn.execute(text(f"PRAGMA table_info({table})")).fetchall()]
+
+
+def ensure_discovery_schema(bind=None) -> dict:
+    """
+    Additive Knowledge Discovery schema changes. Each step runs in its own transaction, so one
+    failure never skips the others, and every failure is logged. Never deletes or rewrites data.
+    Returns the outcome per step: "added", "present", "no_table", "skipped_duplicates" or "failed".
+    """
+    target = bind or engine
+    outcome: dict = {}
+
+    def add_column(step: str, table: str, column: str, ddl: str) -> None:
+        try:
+            with target.begin() as conn:
+                cols = _table_columns(conn, table)
+                if not cols:
+                    outcome[step] = "no_table"
+                elif column in cols:
+                    outcome[step] = "present"
+                else:
+                    conn.execute(text(ddl))
+                    outcome[step] = "added"
+        except Exception:
+            outcome[step] = "failed"
+            logger.exception("Schema migration step failed: %s", step)
+
+    add_column("discovery_interactions.analysis", "discovery_interactions", "analysis",
+               "ALTER TABLE discovery_interactions ADD COLUMN analysis TEXT")
+    add_column("discovery_interactions.subquestions", "discovery_interactions", "subquestions",
+               "ALTER TABLE discovery_interactions ADD COLUMN subquestions TEXT")
+    add_column("discovery_interactions.motive", "discovery_interactions", "motive",
+               "ALTER TABLE discovery_interactions ADD COLUMN motive TEXT")
+    add_column("discovery_interactions.questions", "discovery_interactions", "questions",
+               "ALTER TABLE discovery_interactions ADD COLUMN questions TEXT")
+    add_column("knowledge_profiles.learner_context", "knowledge_profiles", "learner_context",
+               "ALTER TABLE knowledge_profiles ADD COLUMN learner_context TEXT")
+
+    step = f"index {DISCOVERY_INDEX_NAME}"
     try:
-        with engine.begin() as conn:
+        with target.begin() as conn:
+            if not _table_columns(conn, "discovery_interactions"):
+                outcome[step] = "no_table"
+            elif conn.execute(
+                text("SELECT 1 FROM sqlite_master WHERE type='index' AND name=:n"), {"n": DISCOVERY_INDEX_NAME}
+            ).first():
+                outcome[step] = "present"
+            else:
+                duplicates = conn.execute(text(
+                    "SELECT journey_id, question_index, COUNT(*) FROM discovery_interactions "
+                    "GROUP BY journey_id, question_index HAVING COUNT(*) > 1"
+                )).fetchall()
+                if duplicates:
+                    outcome[step] = "skipped_duplicates"
+                    logger.error(
+                        "Not creating unique index %s: %d (journey_id, question_index) pair(s) already have "
+                        "duplicate rows and NO data was changed. Resolve them manually (for example keep the "
+                        "answered row and remove or renumber the other), then restart. Conflicts: %s",
+                        DISCOVERY_INDEX_NAME, len(duplicates), [tuple(row) for row in duplicates[:20]],
+                    )
+                else:
+                    conn.execute(text(
+                        f"CREATE UNIQUE INDEX IF NOT EXISTS {DISCOVERY_INDEX_NAME} "
+                        "ON discovery_interactions (journey_id, question_index)"
+                    ))
+                    outcome[step] = "added"
+    except Exception:
+        outcome[step] = "failed"
+        logger.exception("Schema migration step failed: %s", step)
+    return outcome
+
+
+def ensure_schema_migrations(bind=None):
+    """Add any missing columns to existing SQLite tables automatically."""
+    ensure_discovery_schema(bind)
+    try:
+        with (bind or engine).begin() as conn:
             # Check learning_journeys columns
             res = conn.execute(text("PRAGMA table_info(learning_journeys)")).fetchall()
             cols = [row[1] for row in res]
@@ -100,5 +180,5 @@ def ensure_schema_migrations():
                 if "generation_details" not in cols:
                     conn.execute(text("ALTER TABLE note_sections ADD COLUMN generation_details TEXT"))
     except Exception:
-        pass
+        logger.exception("Schema auto-migration failed; some columns may be missing.")
 
