@@ -8,14 +8,11 @@ from backend.app.db.session import SessionLocal
 from backend.app.discovery.locks import JourneyLocks, discovery_locks
 from backend.app.models.discovery import DiscoveryInteraction
 from backend.app.models.journey import LearningJourney
-from discovery_helpers import Gate, opening, turn, finding
+from discovery_helpers import Gate, core_state, opening, turn
 
 Q1 = "Why do you think we needed a way to adjust weights automatically?"
 Q2 = "What would you like to be able to do with this idea?"
-GROUNDED = {
-    "understanding": finding("Knows the forward pass", "demonstrated", "the forward pass"),
-    "intent": finding("Wants concepts", "stated", "concepts"),
-}
+GROUNDED = core_state("concepts")  # every core dimension established by a quote found in the finishing replies
 
 
 @pytest.fixture
@@ -136,7 +133,7 @@ async def test_simultaneous_starts_create_exactly_one_first_question(async_clien
     r1, r2 = await asyncio.gather(first, second)
 
     assert r1.status_code == r2.status_code == 200
-    assert r1.json()["question_text"] == r2.json()["question_text"] == Q1
+    assert r1.json()["questions"] == r2.json()["questions"] == [Q1]
     assert scripted_async.calls == 1                       # and it never made its own model call
     assert rows(journey_id) == [(1, False)]
     assert status(journey_id) == "discovery"
@@ -290,3 +287,49 @@ async def test_a_slow_journey_does_not_block_another(async_client, scripted_asyn
     assert fast.status_code == 200 and not slow.done()
     gate.release.set()
     assert (await slow).status_code == 200
+
+
+async def test_simultaneous_starts_return_the_same_group_with_its_motive_and_questions(async_client, scripted_async):
+    questions = ["What made you interested in learning this topic now?", "Where do you expect to use this knowledge?"]
+    motive = "I'd like to understand what prompted your interest, so the notes fit your reason for learning."
+    gate = Gate(opening(motive=motive, questions=questions))
+    scripted_async.push(gate)
+    journey_id = await new_journey(async_client)
+
+    first = asyncio.create_task(async_client.post(f"/journeys/{journey_id}/discovery/start"))
+    await asyncio.wait_for(gate.entered.wait(), 5)
+    second = asyncio.create_task(async_client.post(f"/journeys/{journey_id}/discovery/start"))
+    await wait_until(lambda: discovery_locks.holders(journey_id) == 2)
+    gate.release.set()
+    r1, r2 = await asyncio.gather(first, second)
+
+    assert r1.json()["questions"] == r2.json()["questions"] == questions
+    assert r1.json()["motive"] == r2.json()["motive"] == motive
+    assert r1.json()["questions_asked"] == r2.json()["questions_asked"] == 2     # the questions were counted once
+    assert scripted_async.calls == 1 and rows(journey_id) == [(1, False)]
+
+
+async def test_simultaneous_requests_cannot_spend_more_than_the_question_budget(async_client, scripted_async, test_settings):
+    test_settings.discovery_max_questions = 3
+    scripted_async.push(opening(motive="I'd like to understand why you are learning this, so the notes fit your reason.",
+                                questions=["What prompted you to learn it?", "What would you like to build with it?"]))
+    journey_id = await new_journey(async_client)
+    await async_client.post(f"/journeys/{journey_id}/discovery/start")                         # 2 of 3 questions spent
+
+    five = ["How would you explain the idea in your own words?", "Which part feels least clear to you?", "What have you tried so far?",
+            "Which example would help you most?", "What would you like to check yourself on?"]
+    gate = Gate(turn(motive="I'd like to hear how you picture the idea working, step by step.", questions=five))
+    scripted_async.push(gate)
+    scripted_async.default = turn(motive="This extra group must never be requested at all.", questions=five)
+
+    answer = asyncio.create_task(async_client.post(f"/journeys/{journey_id}/discovery/answer", json={"answer": "It prompts me daily."}))
+    await asyncio.wait_for(gate.entered.wait(), 5)
+    reloads = [asyncio.create_task(async_client.post(f"/journeys/{journey_id}/discovery/start")) for _ in range(4)]
+    await wait_until(lambda: discovery_locks.holders(journey_id) == 5)
+    gate.release.set()
+    results = await asyncio.gather(answer, *reloads)
+
+    assert all(r.status_code == 200 for r in results)
+    assert {r.json()["questions_asked"] for r in results} == {3}                                # exactly the limit, never beyond
+    assert all(len(r.json()["questions"]) == 1 and r.json()["questions_remaining"] == 0 for r in results)   # five proposed, one left
+    assert scripted_async.calls == 2 and rows(journey_id) == [(1, True), (2, False)]            # one analysis; no duplicate groups

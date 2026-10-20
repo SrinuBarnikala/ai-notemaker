@@ -81,9 +81,9 @@ def _fallback_profile(topic: str, state: Optional[DiscoveryLearnerState]) -> Pro
     misconceptions: List[str] = []
     if state is not None:
         if state.understanding:
-            summary_parts.append(f"Learner's understanding as recorded in discovery: {state.understanding.value}")
+            summary_parts.append(f"Learner's understanding as recorded in discovery: {state.understanding.value.rstrip('. ')}.")
         if state.intent:
-            summary_parts.append(f"Stated goal: {state.intent.value}")
+            summary_parts.append(f"Goal as recorded in discovery: {state.intent.value.rstrip('. ')}.")
         gaps = [f.value for f in state.gaps]
         misconceptions = [f.value for f in state.misconceptions]
 

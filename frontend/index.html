@@ -358,23 +358,26 @@
         <div class="concept-pill" id="disc-concept"><svg class="icon" aria-hidden="true"><use href="/static/icons.svg#target"></use></svg> Initializing...</div>
       </div>
 
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-        <span class="disc-step-wrap">
-          <span class="disc-steps" id="disc-steps" aria-hidden="true"></span>
-          <span class="text-sm" style="color: var(--text-muted);" id="disc-step-label">Getting to know you</span>
-        </span>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+        <span class="text-sm" style="color: var(--text-muted);" id="disc-step-label">Getting to know you</span>
         <span class="text-sm fw-semibold" style="color: var(--color-blue);" id="disc-topic-label">--</span>
       </div>
+      <div class="progress-bar-bg" aria-hidden="true"><div class="progress-bar-fill" id="disc-progress" style="width: 0%;"></div></div>
 
       <div id="active-question-section">
         <div class="question-box">
-          <div class="question-prompt-text" id="disc-question-text">Generating adaptive probe...</div>
+          <div id="disc-motive-block">
+            <div class="motive-label">Why I'm asking</div>
+            <div class="question-prompt-text" id="disc-motive">Preparing your first questions…</div>
+          </div>
+          <ul class="peer-questions" id="disc-questions" style="display: none;"></ul>
+          <p class="group-hint" id="disc-group-hint"></p>
         </div>
 
         <textarea 
           id="disc-answer-input" 
           class="answer-textarea" 
-          placeholder="Answer in your own words. &quot;I'm not sure&quot; is a perfectly good answer, and it helps shape your notes."
+          placeholder="Answer in your own words, in one message. You don't need to go question by question, and &quot;I'm not sure&quot; is a perfectly good answer."
         ></textarea>
 
         <div class="disc-error" id="disc-error" role="alert" style="display: none;">
@@ -417,6 +420,8 @@
         </div>
         <div class="profile-summary-text" id="prof-summary">Synthesizing knowledge profile...</div>
       </div>
+
+      <div class="learner-context" id="prof-learner-context" style="display: none;"></div>
 
       <div id="misconceptions-container" style="display: none; margin-bottom: 1.5rem;">
         <div class="text-sm fw-bold" style="color: var(--danger-text); margin-bottom: 0.5rem;">

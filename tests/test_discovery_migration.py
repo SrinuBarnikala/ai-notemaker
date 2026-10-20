@@ -110,6 +110,9 @@ def test_old_database_gets_columns_and_index_without_touching_data(tmp_path):
     outcome = ensure_discovery_schema(old)
     assert outcome == {
         "discovery_interactions.analysis": "added",
+        "discovery_interactions.subquestions": "added",
+        "discovery_interactions.motive": "added",
+        "discovery_interactions.questions": "added",
         "knowledge_profiles.learner_context": "added",
         INDEX_STEP: "added",
     }
@@ -135,6 +138,9 @@ def test_repeated_initialization_is_idempotent(tmp_path):
     assert first[INDEX_STEP] == "added"
     assert again == third == {
         "discovery_interactions.analysis": "present",
+        "discovery_interactions.subquestions": "present",
+        "discovery_interactions.motive": "present",
+        "discovery_interactions.questions": "present",
         "knowledge_profiles.learner_context": "present",
         INDEX_STEP: "present",
     }
@@ -147,6 +153,9 @@ def test_a_database_with_no_discovery_tables_is_left_alone(tmp_path):
     empty = create_engine(f"sqlite:///{(tmp_path / 'empty.db').as_posix()}")
     assert ensure_discovery_schema(empty) == {
         "discovery_interactions.analysis": "no_table",
+        "discovery_interactions.subquestions": "no_table",
+        "discovery_interactions.motive": "no_table",
+        "discovery_interactions.questions": "no_table",
         "knowledge_profiles.learner_context": "no_table",
         INDEX_STEP: "no_table",
     }
@@ -207,3 +216,40 @@ def test_legacy_rows_are_readable_by_the_orm_after_migration(tmp_path):
         assert rows[0].learner_answer == "A1" and rows[1].learner_answer is None
     finally:
         session.close()
+
+
+# ---------------------------------------------------------------------------
+# The motive / questions columns and older rows
+# ---------------------------------------------------------------------------
+
+def test_motive_and_questions_columns_are_added_and_older_rows_stay_readable_as_legacy(tmp_path):
+    from sqlalchemy.orm import sessionmaker
+    from backend.app.discovery.groups import normalize_interaction
+
+    old = make_old_schema(tmp_path / "pre_groups.db")
+    with old.begin() as conn:  # a database from the earlier "card" model: it has subquestions, but no motive or questions
+        conn.execute(text("ALTER TABLE discovery_interactions ADD COLUMN subquestions TEXT"))
+        conn.execute(text("UPDATE discovery_interactions SET subquestions='[\"First sub?\", \"Second sub?\"]' WHERE id='d2'"))
+    before = snapshot(old)
+
+    outcome = ensure_discovery_schema(old)
+    assert outcome["discovery_interactions.motive"] == "added" and outcome["discovery_interactions.questions"] == "added"
+    assert outcome["discovery_interactions.subquestions"] == "present"
+    assert ensure_discovery_schema(old)["discovery_interactions.motive"] == "present"            # idempotent
+    assert snapshot(old) == before                                                                  # nothing rewritten
+
+    session = sessionmaker(bind=old)()
+    try:
+        groups = {r.id: normalize_interaction(r.question_text, r.subquestions, r.motive, r.questions)
+                  for r in session.query(DiscoveryInteraction).all()}
+    finally:
+        session.close()
+    assert all(g.legacy and g.motive is None for g in groups.values())
+    assert groups["d1"].questions == ["Q1?"] and groups["d2"].questions == ["Q2?", "First sub?", "Second sub?"]
+    assert sum(g.units for g in groups.values()) == 1 + 3 + 1
+
+
+def test_the_new_columns_exist_on_a_fresh_database():
+    with engine.connect() as conn:
+        columns = [r[1] for r in conn.execute(text("PRAGMA table_info(discovery_interactions)"))]
+    assert {"motive", "questions", "subquestions", "analysis"} <= set(columns)

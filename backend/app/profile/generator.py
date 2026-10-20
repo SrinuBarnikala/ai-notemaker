@@ -15,6 +15,7 @@ from backend.app.profile.prompts import (
     PROFILE_GENERATION_PROMPT_TEMPLATE,
 )
 from backend.app.profile.parser import parse_knowledge_profile
+from backend.app.discovery.groups import normalize_interaction
 from backend.app.discovery.state import (
     DISCOVERY_CONCLUDED_STATUSES,
     load_analysis,
@@ -30,9 +31,13 @@ logger = logging.getLogger(__name__)
 def format_discovery_log(interactions: List[DiscoveryInteraction]) -> str:
     lines = []
     for item in interactions:
-        lines.append(f"Turn {item.question_index} Target Concept: {item.concept_target}")
-        lines.append(f"Question: {item.question_text}")
-        lines.append(f"Learner Answer: {item.learner_answer}")
+        group = normalize_interaction(item.question_text, item.subquestions, item.motive, item.questions)
+        lines.append(f"Turn {item.question_index} Focus: {item.concept_target}")
+        if group.motive:
+            lines.append(f"Motive: {group.motive}")
+        for q in group.questions:
+            lines.append(f"  Question: {q}")
+        lines.append(f"Learner Answer (one reply to the whole group): {item.learner_answer}")
         if item.quick_assessment:
             lines.append(f"Assessed Observation: {item.quick_assessment}")
         lines.append("---")
@@ -127,7 +132,11 @@ async def generate_knowledge_profile(
         analyses = [load_analysis(i.analysis) for i in interactions]
         learner_context = state_to_context_dict(learner_state)
         learner_context["discovery"] = {
-            "answered_questions": len(interactions),
+            "answered_questions": sum(
+                normalize_interaction(i.question_text, i.subquestions, i.motive, i.questions).units for i in interactions
+            ),
+            "answered_groups": len(interactions),
+            "coverage": last_analysis.get("coverage") or None,
             "completed": journey.status in DISCOVERY_CONCLUDED_STATUSES,
             "stopped_reason": last_analysis.get("stopped_reason"),
             "fallback_questions": sum(1 for a in analyses if a.get("question_fallback")),

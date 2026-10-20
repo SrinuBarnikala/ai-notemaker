@@ -19,8 +19,12 @@ ANSWER = "I know hashing basics and want to understand how it works internally w
 RICH_STATE = {
     "understanding": finding("Knows hashing basics", "demonstrated", "I know hashing basics"),
     "intent": finding("Understand the internals well enough to implement it", "stated", "understand how it works internally well enough to implement it"),
-    "desired_depth": finding("Internal mechanisms", "inferred"),
-    "explanation_preferences": [finding("Likes code examples", "inferred")],
+    "desired_outcome": finding("Implement a Bloom filter", "stated", "well enough to implement it"),
+    "desired_depth": finding("Internal mechanisms", "stated", "how it works internally"),
+    "explanation_preferences": [
+        finding("Learns by implementing", "stated", "well enough to implement it"),
+        finding("Likes code examples", "inferred"),
+    ],
     "challenge_willingness": None,
 }
 
@@ -50,15 +54,19 @@ def test_profile_keeps_provenance_and_unknowns(client, scripted):
     assert ctx["intention"]["basis"] == "stated"
     assert ctx["intention"]["evidence"] in ANSWER  # a verbatim quote from the learner
     assert ctx["understanding"]["basis"] == "demonstrated"
-    assert ctx["desired_depth"]["basis"] == "inferred"  # tentative inference stays labelled as such
+    assert ctx["desired_depth"]["basis"] == "stated" and ctx["desired_depth"]["evidence"] in ANSWER
     assert ctx["challenge_willingness"] is None          # never established, so unknown
     assert ctx["available_time"] is None
-    # Understanding and intention were confirmed by the learner; depth was only inferred, and says so
-    assert ctx["unresolved"] == ["Only inferred, not confirmed by the learner: desired depth"]
-    assert ctx["discovery"] == {
-        "answered_questions": 1, "completed": True, "stopped_reason": "sufficient",
+    assert ctx["desired_outcome"]["basis"] == "stated" and ctx["desired_outcome"]["evidence"] in ANSWER
+    assert ctx["unresolved"] == []  # every core dimension was confirmed by the learner's own words
+    discovery = ctx["discovery"]
+    assert {k: discovery[k] for k in ("answered_questions", "answered_groups", "completed", "stopped_reason",
+                                       "fallback_questions", "unanalyzed_answers", "profile_synthesis")} == {
+        "answered_questions": 1, "answered_groups": 1, "completed": True, "stopped_reason": "sufficient",
         "fallback_questions": 0, "unanalyzed_answers": 0, "profile_synthesis": "model",
     }
+    assert discovery["coverage"]["learning_approach"]["status"] == "sufficient"      # computed from the evidence
+    assert discovery["coverage"]["practical_constraints"]["status"] == "none"        # unknown stays unknown
 
     # The profile model is given the structured state, not just the raw transcript
     profile_prompt = scripted.prompts[-1]
@@ -114,12 +122,14 @@ def test_architecture_uses_discovered_intention_and_context(client, scripted):
 
     res = client.post(f"/journeys/{journey_id}/architecture", json={})
     assert res.status_code == 200
-    assert res.json()["learning_goal"] == "Understand the internals well enough to implement it"
+    # the learner's desired OUTCOME is the goal; why they started is context
+    assert res.json()["learning_goal"] == "Implement a Bloom filter"
 
     prompt = scripted.prompts[-1]
     assert "Per-topic discovery for THIS topic" in prompt
     assert "Understand the internals well enough to implement it [stated]" in prompt
-    assert "Internal mechanisms [inferred]" in prompt
+    assert "Desired outcome: Implement a Bloom filter [stated]" in prompt
+    assert "Internal mechanisms [stated]" in prompt
 
 
 def test_explicit_goal_beats_discovered_goal(client, scripted):

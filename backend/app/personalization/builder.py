@@ -8,6 +8,7 @@ from typing import Optional, List, Any
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
+from backend.app.discovery.dimensions import DIMENSION_LABELS
 from backend.app.discovery.state import GROUNDED_BASES
 from backend.app.models.journey import LearningJourney
 from backend.app.models.profile import KnowledgeProfile, KnowledgeConcept
@@ -282,25 +283,40 @@ class PersonalizationContextBuilder:
             return DiscoveredLearnerContext()
 
         intention = data.get("intention")
-        goal_text = None
-        if (
-            isinstance(intention, dict)
-            and str(intention.get("value") or "").strip()
-            and intention.get("basis") in GROUNDED_BASES
-        ):
-            goal_text = str(intention["value"]).strip()
+        outcome = data.get("desired_outcome")
+
+        def grounded_text(finding: Any) -> Optional[str]:
+            if isinstance(finding, dict) and str(finding.get("value") or "").strip() and finding.get("basis") in GROUNDED_BASES:
+                return str(finding["value"]).strip()
+            return None
+
+        # What the learner wants to achieve outranks why they started; an inferred value never counts
+        goal_text = grounded_text(outcome) or grounded_text(intention)
+
+        coverage_notes: List[str] = []
+        notes = data.get("dimension_notes")
+        if isinstance(notes, dict):
+            for dim, note in notes.items():
+                if isinstance(note, dict) and dim in DIMENSION_LABELS and note.get("relevance") == "not_relevant":
+                    reason = str(note.get("reason") or "").strip()
+                    coverage_notes.append(f"{DIMENSION_LABELS[dim].capitalize()}: judged not relevant to this learner ({reason})")
 
         unresolved = data.get("unresolved")
         resolved = data.get("resolved")
         return DiscoveredLearnerContext(
             goal_text=goal_text,
             intention=_tagged(intention),
+            desired_outcome=_tagged(outcome),
             desired_depth=_tagged(data.get("desired_depth")),
             understanding=_tagged(data.get("understanding")),
             related_familiarity=_tagged_list(data.get("related_familiarity")),
             explanation_preferences=_tagged_list(data.get("explanation_preferences")),
+            observed_approach=_tagged_list(data.get("observed_approach")),
+            questions_to_answer=_tagged_list(data.get("questions_to_answer")),
+            constraints=_tagged_list(data.get("constraints")),
             challenge_willingness=_tagged(data.get("challenge_willingness")),
             available_time=_tagged(data.get("available_time")),
+            coverage_notes=coverage_notes,
             unresolved=[str(u) for u in unresolved if str(u).strip()] if isinstance(unresolved, list) else [],
             resolved=[
                 str(r["value"]) for r in resolved if isinstance(r, dict) and str(r.get("value") or "").strip()

@@ -17,6 +17,7 @@ from typing import Any, Dict, Iterable, List, Literal, Optional, Sequence, Tuple
 
 from pydantic import BaseModel, Field
 
+from backend.app.discovery.dimensions import DimensionNote
 from backend.app.discovery.text import contains_sequence, jaccard, tokenize
 
 Basis = Literal["stated", "demonstrated", "inferred"]
@@ -35,15 +36,6 @@ GROUNDED_BASES = ("stated", "demonstrated")
 # Journey statuses at which discovery is over (or the journey has moved on to later stages)
 DISCOVERY_CONCLUDED_STATUSES = {"discovery_completed", "profile_ready", "architecture_ready", "note_generated"}
 
-# Dimensions whose absence materially limits personalization
-CORE_DIMENSIONS = ("understanding", "intent", "desired_depth")
-
-DIMENSION_LABELS = {
-    "understanding": "current understanding of the topic",
-    "intent": "learning intention",
-    "desired_depth": "desired depth",
-}
-
 # Two finding texts this similar are treated as the same finding (retractions, de-duplication)
 SAME_FINDING_SIMILARITY = 0.6
 
@@ -52,6 +44,13 @@ class Finding(BaseModel):
     value: str
     basis: Basis = "inferred"
     evidence: Optional[str] = None
+    # question_index of the interaction whose learner response contains `evidence`. Set by the code that verifies
+    # the quote, never by the model, so a finding can be traced back to the exact response it came from.
+    source_card: Optional[int] = None
+    # The model's own calibration, kept only when it is one of low / medium / high, plus a short note on what is
+    # still uncertain about the finding. Neither replaces the evidence basis.
+    confidence: Optional[str] = None
+    uncertainty: Optional[str] = None
 
 
 class ResolvedItem(BaseModel):
@@ -59,6 +58,14 @@ class ResolvedItem(BaseModel):
     field: str
     value: str
     reason: Optional[str] = None
+    corrected_in: Optional[int] = None  # question_index of the interaction in which the correction happened
+
+
+class OpenIssue(BaseModel):
+    """An uncertainty the model considers material to the notes (kept for the coverage view, never trusted blindly)."""
+    dimension: str
+    issue: str
+    impact: str = "low"  # "high" | "low"
 
 
 class Retraction(BaseModel):
@@ -67,45 +74,47 @@ class Retraction(BaseModel):
     reason: Optional[str] = None
 
 
-SINGLE_FIELDS = ("intent", "desired_depth", "understanding", "challenge_willingness", "available_time")
-LIST_FIELDS = ("related_familiarity", "gaps", "misconceptions", "explanation_preferences")
+SINGLE_FIELDS = ("intent", "desired_outcome", "desired_depth", "understanding", "challenge_willingness", "available_time")
+LIST_FIELDS = (
+    "related_familiarity", "gaps", "misconceptions", "explanation_preferences",
+    "observed_approach", "questions_to_answer", "constraints",
+)
 RETRACTABLE_FIELDS = SINGLE_FIELDS + LIST_FIELDS
 
 
 class DiscoveryLearnerState(BaseModel):
     original_topic: str = ""
+    # Dimension 1: learning intention
     intent: Optional[Finding] = None
-    desired_depth: Optional[Finding] = None
+    # Dimension 2: desired outcome
+    desired_outcome: Optional[Finding] = None
+    # Dimension 3: learning approach (stated preferences, and responses actually observed)
+    explanation_preferences: List[Finding] = Field(default_factory=list)
+    observed_approach: List[Finding] = Field(default_factory=list)
+    # Dimension 4: commitment and willingness (kept apart from ability, confidence, motivation, time)
+    challenge_willingness: Optional[Finding] = None
+    # Dimension 5: current mental model
     understanding: Optional[Finding] = None
+    # Dimension 6: conceptual familiarity
     related_familiarity: List[Finding] = Field(default_factory=list)
+    # Dimension 7: desired depth
+    desired_depth: Optional[Finding] = None
+    # Dimension 8: confusions, gaps and open questions
     gaps: List[Finding] = Field(default_factory=list)
     misconceptions: List[Finding] = Field(default_factory=list)
-    explanation_preferences: List[Finding] = Field(default_factory=list)
-    challenge_willingness: Optional[Finding] = None
+    questions_to_answer: List[Finding] = Field(default_factory=list)
+    # Dimension 9: practical constraints
     available_time: Optional[Finding] = None
+    constraints: List[Finding] = Field(default_factory=list)
+    # Cross-cutting: what is still unknown, what was corrected, and the model's judgments about coverage
     unresolved: List[str] = Field(default_factory=list)
     resolved: List[ResolvedItem] = Field(default_factory=list)
+    dimension_notes: Dict[str, DimensionNote] = Field(default_factory=dict)
+    open_issues: List[OpenIssue] = Field(default_factory=list)
 
-    def missing_core(self) -> List[str]:
-        """Core dimensions with no finding at all."""
-        return [d for d in CORE_DIMENSIONS if getattr(self, d) is None]
-
-    def unconfirmed_core(self) -> List[Tuple[str, str]]:
-        """
-        Core dimensions not backed by the learner's own words, as (dimension, "unknown" | "inferred").
-        A merely inferred finding does not count as established.
-        """
-        result: List[Tuple[str, str]] = []
-        for dim in CORE_DIMENSIONS:
-            finding = getattr(self, dim)
-            if finding is None:
-                result.append((dim, "unknown"))
-            elif finding.basis not in GROUNDED_BASES:
-                result.append((dim, "inferred"))
-        return result
-
-    def is_confirmed(self, dim: str) -> bool:
-        finding = getattr(self, dim)
+    def is_confirmed(self, field: str) -> bool:
+        """True if the single-valued field holds a finding the learner's own words support."""
+        finding = getattr(self, field)
         return finding is not None and finding.basis in GROUNDED_BASES
 
 
@@ -150,7 +159,12 @@ def _parse_finding(raw: Any) -> Optional[Finding]:
     if basis not in ("stated", "demonstrated", "inferred"):
         basis = "inferred"
     evidence = _clean(raw.get("evidence")) or None
-    return Finding(value=value, basis=basis, evidence=evidence)  # type: ignore[arg-type]
+    confidence = str(raw.get("confidence") or "").strip().lower()
+    return Finding(
+        value=value, basis=basis, evidence=evidence,  # type: ignore[arg-type]
+        confidence=confidence if confidence in ("low", "medium", "high") else None,
+        uncertainty=_clean(raw.get("uncertainty"), 200) or None,
+    )
 
 
 def parse_state(data: Any, topic: str) -> DiscoveryLearnerState:
@@ -204,38 +218,54 @@ def _split_quote(evidence: str) -> List[List[str]]:
     return [t for t in (tokenize(f) for f in fragments) if t]
 
 
-def evidence_is_valid(evidence: Optional[str], learner_answers: Sequence[str]) -> bool:
+def evidence_source(evidence: Optional[str], learner_answers: Sequence[str]) -> Optional[int]:
     """
-    True if the quote is substantial and every fragment appears, as whole tokens, in one single
-    learner answer. (Existence only; semantic support is not verified.)
+    Position (in `learner_answers`) of the first answer that contains the quote, or None if the quote is
+    not substantial or is not found. The quote must be substantial and every fragment must appear, as whole
+    tokens, in ONE answer (an answer is the learner's single combined response to a whole card).
+    Existence only; whether the quote semantically supports the claim is not verified.
     """
     fragments = _split_quote(evidence or "")
     if not fragments:
-        return False
+        return None
     all_tokens = [t for frag in fragments for t in frag]
     if sum(len(t) for t in all_tokens) < MIN_EVIDENCE_TOTAL_CHARS:
-        return False
+        return None
     if max(len(t) for t in all_tokens) < MIN_EVIDENCE_LONGEST_TOKEN:
-        return False
-    for answer in learner_answers:
+        return None
+    for position, answer in enumerate(learner_answers):
         answer_tokens = tokenize(answer)
         if all(contains_sequence(answer_tokens, frag) for frag in fragments):
-            return True
-    return False
+            return position
+    return None
 
 
-def ground_findings(state: DiscoveryLearnerState, learner_answers: List[str]) -> DiscoveryLearnerState:
+def evidence_is_valid(evidence: Optional[str], learner_answers: Sequence[str]) -> bool:
+    return evidence_source(evidence, learner_answers) is not None
+
+
+def ground_findings(
+    state: DiscoveryLearnerState,
+    learner_answers: List[str],
+    answer_cards: Optional[Sequence[int]] = None,
+) -> DiscoveryLearnerState:
     """
     Keep only evidence that is genuinely present in a learner answer. A stated/demonstrated claim
     whose evidence is missing, too short, or not found is downgraded to a provisional inference
-    and its invalid evidence is discarded, so no fabricated quote is ever exposed.
+    and its invalid evidence is discarded, so no fabricated quote is ever exposed. When `answer_cards`
+    (the question_index of each answer) is given, each verified finding records the card it came from.
     """
     def ground(finding: Optional[Finding]) -> Optional[Finding]:
         if finding is None:
             return None
-        valid = evidence_is_valid(finding.evidence, learner_answers)
+        position = evidence_source(finding.evidence, learner_answers)
+        valid = position is not None
         basis = finding.basis if (finding.basis == "inferred" or valid) else "inferred"
-        return Finding(value=finding.value, basis=basis, evidence=finding.evidence if valid else None)
+        source = answer_cards[position] if (valid and answer_cards is not None) else None
+        return Finding(
+            value=finding.value, basis=basis, evidence=finding.evidence if valid else None, source_card=source,
+            confidence=finding.confidence, uncertainty=finding.uncertainty,
+        )
 
     for name in SINGLE_FIELDS:
         setattr(state, name, ground(getattr(state, name)))
@@ -291,6 +321,7 @@ def merge_states(
     previous: Optional[DiscoveryLearnerState],
     new: DiscoveryLearnerState,
     retractions: Sequence[Retraction] = (),
+    corrected_in: Optional[int] = None,
 ) -> DiscoveryLearnerState:
     """
     Carry earlier findings forward when a later model reply merely omits them, but honor explicit
@@ -298,11 +329,15 @@ def merge_states(
     new output, if it was listed again) and is recorded under `resolved`.
     """
     new_eff, removed_new = apply_retractions(new, retractions)
+    for item in removed_new:
+        item.corrected_in = corrected_in
     if previous is None:
         new_eff.resolved = _dedupe_resolved([*new.resolved, *removed_new])
         return new_eff
 
     prev_eff, removed_prev = apply_retractions(previous, retractions)
+    for item in removed_prev:
+        item.corrected_in = corrected_in
     merged = new_eff
     for name in SINGLE_FIELDS:
         if getattr(merged, name) is None:
@@ -314,6 +349,9 @@ def merge_states(
                 current.append(old)
         setattr(merged, name, current[:MAX_LIST_ITEMS])
     merged.resolved = _dedupe_resolved([*previous.resolved, *new.resolved, *removed_prev, *removed_new])
+    # Dimension notes accumulate (a later note about a dimension replaces the earlier one); open issues are the
+    # model's CURRENT view, so they are replaced, not accumulated.
+    merged.dimension_notes = {**previous.dimension_notes, **new.dimension_notes}
     return merged
 
 
@@ -330,6 +368,7 @@ def state_to_prompt_text(state: Optional[DiscoveryLearnerState]) -> str:
         return "Nothing established yet."
     lines = [
         f"- Learning intention: {_fmt(state.intent)}",
+        f"- Desired outcome: {_fmt(state.desired_outcome)}",
         f"- Desired depth: {_fmt(state.desired_depth)}",
         f"- Current understanding: {_fmt(state.understanding)}",
         f"- Willingness to engage with challenging material: {_fmt(state.challenge_willingness)}",
@@ -339,7 +378,10 @@ def state_to_prompt_text(state: Optional[DiscoveryLearnerState]) -> str:
         ("Related familiarity", "related_familiarity"),
         ("Knowledge gaps", "gaps"),
         ("Possible misconceptions", "misconceptions"),
+        ("Questions the learner wants answered", "questions_to_answer"),
         ("Explanation preferences", "explanation_preferences"),
+        ("Observed response to explanation approaches", "observed_approach"),
+        ("Practical constraints (tools, environment, budget, project)", "constraints"),
     ):
         items = getattr(state, name)
         lines.append(f"- {label}: " + ("; ".join(_fmt(i) for i in items) if items else "unknown"))
@@ -356,14 +398,20 @@ def state_to_context_dict(state: DiscoveryLearnerState) -> Dict[str, Any]:
     return {
         "original_topic": state.original_topic,
         "intention": state.intent.model_dump() if state.intent else None,
+        "desired_outcome": state.desired_outcome.model_dump() if state.desired_outcome else None,
         "desired_depth": state.desired_depth.model_dump() if state.desired_depth else None,
         "understanding": state.understanding.model_dump() if state.understanding else None,
         "related_familiarity": [f.model_dump() for f in state.related_familiarity],
         "gaps": [f.model_dump() for f in state.gaps],
         "misconceptions": [f.model_dump() for f in state.misconceptions],
         "explanation_preferences": [f.model_dump() for f in state.explanation_preferences],
+        "observed_approach": [f.model_dump() for f in state.observed_approach],
+        "questions_to_answer": [f.model_dump() for f in state.questions_to_answer],
+        "constraints": [f.model_dump() for f in state.constraints],
         "challenge_willingness": state.challenge_willingness.model_dump() if state.challenge_willingness else None,
         "available_time": state.available_time.model_dump() if state.available_time else None,
         "unresolved": list(state.unresolved),
         "resolved": [r.model_dump() for r in state.resolved],
+        "dimension_notes": {d: n.model_dump() for d, n in state.dimension_notes.items()},
+        "open_issues": [i.model_dump() for i in state.open_issues],
     }

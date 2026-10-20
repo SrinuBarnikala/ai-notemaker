@@ -88,6 +88,12 @@ def ensure_discovery_schema(bind=None) -> dict:
 
     add_column("discovery_interactions.analysis", "discovery_interactions", "analysis",
                "ALTER TABLE discovery_interactions ADD COLUMN analysis TEXT")
+    add_column("discovery_interactions.subquestions", "discovery_interactions", "subquestions",
+               "ALTER TABLE discovery_interactions ADD COLUMN subquestions TEXT")
+    add_column("discovery_interactions.motive", "discovery_interactions", "motive",
+               "ALTER TABLE discovery_interactions ADD COLUMN motive TEXT")
+    add_column("discovery_interactions.questions", "discovery_interactions", "questions",
+               "ALTER TABLE discovery_interactions ADD COLUMN questions TEXT")
     add_column("knowledge_profiles.learner_context", "knowledge_profiles", "learner_context",
                "ALTER TABLE knowledge_profiles ADD COLUMN learner_context TEXT")
 

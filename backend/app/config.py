@@ -1,5 +1,6 @@
 from functools import lru_cache
 from typing import Literal, Optional
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -24,8 +25,9 @@ class Settings(BaseSettings):
 
     ollama_base_url: str = "http://localhost:11434"
 
-    # Knowledge Discovery: safety limit on answered questions (a ceiling, not a target)
-    discovery_max_questions: int = 6
+    # Knowledge Discovery: safety limit on answered QUESTION CARDS (a ceiling, not a target). A card is one
+    # main question plus up to three subquestions answered together, so subquestions never count toward it.
+    discovery_max_questions: int = Field(default=10, ge=1)
     # Overall deadline for one discovery request (all nested model calls and retries combined).
     # Chosen to exceed a single provider attempt at the default 120 s timeout, so one slow but
     # successful call is not cut off, while still bounding stacked retries.

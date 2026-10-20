@@ -66,6 +66,7 @@ def test_settings():
         database_url="sqlite:///:memory:",
         llm_provider="mock",
         llm_model="mock-qwen",
+        discovery_max_questions=10,
     )
 
 
